@@ -7,6 +7,7 @@ import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import UserPage from "./pages/UserPage";
 import ManagementDashboard from "./pages/ManagementDashboard";
+import ChatbotPage from "./pages/ChatbotPage";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +22,7 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<ManagementDashboard />} />
           <Route path="/:username" element={<UserPage />} />
+          <Route path="/bot/:customDomain" element={<ChatbotPage />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
