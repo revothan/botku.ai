@@ -2,7 +2,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { minus } from "lucide-react";
+import { Minus } from "lucide-react";
 
 type ButtonConfig = {
   id: string;
@@ -56,7 +56,7 @@ const SortableButton = ({ button, onRemove, onUpdate }: SortableButtonProps) => 
         onClick={onRemove}
         className="shrink-0"
       >
-        <minus className="h-4 w-4" />
+        <Minus className="h-4 w-4" />
       </Button>
     </div>
   );

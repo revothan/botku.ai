@@ -15,7 +15,7 @@ import {
 } from "@dnd-kit/sortable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { plus, minus } from "lucide-react";
+import { Plus, Minus } from "lucide-react";
 import SortableButton from "./SortableButton";
 
 type ButtonConfig = {
@@ -29,7 +29,7 @@ type ButtonManagerProps = {
   onChange: (buttons: ButtonConfig[]) => void;
 };
 
-const ButtonManager = ({ buttons, onChange }: ButtonManagerProps) => {
+const ButtonManager = ({ buttons = [], onChange }: ButtonManagerProps) => {
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -79,7 +79,7 @@ const ButtonManager = ({ buttons, onChange }: ButtonManagerProps) => {
           variant="outline"
           size="sm"
         >
-          <plus className="h-4 w-4 mr-2" />
+          <Plus className="h-4 w-4 mr-2" />
           Add Button
         </Button>
       </div>

@@ -6,10 +6,17 @@ import { useToast } from "@/hooks/use-toast";
 import ChatbotSettingsForm from "@/components/dashboard/ChatbotSettingsForm";
 import PhonePreview from "@/components/dashboard/PhonePreview";
 
+type ButtonConfig = {
+  id: string;
+  label: string;
+  url: string;
+};
+
 type ChatbotSettings = {
   bot_name: string;
   greeting_message: string;
   training_data: string;
+  buttons: ButtonConfig[];
 };
 
 const ManagementDashboard = () => {
