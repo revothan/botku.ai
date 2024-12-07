@@ -2,17 +2,12 @@ import { useParams } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Send } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
-import type { ButtonConfig } from "@/types/chatbot";
-
-type Message = {
-  role: "assistant" | "user";
-  content: string;
-};
+import { ChatMessage } from "@/components/chatbot/ChatMessage";
+import { ChatInput } from "@/components/chatbot/ChatInput";
+import { ChatButtons } from "@/components/chatbot/ChatButtons";
+import type { Message, ButtonConfig } from "@/types/chatbot";
 
 type AssistantResponse = {
   response: {
@@ -46,36 +41,18 @@ const ChatbotPage = () => {
         .eq("custom_domain", customDomain)
         .limit(1);
 
-      if (profileError) {
-        console.error("Error fetching profile:", profileError);
-        throw profileError;
-      }
-
-      if (!profiles || profiles.length === 0) {
-        console.error("No profile found for domain:", customDomain);
-        throw new Error(`No chatbot found for domain: ${customDomain}`);
-      }
-
-      const profile = profiles[0];
-      console.log("Found profile:", profile);
+      if (profileError) throw profileError;
+      if (!profiles?.length) throw new Error(`No chatbot found for domain: ${customDomain}`);
 
       const { data: chatbotSettings, error: settingsError } = await supabase
         .from("chatbot_settings")
         .select("*")
-        .eq("profile_id", profile.id)
+        .eq("profile_id", profiles[0].id)
         .limit(1);
 
-      if (settingsError) {
-        console.error("Error fetching chatbot settings:", settingsError);
-        throw settingsError;
-      }
+      if (settingsError) throw settingsError;
+      if (!chatbotSettings?.length) throw new Error("Chatbot not configured for this domain");
 
-      if (!chatbotSettings || chatbotSettings.length === 0) {
-        console.error("No chatbot settings found for profile:", profile.id);
-        throw new Error("Chatbot not configured for this domain");
-      }
-
-      console.log("Chatbot settings found:", chatbotSettings[0]);
       return chatbotSettings[0];
     },
     enabled: !!customDomain,
@@ -94,19 +71,12 @@ const ChatbotPage = () => {
         })
       });
 
-      if (response.error) {
-        throw new Error(response.error.message);
-      }
-
-      console.log("Received response from assistant:", response.data);
+      if (response.error) throw response.error;
       return response.data;
     },
     onSuccess: (response) => {
       if (response?.response?.text?.value) {
-        setMessages(prev => [
-          ...prev,
-          { role: "assistant", content: response.response.text.value }
-        ]);
+        setMessages(prev => [...prev, { role: "assistant", content: response.response.text.value }]);
         setInputMessage("");
       } else {
         console.error("Unexpected response format:", response);
@@ -136,7 +106,7 @@ const ChatbotPage = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#fcf5eb] to-white">
         <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-primary"></div>
       </div>
     );
@@ -144,8 +114,8 @@ const ChatbotPage = () => {
 
   if (error || !settings) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card className="w-full max-w-md">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#fcf5eb] to-white">
+        <Card className="w-full max-w-md bg-white/80 backdrop-blur-sm">
           <CardContent className="pt-6">
             <p className="text-center text-muted-foreground">
               {error?.message || "Chatbot not found or not configured"}
@@ -159,12 +129,12 @@ const ChatbotPage = () => {
   const buttons = (settings.buttons || []) as ButtonConfig[];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 p-4">
+    <div className="min-h-screen bg-gradient-to-b from-[#fcf5eb] to-white p-4">
       <div className="max-w-lg mx-auto">
-        <Card className="border-none shadow-lg">
+        <Card className="border-none shadow-lg bg-white/80 backdrop-blur-sm">
           <CardContent className="p-4">
             <div className="text-center border-b pb-4">
-              <h3 className="font-bold">{settings.bot_name}</h3>
+              <h3 className="font-bold text-secondary">{settings.bot_name}</h3>
             </div>
             <div className="h-[400px] overflow-y-auto py-4 space-y-4">
               <div className="bg-primary/10 rounded-lg p-3 max-w-[80%]">
@@ -172,16 +142,7 @@ const ChatbotPage = () => {
               </div>
 
               {messages.map((message, index) => (
-                <div
-                  key={index}
-                  className={`${
-                    message.role === "assistant"
-                      ? "bg-primary/10 rounded-lg p-3 max-w-[80%]"
-                      : "bg-primary/5 rounded-lg p-3 max-w-[80%] ml-auto"
-                  }`}
-                >
-                  <p className="text-sm">{message.content}</p>
-                </div>
+                <ChatMessage key={index} message={message} />
               ))}
 
               {sendMessage.isPending && (
@@ -194,39 +155,15 @@ const ChatbotPage = () => {
                 </div>
               )}
 
-              {buttons.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-4">
-                  {buttons.map((button) => (
-                    <a
-                      key={button.id}
-                      href={button.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="bg-primary/20 text-primary px-3 py-1 rounded-full text-sm hover:bg-primary/30 transition-colors"
-                    >
-                      {button.label}
-                    </a>
-                  ))}
-                </div>
-              )}
+              <ChatButtons buttons={buttons} />
             </div>
             <div className="border-t pt-4">
-              <form onSubmit={handleSubmit} className="flex gap-2">
-                <Input
-                  value={inputMessage}
-                  onChange={(e) => setInputMessage(e.target.value)}
-                  placeholder="Type your message..."
-                  className="flex-1"
-                  disabled={sendMessage.isPending}
-                />
-                <Button 
-                  type="submit" 
-                  size="icon"
-                  disabled={sendMessage.isPending || !inputMessage.trim()}
-                >
-                  <Send className="h-4 w-4" />
-                </Button>
-              </form>
+              <ChatInput
+                inputMessage={inputMessage}
+                setInputMessage={setInputMessage}
+                handleSubmit={handleSubmit}
+                isLoading={sendMessage.isPending}
+              />
             </div>
           </CardContent>
         </Card>

@@ -36,11 +36,11 @@ const Index = () => {
 
   if (!session) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
+      <div className="min-h-screen bg-gradient-to-b from-[#fcf5eb] to-white">
         <div className="container mx-auto px-4 py-16">
           <div className="max-w-md mx-auto">
-            <h1 className="text-2xl font-bold tracking-tight text-center mb-8">BOTKU</h1>
-            <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-100">
+            <h1 className="text-2xl font-bold tracking-tight text-center mb-8 text-secondary">BOTKU</h1>
+            <div className="bg-white/80 backdrop-blur-sm p-8 rounded-lg shadow-sm border border-primary/10">
               <Auth
                 supabaseClient={supabase}
                 appearance={{
@@ -48,8 +48,8 @@ const Index = () => {
                   variables: {
                     default: {
                       colors: {
-                        brand: '#9b87f5',
-                        brandAccent: '#7E69AB',
+                        brand: '#25d366',
+                        brandAccent: '#128c7e',
                       },
                     },
                   },
@@ -65,10 +65,10 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-[#fcf5eb] to-white">
       <div className="container mx-auto px-4 py-16">
         <nav className="flex justify-between items-center mb-16">
-          <h1 className="text-2xl font-bold tracking-tight">BOTKU</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-secondary">BOTKU</h1>
           <div className="space-x-4">
             <Button
               variant="ghost"
