@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 const UserPage = () => {
   const { username } = useParams();
 
-  const { data: profile, isLoading } = useQuery({
+  const { data: profile, isLoading, error } = useQuery({
     queryKey: ["profile", username],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -18,7 +18,14 @@ const UserPage = () => {
         .eq("username", username)
         .single();
 
+      // If no data is found, return null instead of throwing an error
+      if (error && error.code === "PGRST116") {
+        return null;
+      }
+
+      // For other errors, throw them to be handled by error boundary
       if (error) throw error;
+      
       return data;
     },
   });
