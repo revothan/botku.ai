@@ -10,24 +10,13 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import ButtonManager from "./ButtonManager";
+import type { ChatbotSettings } from "@/types/chatbot";
 
-type ButtonConfig = {
-  id: string;
-  label: string;
-  url: string;
-};
-
-type ChatbotSettings = {
-  bot_name: string;
-  greeting_message: string;
-  training_data: string;
-  buttons: ButtonConfig[];
-};
+type ChatbotFormData = Omit<ChatbotSettings, 'buttons'>;
 
 type ChatbotSettingsFormProps = {
-  defaultValues: ChatbotSettings;
-  onSubmit: (values: ChatbotSettings) => void;
+  defaultValues: ChatbotFormData;
+  onSubmit: (values: ChatbotFormData) => void;
   isSubmitting: boolean;
   hasExistingBot: boolean;
 };
@@ -38,7 +27,7 @@ const ChatbotSettingsForm = ({
   isSubmitting,
   hasExistingBot 
 }: ChatbotSettingsFormProps) => {
-  const form = useForm<ChatbotSettings>({
+  const form = useForm<ChatbotFormData>({
     defaultValues,
   });
 
@@ -69,23 +58,6 @@ const ChatbotSettingsForm = ({
                 <Textarea
                   placeholder="Enter the greeting message for your visitors"
                   {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="buttons"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Quick Action Buttons</FormLabel>
-              <FormControl>
-                <ButtonManager
-                  buttons={field.value}
-                  onChange={field.onChange}
                 />
               </FormControl>
               <FormMessage />

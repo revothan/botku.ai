@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import ChatbotSettingsForm from "@/components/dashboard/ChatbotSettingsForm";
+import ButtonsSection from "@/components/dashboard/ButtonsSection";
 import PhonePreview from "@/components/dashboard/PhonePreview";
 import type { ButtonConfig, ChatbotSettings } from "@/types/chatbot";
 
@@ -76,7 +77,7 @@ const ManagementDashboard = () => {
   });
 
   const updateSettings = useMutation({
-    mutationFn: async (values: ChatbotSettings) => {
+    mutationFn: async (values: Omit<ChatbotSettings, 'buttons'>) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
@@ -84,8 +85,9 @@ const ManagementDashboard = () => {
       const { data: settingsData, error: settingsError } = await supabase
         .from("chatbot_settings")
         .update({
-          ...values,
-          buttons: values.buttons || []
+          bot_name: values.bot_name,
+          greeting_message: values.greeting_message,
+          training_data: values.training_data,
         })
         .eq("profile_id", user.id)
         .select()
@@ -114,10 +116,7 @@ const ManagementDashboard = () => {
       }
 
       return { 
-        settings: {
-          ...settingsData,
-          buttons: (settingsData.buttons || []) as ButtonConfig[]
-        }, 
+        settings: settingsData,
         assistant: assistantResponse.data 
       };
     },
@@ -148,24 +147,32 @@ const ManagementDashboard = () => {
     );
   }
 
-  const defaultValues: ChatbotSettings = {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
+
+  const defaultValues = {
     bot_name: settings?.bot_name || "",
     greeting_message: settings?.greeting_message || "",
     training_data: settings?.training_data || "",
-    buttons: (settings?.buttons || []) as ButtonConfig[],
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 p-8">
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col lg:flex-row gap-8">
-          <div className="flex-1">
-            <h1 className="text-2xl font-bold mb-6">Chatbot Settings</h1>
-            <ChatbotSettingsForm
-              defaultValues={defaultValues}
-              onSubmit={updateSettings.mutate}
-              isSubmitting={updateSettings.isPending}
-              hasExistingBot={!!settings?.assistant_id}
+          <div className="flex-1 space-y-8">
+            <div>
+              <h1 className="text-2xl font-bold mb-6">Chatbot Settings</h1>
+              <ChatbotSettingsForm
+                defaultValues={defaultValues}
+                onSubmit={updateSettings.mutate}
+                isSubmitting={updateSettings.isPending}
+                hasExistingBot={!!settings?.assistant_id}
+              />
+            </div>
+            <ButtonsSection 
+              profileId={user.id}
+              initialButtons={(settings?.buttons || []) as ButtonConfig[]}
             />
           </div>
           <div className="flex-1">
