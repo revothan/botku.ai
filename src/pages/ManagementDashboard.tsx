@@ -83,7 +83,7 @@ const ManagementDashboard = () => {
 
   if (isAuthChecking || (isLoading && !settings)) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-[#fcf5eb]">
         <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-primary"></div>
       </div>
     );
@@ -94,11 +94,11 @@ const ManagementDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 p-8">
+    <div className="min-h-screen bg-gradient-to-b from-[#fcf5eb] to-white p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Domain Section at the top */}
         <div>
-          <h2 className="text-2xl font-bold mb-6">Share Your Chatbot</h2>
+          <h2 className="text-2xl font-bold mb-6 text-secondary">Share Your Chatbot</h2>
           <DomainSection userId={userId} />
         </div>
 
@@ -106,7 +106,7 @@ const ManagementDashboard = () => {
           {/* Settings Column */}
           <div className="lg:col-span-7 space-y-8">
             <div>
-              <h1 className="text-2xl font-bold mb-6">Chatbot Settings</h1>
+              <h1 className="text-2xl font-bold mb-6 text-secondary">Chatbot Settings</h1>
               <SettingsSection
                 userId={userId}
                 settings={settings}
@@ -118,7 +118,7 @@ const ManagementDashboard = () => {
           {/* Preview Column */}
           <div className="lg:col-span-5">
             <div>
-              <h2 className="text-2xl font-bold mb-6">Preview</h2>
+              <h2 className="text-2xl font-bold mb-6 text-secondary">Preview</h2>
               <PhonePreview
                 botName={settings?.bot_name || ""}
                 greetingMessage={settings?.greeting_message || ""}
