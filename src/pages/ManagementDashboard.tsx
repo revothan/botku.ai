@@ -40,19 +40,39 @@ const ManagementDashboard = () => {
   const { data: settings, isLoading } = useQuery({
     queryKey: ["chatbot-settings"],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
+      console.log("Fetching chatbot settings...");
+      
+      // First get the current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError) {
+        console.error("Error fetching user:", userError);
+        throw userError;
+      }
+      if (!user) {
+        console.error("No user found");
+        throw new Error("Not authenticated");
+      }
 
-      // First try to get existing settings
+      console.log("User found:", user.id);
+
+      // Try to get existing settings
       const { data: existingSettings, error: fetchError } = await supabase
         .from("chatbot_settings")
-        .select("*")
+        .select()
         .eq("profile_id", user.id)
-        .single();
+        .maybeSingle();
+
+      if (fetchError) {
+        console.error("Error fetching settings:", fetchError);
+        throw fetchError;
+      }
 
       if (existingSettings) {
+        console.log("Existing settings found:", existingSettings);
         return existingSettings;
       }
+
+      console.log("No existing settings found, creating default settings...");
 
       // If no settings exist, create default settings
       const { data: newSettings, error: insertError } = await supabase
@@ -66,23 +86,17 @@ const ManagementDashboard = () => {
         .select()
         .single();
 
-      if (insertError) throw insertError;
+      if (insertError) {
+        console.error("Error creating settings:", insertError);
+        throw insertError;
+      }
+
+      console.log("Default settings created:", newSettings);
       return newSettings;
     },
   });
 
-  // Update form when settings are loaded
-  useEffect(() => {
-    if (settings) {
-      form.reset({
-        bot_name: settings.bot_name,
-        greeting_message: settings.greeting_message,
-        training_data: settings.training_data || "",
-      });
-    }
-  }, [settings, form]);
-
-  // Mutation to save settings
+  // Update settings mutation
   const updateSettings = useMutation({
     mutationFn: async (values: ChatbotSettings) => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -90,10 +104,8 @@ const ManagementDashboard = () => {
 
       const { data, error } = await supabase
         .from("chatbot_settings")
-        .upsert({
-          profile_id: user.id,
-          ...values,
-        })
+        .update(values)
+        .eq("profile_id", user.id)
         .select()
         .single();
 
@@ -116,6 +128,17 @@ const ManagementDashboard = () => {
     },
   });
 
+  // Update form when settings are loaded
+  useEffect(() => {
+    if (settings) {
+      form.reset({
+        bot_name: settings.bot_name,
+        greeting_message: settings.greeting_message,
+        training_data: settings.training_data || "",
+      });
+    }
+  }, [settings, form]);
+
   const onSubmit = (values: ChatbotSettings) => {
     updateSettings.mutate(values);
   };
@@ -127,6 +150,8 @@ const ManagementDashboard = () => {
       </div>
     );
   }
+
+  // ... keep existing code (the JSX for the form and phone preview)
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 p-8">
