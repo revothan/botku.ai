@@ -5,7 +5,7 @@ import { Link as LinkIcon, MessageSquare, Users, Settings } from "lucide-react";
 
 const Landing = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#dcf8c6] to-white">
+    <div className="min-h-screen bg-gradient-to-b from-[#fcf5eb] to-white">
       {/* Header Section */}
       <div className="container mx-auto px-4 py-6">
         <nav className="flex justify-between items-center mb-16">
