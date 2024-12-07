@@ -23,7 +23,8 @@ const ChatbotPage = () => {
       const { data: profiles, error: profileError } = await supabase
         .from("profiles")
         .select("id")
-        .eq("custom_domain", customDomain);
+        .eq("custom_domain", customDomain)
+        .limit(1);
 
       if (profileError) {
         console.error("Error fetching profile:", profileError);
@@ -43,15 +44,19 @@ const ChatbotPage = () => {
         .from("chatbot_settings")
         .select("*")
         .eq("profile_id", profile.id)
-        .single();
+        .limit(1);
 
       if (settingsError) {
         console.error("Error fetching chatbot settings:", settingsError);
         throw settingsError;
       }
 
-      console.log("Existing settings found:", chatbotSettings);
-      return chatbotSettings;
+      if (!chatbotSettings || chatbotSettings.length === 0) {
+        throw new Error("Chatbot settings not found");
+      }
+
+      console.log("Existing settings found:", chatbotSettings[0]);
+      return chatbotSettings[0];
     },
     enabled: !!customDomain,
   });
