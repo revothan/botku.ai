@@ -15,7 +15,7 @@ import {
 } from "@dnd-kit/sortable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Minus } from "lucide-react";
+import { Plus } from "lucide-react";
 import SortableButton from "./SortableButton";
 
 type ButtonConfig = {
@@ -30,6 +30,8 @@ type ButtonManagerProps = {
 };
 
 const ButtonManager = ({ buttons = [], onChange }: ButtonManagerProps) => {
+  const [localButtons, setLocalButtons] = useState<ButtonConfig[]>(buttons);
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -40,33 +42,39 @@ const ButtonManager = ({ buttons = [], onChange }: ButtonManagerProps) => {
   const handleDragEnd = (event: any) => {
     const { active, over } = event;
     if (active.id !== over.id) {
-      const oldIndex = buttons.findIndex((btn) => btn.id === active.id);
-      const newIndex = buttons.findIndex((btn) => btn.id === over.id);
-      onChange(arrayMove(buttons, oldIndex, newIndex));
+      const oldIndex = localButtons.findIndex((btn) => btn.id === active.id);
+      const newIndex = localButtons.findIndex((btn) => btn.id === over.id);
+      const newButtons = arrayMove(localButtons, oldIndex, newIndex);
+      setLocalButtons(newButtons);
+      onChange(newButtons);
     }
   };
 
   const addButton = () => {
-    if (buttons.length < 4) {
+    if (localButtons.length < 4) {
       const newButton = {
         id: crypto.randomUUID(),
         label: "",
         url: "",
       };
-      onChange([...buttons, newButton]);
+      const newButtons = [...localButtons, newButton];
+      setLocalButtons(newButtons);
+      onChange(newButtons);
     }
   };
 
   const removeButton = (id: string) => {
-    onChange(buttons.filter((btn) => btn.id !== id));
+    const newButtons = localButtons.filter((btn) => btn.id !== id);
+    setLocalButtons(newButtons);
+    onChange(newButtons);
   };
 
   const updateButton = (id: string, field: "label" | "url", value: string) => {
-    onChange(
-      buttons.map((btn) =>
-        btn.id === id ? { ...btn, [field]: value } : btn
-      )
+    const newButtons = localButtons.map((btn) =>
+      btn.id === id ? { ...btn, [field]: value } : btn
     );
+    setLocalButtons(newButtons);
+    onChange(newButtons);
   };
 
   return (
@@ -75,7 +83,7 @@ const ButtonManager = ({ buttons = [], onChange }: ButtonManagerProps) => {
         <h3 className="text-lg font-medium">Chatbot Buttons</h3>
         <Button
           onClick={addButton}
-          disabled={buttons.length >= 4}
+          disabled={localButtons.length >= 4}
           variant="outline"
           size="sm"
         >
@@ -88,9 +96,9 @@ const ButtonManager = ({ buttons = [], onChange }: ButtonManagerProps) => {
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}
       >
-        <SortableContext items={buttons} strategy={verticalListSortingStrategy}>
+        <SortableContext items={localButtons} strategy={verticalListSortingStrategy}>
           <div className="space-y-3">
-            {buttons.map((button) => (
+            {localButtons.map((button) => (
               <SortableButton
                 key={button.id}
                 button={button}
