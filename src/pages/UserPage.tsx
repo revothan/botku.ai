@@ -1,10 +1,12 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
 
 const UserPage = () => {
   const { username } = useParams();
+  const navigate = useNavigate();
 
   const { data: profile, isLoading, error } = useQuery({
     queryKey: ["profile", username],
@@ -46,8 +48,10 @@ const UserPage = () => {
 
   if (!profile) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <h1 className="text-2xl font-bold">User not found</h1>
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
+        <h1 className="text-2xl font-bold">Profile not found</h1>
+        <p className="text-gray-600">The profile you're looking for doesn't exist.</p>
+        <Button onClick={() => navigate("/")}>Go Home</Button>
       </div>
     );
   }

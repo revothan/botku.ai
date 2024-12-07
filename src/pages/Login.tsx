@@ -5,15 +5,39 @@ import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
+import { useToast } from "@/components/ui/use-toast";
 
 const Index = () => {
   const navigate = useNavigate();
   const [session, setSession] = useState(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     // Check current session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
+      if (session) {
+        // Fetch the user's profile to get their username
+        supabase
+          .from('profiles')
+          .select('username')
+          .eq('id', session.user.id)
+          .single()
+          .then(({ data: profile, error }) => {
+            if (error) {
+              console.error('Error fetching profile:', error);
+              toast({
+                title: "Error",
+                description: "Could not fetch your profile. Please try again.",
+                variant: "destructive",
+              });
+              return;
+            }
+            if (profile?.username) {
+              navigate(`/${profile.username}`);
+            }
+          });
+      }
     });
 
     // Listen for auth changes
@@ -21,10 +45,32 @@ const Index = () => {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      if (session) {
+        // Fetch the user's profile to get their username
+        supabase
+          .from('profiles')
+          .select('username')
+          .eq('id', session.user.id)
+          .single()
+          .then(({ data: profile, error }) => {
+            if (error) {
+              console.error('Error fetching profile:', error);
+              toast({
+                title: "Error",
+                description: "Could not fetch your profile. Please try again.",
+                variant: "destructive",
+              });
+              return;
+            }
+            if (profile?.username) {
+              navigate(`/${profile.username}`);
+            }
+          });
+      }
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [navigate]);
 
   if (!session) {
     return (
@@ -83,109 +129,13 @@ const Index = () => {
             className="space-y-6"
           >
             <span className="px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium">
-              Welcome to Your Dashboard
+              Loading your profile...
             </span>
-            
-            <h2 className="text-5xl font-bold tracking-tight text-gray-900 sm:text-6xl">
-              Create Your Landing Page
-            </h2>
-            
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Start building your personalized landing page. Add your links, customize your profile, and share your content with the world.
-            </p>
-
-            <div className="flex justify-center gap-4 mt-8">
-              <Button
-                size="lg"
-                className="bg-primary hover:bg-primary/90 text-white px-8"
-                onClick={() => navigate("/dashboard")}
-              >
-                Get Started
-              </Button>
-            </div>
           </motion.div>
-
-          {features.map((feature, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.4 + index * 0.1 }}
-              className="mt-24 grid grid-cols-1 gap-8 sm:grid-cols-3"
-            >
-              <div className="p-6 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4 mx-auto">
-                  {feature.icon}
-                </div>
-                <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
-                <p className="text-gray-600">{feature.description}</p>
-              </div>
-            </motion.div>
-          ))}
         </main>
       </div>
     </div>
   );
 };
-
-const features = [
-  {
-    title: "Beautiful Design",
-    description: "Create stunning, professional-looking landing pages with our pre-built templates.",
-    icon: (
-      <svg
-        className="w-6 h-6 text-primary"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-        />
-      </svg>
-    ),
-  },
-  {
-    title: "Analytics & Insights",
-    description: "Track your performance with detailed analytics and visitor insights.",
-    icon: (
-      <svg
-        className="w-6 h-6 text-primary"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-        />
-      </svg>
-    ),
-  },
-  {
-    title: "Custom Domains",
-    description: "Use your own domain name to make your landing page truly yours.",
-    icon: (
-      <svg
-        className="w-6 h-6 text-primary"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
-        />
-      </svg>
-    ),
-  },
-];
 
 export default Index;
