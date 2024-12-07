@@ -20,7 +20,7 @@ const DomainSection = ({ userId }: DomainSectionProps) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("custom_domain")
+        .select("custom_domain, has_customized_domain")
         .eq("id", userId)
         .single();
 
@@ -34,9 +34,17 @@ const DomainSection = ({ userId }: DomainSectionProps) => {
 
   const updateDomain = useMutation({
     mutationFn: async (newDomain: string) => {
+      // Check if domain has already been customized
+      if (profile?.has_customized_domain) {
+        throw new Error("You can only customize your domain once.");
+      }
+
       const { error } = await supabase
         .from("profiles")
-        .update({ custom_domain: newDomain })
+        .update({ 
+          custom_domain: newDomain, 
+          has_customized_domain: true 
+        })
         .eq("id", userId);
 
       if (error) throw error;
@@ -48,10 +56,10 @@ const DomainSection = ({ userId }: DomainSectionProps) => {
         description: "Your custom domain has been updated successfully.",
       });
     },
-    onError: () => {
+    onError: (error) => {
       toast({
         title: "Error",
-        description: "Failed to update domain. Please try again.",
+        description: error.message || "Failed to update domain. Please try again.",
         variant: "destructive",
       });
     },
@@ -79,7 +87,9 @@ const DomainSection = ({ userId }: DomainSectionProps) => {
       <CardHeader>
         <CardTitle>Your Chatbot Domain</CardTitle>
         <CardDescription>
-          Customize your chatbot's URL and share it with your visitors
+          {profile?.has_customized_domain 
+            ? "You have already customized your domain." 
+            : "Customize your chatbot's URL and share it with your visitors"}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -93,10 +103,11 @@ const DomainSection = ({ userId }: DomainSectionProps) => {
               onChange={(e) => setCustomDomain(e.target.value)}
               placeholder="your-custom-domain"
               className="flex-1"
+              disabled={profile?.has_customized_domain}
             />
             <Button 
               type="submit" 
-              disabled={updateDomain.isPending}
+              disabled={updateDomain.isPending || profile?.has_customized_domain}
             >
               {updateDomain.isPending ? "Saving..." : "Save"}
             </Button>

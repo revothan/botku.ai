@@ -104,6 +104,7 @@ export type Database = {
           created_at: string
           custom_domain: string | null
           display_name: string | null
+          has_customized_domain: boolean | null
           id: string
           theme: string | null
           updated_at: string
@@ -115,6 +116,7 @@ export type Database = {
           created_at?: string
           custom_domain?: string | null
           display_name?: string | null
+          has_customized_domain?: boolean | null
           id: string
           theme?: string | null
           updated_at?: string
@@ -126,6 +128,7 @@ export type Database = {
           created_at?: string
           custom_domain?: string | null
           display_name?: string | null
+          has_customized_domain?: boolean | null
           id?: string
           theme?: string | null
           updated_at?: string
