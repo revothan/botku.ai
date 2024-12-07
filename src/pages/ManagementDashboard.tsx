@@ -1,17 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import ChatbotSettingsForm from "@/components/dashboard/ChatbotSettingsForm";
-import ButtonsSection from "@/components/dashboard/ButtonsSection";
-import PhonePreview from "@/components/dashboard/PhonePreview";
-import type { ButtonConfig, ChatbotSettings } from "@/types/chatbot";
+import DomainSection from "@/components/dashboard/DomainSection";
+import SettingsSection from "@/components/dashboard/SettingsSection";
 
 const ManagementDashboard = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
   const [userId, setUserId] = useState<string | null>(null);
   const [isAuthChecking, setIsAuthChecking] = useState(true);
 
@@ -51,10 +46,7 @@ const ManagementDashboard = () => {
 
       if (existingSettings) {
         console.log("Existing settings found:", existingSettings);
-        return {
-          ...existingSettings,
-          buttons: (existingSettings.buttons || []) as ButtonConfig[]
-        };
+        return existingSettings;
       }
 
       console.log("No existing settings found, creating default settings...");
@@ -77,77 +69,12 @@ const ManagementDashboard = () => {
       }
 
       console.log("Default settings created:", newSettings);
-      return {
-        ...newSettings,
-        buttons: [] as ButtonConfig[]
-      };
+      return newSettings;
     },
     enabled: !!userId,
   });
 
-  const updateSettings = useMutation({
-    mutationFn: async (values: Omit<ChatbotSettings, 'buttons'>) => {
-      if (!userId) throw new Error("Not authenticated");
-
-      // First, update Supabase settings
-      const { data: settingsData, error: settingsError } = await supabase
-        .from("chatbot_settings")
-        .update({
-          bot_name: values.bot_name,
-          greeting_message: values.greeting_message,
-          training_data: values.training_data,
-        })
-        .eq("profile_id", userId)
-        .select()
-        .single();
-
-      if (settingsError) throw settingsError;
-
-      // Then, update or create OpenAI Assistant
-      const assistantResponse = await supabase.functions.invoke('create-openai-assistant', {
-        body: JSON.stringify({
-          ...values,
-          assistant_id: settings?.assistant_id
-        })
-      });
-
-      if (assistantResponse.error) {
-        throw new Error(assistantResponse.error.message);
-      }
-
-      // Update assistant_id in database if it's a new assistant
-      if (!settings?.assistant_id) {
-        await supabase
-          .from("chatbot_settings")
-          .update({ assistant_id: assistantResponse.data.assistant.id })
-          .eq("profile_id", userId);
-      }
-
-      return { 
-        settings: settingsData,
-        assistant: assistantResponse.data 
-      };
-    },
-    onSuccess: (result) => {
-      queryClient.invalidateQueries({ queryKey: ["chatbot-settings"] });
-      toast({
-        title: settings?.assistant_id ? "Settings updated" : "Chatbot created",
-        description: settings?.assistant_id 
-          ? "Your chatbot settings have been updated successfully."
-          : "Your chatbot has been created successfully.",
-      });
-      console.log("OpenAI Assistant operation successful:", result.assistant);
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
-
-  if (isAuthChecking || isLoading) {
+  if (isAuthChecking || (isLoading && !settings)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-primary"></div>
@@ -159,12 +86,6 @@ const ManagementDashboard = () => {
     return null;
   }
 
-  const defaultValues = {
-    bot_name: settings?.bot_name || "",
-    greeting_message: settings?.greeting_message || "",
-    training_data: settings?.training_data || "",
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 p-8">
       <div className="max-w-6xl mx-auto">
@@ -172,25 +93,16 @@ const ManagementDashboard = () => {
           <div className="flex-1 space-y-8">
             <div>
               <h1 className="text-2xl font-bold mb-6">Chatbot Settings</h1>
-              <ChatbotSettingsForm
-                defaultValues={defaultValues}
-                onSubmit={updateSettings.mutate}
-                isSubmitting={updateSettings.isPending}
-                hasExistingBot={!!settings?.assistant_id}
+              <SettingsSection
+                userId={userId}
+                settings={settings}
+                isLoading={isLoading}
               />
             </div>
-            <ButtonsSection 
-              profileId={userId}
-              initialButtons={(settings?.buttons || []) as ButtonConfig[]}
-            />
           </div>
-          <div className="flex-1">
-            <h2 className="text-2xl font-bold mb-6">Preview</h2>
-            <PhonePreview
-              botName={settings?.bot_name}
-              greetingMessage={settings?.greeting_message}
-              buttons={(settings?.buttons || []) as ButtonConfig[]}
-            />
+          <div className="lg:w-80">
+            <h2 className="text-2xl font-bold mb-6">Share Your Chatbot</h2>
+            <DomainSection userId={userId} />
           </div>
         </div>
       </div>
