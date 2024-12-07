@@ -69,6 +69,16 @@ const UserPage = () => {
           )}
           <h1 className="text-3xl font-bold">{profile.display_name || profile.username}</h1>
           {profile.bio && <p className="text-gray-600">{profile.bio}</p>}
+          {profile.custom_domain && (
+            <a
+              href={`https://${profile.custom_domain}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              {profile.custom_domain}
+            </a>
+          )}
         </motion.div>
 
         <div className="space-y-4">
