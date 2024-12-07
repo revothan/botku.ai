@@ -30,6 +30,11 @@ const SortableButton = ({ button, onRemove, onUpdate }: SortableButtonProps) => 
     transition,
   };
 
+  const handleRemove = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent drag event from firing
+    onRemove();
+  };
+
   return (
     <div
       ref={setNodeRef}
@@ -41,20 +46,23 @@ const SortableButton = ({ button, onRemove, onUpdate }: SortableButtonProps) => 
       <div className="flex-1 grid grid-cols-2 gap-3">
         <Input
           placeholder="Button Label"
-          value={button.label}
+          value={button.label || ""}
           onChange={(e) => onUpdate(button.id, "label", e.target.value)}
+          onClick={(e) => e.stopPropagation()} // Prevent drag when clicking input
         />
         <Input
           placeholder="Button URL"
-          value={button.url}
+          value={button.url || ""}
           onChange={(e) => onUpdate(button.id, "url", e.target.value)}
+          onClick={(e) => e.stopPropagation()} // Prevent drag when clicking input
         />
       </div>
       <Button
         variant="ghost"
         size="icon"
-        onClick={onRemove}
+        onClick={handleRemove}
         className="shrink-0"
+        type="button"
       >
         <Minus className="h-4 w-4" />
       </Button>

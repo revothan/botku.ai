@@ -15,6 +15,7 @@ const ButtonsSection = ({ profileId, initialButtons }: ButtonsSectionProps) => {
 
   const updateButtons = useMutation({
     mutationFn: async (buttons: ButtonConfig[]) => {
+      console.log("Updating buttons:", buttons);
       const { data, error } = await supabase
         .from("chatbot_settings")
         .update({ buttons })
@@ -22,7 +23,10 @@ const ButtonsSection = ({ profileId, initialButtons }: ButtonsSectionProps) => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error updating buttons:", error);
+        throw error;
+      }
       return data;
     },
     onSuccess: () => {
@@ -33,6 +37,7 @@ const ButtonsSection = ({ profileId, initialButtons }: ButtonsSectionProps) => {
       });
     },
     onError: (error) => {
+      console.error("Error in updateButtons mutation:", error);
       toast({
         title: "Error",
         description: error.message,
@@ -42,12 +47,12 @@ const ButtonsSection = ({ profileId, initialButtons }: ButtonsSectionProps) => {
   });
 
   const handleButtonsChange = (buttons: ButtonConfig[]) => {
+    console.log("Handling button change:", buttons);
     updateButtons.mutate(buttons);
   };
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-medium">Quick Action Buttons</h3>
       <ButtonManager
         buttons={initialButtons}
         onChange={handleButtonsChange}
