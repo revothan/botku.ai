@@ -2,7 +2,6 @@ import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import ButtonManager from "./ButtonManager";
-import { Button } from "@/components/ui/button";
 import type { ButtonConfig } from "@/types/chatbot";
 
 type ButtonsSectionProps = {

@@ -31,33 +31,29 @@ const SortableButton = ({ button, onRemove, onUpdate }: SortableButtonProps) => 
     onRemove();
   };
 
-  const handleInputChange = (field: "label" | "url", value: string) => {
-    onUpdate(button.id, field, value);
-  };
-
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center gap-3 p-3 bg-white rounded-lg border cursor-move"
-      {...attributes}
-      {...listeners}
+      className="flex items-center gap-3 p-3 bg-white rounded-lg border"
     >
-      <div className="flex-1 grid grid-cols-2 gap-3">
-        <Input
-          placeholder="Button Label"
-          value={button.label}
-          onChange={(e) => handleInputChange("label", e.target.value)}
-          onClick={(e) => e.stopPropagation()}
-          onMouseDown={(e) => e.stopPropagation()}
-        />
-        <Input
-          placeholder="Button URL"
-          value={button.url}
-          onChange={(e) => handleInputChange("url", e.target.value)}
-          onClick={(e) => e.stopPropagation()}
-          onMouseDown={(e) => e.stopPropagation()}
-        />
+      <div 
+        className="w-full flex items-center gap-3 cursor-move"
+        {...attributes}
+        {...listeners}
+      >
+        <div className="flex-1 grid grid-cols-2 gap-3">
+          <Input
+            placeholder="Button Label"
+            value={button.label}
+            onChange={(e) => onUpdate(button.id, "label", e.target.value)}
+          />
+          <Input
+            placeholder="Button URL"
+            value={button.url}
+            onChange={(e) => onUpdate(button.id, "url", e.target.value)}
+          />
+        </div>
       </div>
       <Button
         variant="ghost"
