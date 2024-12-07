@@ -30,6 +30,8 @@ const ChatbotPage = () => {
         throw profileError;
       }
 
+      console.log("Profiles found:", profiles);
+
       if (!profiles || profiles.length === 0) {
         throw new Error("Profile not found");
       }
@@ -48,6 +50,7 @@ const ChatbotPage = () => {
         throw settingsError;
       }
 
+      console.log("Existing settings found:", chatbotSettings);
       return chatbotSettings;
     },
     enabled: !!customDomain,
