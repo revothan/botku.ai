@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   DndContext,
   closestCenter,
@@ -14,23 +14,21 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Plus } from "lucide-react";
 import SortableButton from "./SortableButton";
-
-type ButtonConfig = {
-  id: string;
-  label: string;
-  url: string;
-};
+import type { ButtonConfig } from "@/types/chatbot";
 
 type ButtonManagerProps = {
   buttons: ButtonConfig[];
   onChange: (buttons: ButtonConfig[]) => void;
 };
 
-const ButtonManager = ({ buttons = [], onChange }: ButtonManagerProps) => {
+const ButtonManager = ({ buttons, onChange }: ButtonManagerProps) => {
   const [localButtons, setLocalButtons] = useState<ButtonConfig[]>(buttons);
+
+  useEffect(() => {
+    setLocalButtons(buttons);
+  }, [buttons]);
 
   const sensors = useSensors(
     useSensor(PointerSensor),

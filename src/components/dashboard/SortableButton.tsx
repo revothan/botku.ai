@@ -3,12 +3,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Minus } from "lucide-react";
-
-type ButtonConfig = {
-  id: string;
-  label: string;
-  url: string;
-};
+import type { ButtonConfig } from "@/types/chatbot";
 
 type SortableButtonProps = {
   button: ButtonConfig;
@@ -31,8 +26,13 @@ const SortableButton = ({ button, onRemove, onUpdate }: SortableButtonProps) => 
   };
 
   const handleRemove = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent drag event from firing
+    e.preventDefault();
+    e.stopPropagation();
     onRemove();
+  };
+
+  const handleInputChange = (field: "label" | "url", value: string) => {
+    onUpdate(button.id, field, value);
   };
 
   return (
@@ -46,15 +46,17 @@ const SortableButton = ({ button, onRemove, onUpdate }: SortableButtonProps) => 
       <div className="flex-1 grid grid-cols-2 gap-3">
         <Input
           placeholder="Button Label"
-          value={button.label || ""}
-          onChange={(e) => onUpdate(button.id, "label", e.target.value)}
-          onClick={(e) => e.stopPropagation()} // Prevent drag when clicking input
+          value={button.label}
+          onChange={(e) => handleInputChange("label", e.target.value)}
+          onClick={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
         />
         <Input
           placeholder="Button URL"
-          value={button.url || ""}
-          onChange={(e) => onUpdate(button.id, "url", e.target.value)}
-          onClick={(e) => e.stopPropagation()} // Prevent drag when clicking input
+          value={button.url}
+          onChange={(e) => handleInputChange("url", e.target.value)}
+          onClick={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
         />
       </div>
       <Button
