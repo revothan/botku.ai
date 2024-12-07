@@ -14,6 +14,7 @@ const ChatbotPage = () => {
     queryKey: ["chatbot-settings", customDomain],
     queryFn: async () => {
       if (!customDomain) {
+        console.error("No domain provided");
         throw new Error("No domain provided");
       }
 
@@ -22,7 +23,7 @@ const ChatbotPage = () => {
       // First get the profile by custom domain
       const { data: profiles, error: profileError } = await supabase
         .from("profiles")
-        .select("id")
+        .select("id, custom_domain")
         .eq("custom_domain", customDomain)
         .limit(1);
 
@@ -34,10 +35,12 @@ const ChatbotPage = () => {
       console.log("Profiles found:", profiles);
 
       if (!profiles || profiles.length === 0) {
-        throw new Error("Profile not found");
+        console.error("No profile found for domain:", customDomain);
+        throw new Error(`No chatbot found for domain: ${customDomain}`);
       }
 
       const profile = profiles[0];
+      console.log("Found profile:", profile);
 
       // Then get the chatbot settings for that profile
       const { data: chatbotSettings, error: settingsError } = await supabase
@@ -52,7 +55,8 @@ const ChatbotPage = () => {
       }
 
       if (!chatbotSettings || chatbotSettings.length === 0) {
-        throw new Error("Chatbot settings not found");
+        console.error("No chatbot settings found for profile:", profile.id);
+        throw new Error("Chatbot not configured for this domain");
       }
 
       console.log("Chatbot settings found:", chatbotSettings[0]);
