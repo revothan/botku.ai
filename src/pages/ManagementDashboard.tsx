@@ -148,6 +148,7 @@ const ManagementDashboard = () => {
     bot_name: settings?.bot_name || "",
     greeting_message: settings?.greeting_message || "",
     training_data: settings?.training_data || "",
+    buttons: settings?.buttons || [], // Added this line to include buttons
   };
 
   return (
@@ -168,6 +169,7 @@ const ManagementDashboard = () => {
             <PhonePreview
               botName={settings?.bot_name}
               greetingMessage={settings?.greeting_message}
+              buttons={settings?.buttons}
             />
           </div>
         </div>
