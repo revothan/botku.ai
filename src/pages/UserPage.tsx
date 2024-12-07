@@ -9,6 +9,8 @@ const UserPage = () => {
   const { data: profile, isLoading, error } = useQuery({
     queryKey: ["profile", username],
     queryFn: async () => {
+      console.log("Fetching profile for username:", username);
+      
       const { data, error } = await supabase
         .from("profiles")
         .select(`
@@ -18,13 +20,19 @@ const UserPage = () => {
         .eq("username", username)
         .single();
 
+      console.log("Query response:", { data, error });
+
       // If no data is found, return null instead of throwing an error
       if (error && error.code === "PGRST116") {
+        console.log("No profile found for username:", username);
         return null;
       }
 
       // For other errors, throw them to be handled by error boundary
-      if (error) throw error;
+      if (error) {
+        console.error("Unexpected error:", error);
+        throw error;
+      }
       
       return data;
     },
