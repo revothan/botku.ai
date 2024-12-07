@@ -1,6 +1,6 @@
 import ChatbotSettingsForm from "@/components/dashboard/ChatbotSettingsForm";
 import ButtonsSection from "@/components/dashboard/ButtonsSection";
-import type { ChatbotSettings } from "@/types/chatbot";
+import type { ChatbotSettings, ChatbotFormData } from "@/types/chatbot";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -16,7 +16,7 @@ const SettingsSection = ({ userId, settings, isLoading }: SettingsSectionProps) 
   const queryClient = useQueryClient();
 
   const updateSettings = useMutation({
-    mutationFn: async (values: Omit<ChatbotSettings, 'buttons'>) => {
+    mutationFn: async (values: ChatbotFormData) => {
       if (!userId) throw new Error("Not authenticated");
 
       const { data: settingsData, error: settingsError } = await supabase
@@ -82,7 +82,7 @@ const SettingsSection = ({ userId, settings, isLoading }: SettingsSectionProps) 
     );
   }
 
-  const defaultValues = {
+  const defaultValues: ChatbotFormData = {
     bot_name: settings?.bot_name || "",
     greeting_message: settings?.greeting_message || "",
     training_data: settings?.training_data || "",

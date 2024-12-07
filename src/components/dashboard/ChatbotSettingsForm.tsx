@@ -10,9 +10,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import type { ChatbotSettings } from "@/types/chatbot";
-
-type ChatbotFormData = Omit<ChatbotSettings, 'buttons'>;
+import type { ChatbotFormData } from "@/types/chatbot";
 
 type ChatbotSettingsFormProps = {
   defaultValues: ChatbotFormData;

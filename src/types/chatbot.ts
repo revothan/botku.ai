@@ -17,4 +17,8 @@ export type ChatbotSettings = {
 };
 
 // Helper type for form data (subset of ChatbotSettings)
-export type ChatbotFormData = Pick<ChatbotSettings, 'bot_name' | 'greeting_message' | 'training_data'>;
+export type ChatbotFormData = {
+  bot_name: string;
+  greeting_message: string;
+  training_data: string | null;
+};
