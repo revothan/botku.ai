@@ -13,6 +13,7 @@ export type Database = {
         Row: {
           assistant_id: string | null
           bot_name: string
+          buttons: Json | null
           created_at: string
           greeting_message: string
           id: string
@@ -23,6 +24,7 @@ export type Database = {
         Insert: {
           assistant_id?: string | null
           bot_name?: string
+          buttons?: Json | null
           created_at?: string
           greeting_message?: string
           id?: string
@@ -33,6 +35,7 @@ export type Database = {
         Update: {
           assistant_id?: string | null
           bot_name?: string
+          buttons?: Json | null
           created_at?: string
           greeting_message?: string
           id?: string

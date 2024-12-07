@@ -54,7 +54,10 @@ const ManagementDashboard = () => {
 
       if (existingSettings) {
         console.log("Existing settings found:", existingSettings);
-        return existingSettings;
+        return {
+          ...existingSettings,
+          buttons: existingSettings.buttons || []
+        };
       }
 
       console.log("No existing settings found, creating default settings...");
@@ -66,6 +69,7 @@ const ManagementDashboard = () => {
           bot_name: "My ChatBot",
           greeting_message: "Hello! How can I help you today?",
           training_data: "",
+          buttons: []
         })
         .select()
         .single();
@@ -88,7 +92,10 @@ const ManagementDashboard = () => {
       // First, update Supabase settings
       const { data: settingsData, error: settingsError } = await supabase
         .from("chatbot_settings")
-        .update(values)
+        .update({
+          ...values,
+          buttons: values.buttons || []
+        })
         .eq("profile_id", user.id)
         .select()
         .single();
@@ -148,7 +155,7 @@ const ManagementDashboard = () => {
     bot_name: settings?.bot_name || "",
     greeting_message: settings?.greeting_message || "",
     training_data: settings?.training_data || "",
-    buttons: settings?.buttons || [], // Added this line to include buttons
+    buttons: settings?.buttons || [],
   };
 
   return (
@@ -169,7 +176,7 @@ const ManagementDashboard = () => {
             <PhonePreview
               botName={settings?.bot_name}
               greetingMessage={settings?.greeting_message}
-              buttons={settings?.buttons}
+              buttons={settings?.buttons || []}
             />
           </div>
         </div>
