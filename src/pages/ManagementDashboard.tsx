@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import DomainSection from "@/components/dashboard/DomainSection";
 import SettingsSection from "@/components/dashboard/SettingsSection";
+import PhonePreview from "@/components/dashboard/PhonePreview";
 import type { ButtonConfig, ChatbotSettings } from "@/types/chatbot";
 
 const ManagementDashboard = () => {
@@ -47,7 +48,6 @@ const ManagementDashboard = () => {
 
       if (existingSettings) {
         console.log("Existing settings found:", existingSettings);
-        // Parse buttons from JSON to ensure correct typing
         return {
           ...existingSettings,
           buttons: Array.isArray(existingSettings.buttons) 
@@ -95,9 +95,10 @@ const ManagementDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 p-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex flex-col lg:flex-row gap-8">
-          <div className="flex-1 space-y-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* Settings Column */}
+          <div className="lg:col-span-7 space-y-8">
             <div>
               <h1 className="text-2xl font-bold mb-6">Chatbot Settings</h1>
               <SettingsSection
@@ -107,9 +108,21 @@ const ManagementDashboard = () => {
               />
             </div>
           </div>
-          <div className="lg:w-80">
-            <h2 className="text-2xl font-bold mb-6">Share Your Chatbot</h2>
-            <DomainSection userId={userId} />
+
+          {/* Preview and Share Column */}
+          <div className="lg:col-span-5 space-y-8">
+            <div>
+              <h2 className="text-2xl font-bold mb-6">Preview</h2>
+              <PhonePreview
+                botName={settings?.bot_name || ""}
+                greetingMessage={settings?.greeting_message || ""}
+                buttons={settings?.buttons || []}
+              />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold mb-6">Share Your Chatbot</h2>
+              <DomainSection userId={userId} />
+            </div>
           </div>
         </div>
       </div>
