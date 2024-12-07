@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Smartphone, Send } from "lucide-react";
+import { Send } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import type { ButtonConfig } from "@/types/chatbot";
@@ -12,6 +12,16 @@ import type { ButtonConfig } from "@/types/chatbot";
 type Message = {
   role: "assistant" | "user";
   content: string;
+};
+
+type AssistantResponse = {
+  response: {
+    type: string;
+    text: {
+      value: string;
+      annotations: any[];
+    };
+  };
 };
 
 const ChatbotPage = () => {
@@ -77,7 +87,7 @@ const ChatbotPage = () => {
         throw new Error("Chatbot not configured properly");
       }
 
-      const response = await supabase.functions.invoke('chat-with-assistant', {
+      const response = await supabase.functions.invoke<AssistantResponse>('chat-with-assistant', {
         body: JSON.stringify({
           message,
           assistantId: settings.assistant_id
@@ -88,14 +98,24 @@ const ChatbotPage = () => {
         throw new Error(response.error.message);
       }
 
-      return response.data.response;
+      console.log("Received response from assistant:", response.data);
+      return response.data;
     },
     onSuccess: (response) => {
-      setMessages(prev => [
-        ...prev,
-        { role: "assistant", content: response.text }
-      ]);
-      setInputMessage("");
+      if (response?.response?.text?.value) {
+        setMessages(prev => [
+          ...prev,
+          { role: "assistant", content: response.response.text.value }
+        ]);
+        setInputMessage("");
+      } else {
+        console.error("Unexpected response format:", response);
+        toast({
+          title: "Error",
+          description: "Received an invalid response from the chatbot",
+          variant: "destructive",
+        });
+      }
     },
     onError: (error) => {
       toast({
