@@ -36,21 +36,38 @@ const ManagementDashboard = () => {
     },
   });
 
-  // Fetch current user and their chatbot settings
+  // Fetch or create chatbot settings
   const { data: settings, isLoading } = useQuery({
     queryKey: ["chatbot-settings"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      const { data, error } = await supabase
+      // First try to get existing settings
+      const { data: existingSettings, error: fetchError } = await supabase
         .from("chatbot_settings")
         .select("*")
         .eq("profile_id", user.id)
         .single();
 
-      if (error) throw error;
-      return data;
+      if (existingSettings) {
+        return existingSettings;
+      }
+
+      // If no settings exist, create default settings
+      const { data: newSettings, error: insertError } = await supabase
+        .from("chatbot_settings")
+        .insert({
+          profile_id: user.id,
+          bot_name: "My ChatBot",
+          greeting_message: "Hello! How can I help you today?",
+          training_data: "",
+        })
+        .select()
+        .single();
+
+      if (insertError) throw insertError;
+      return newSettings;
     },
   });
 
