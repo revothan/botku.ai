@@ -39,28 +39,25 @@ const SortableButton = ({ button, onRemove, onUpdate }: SortableButtonProps) => 
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center gap-3 p-3 bg-white rounded-lg border"
+      className="flex items-center gap-3 p-3 bg-white rounded-lg border cursor-move"
       {...attributes}
+      {...listeners}
     >
       <div className="flex-1 grid grid-cols-2 gap-3">
-        <div className="relative">
-          <Input
-            placeholder="Button Label"
-            value={button.label}
-            onChange={(e) => handleInputChange("label", e.target.value)}
-            onClick={(e) => e.stopPropagation()}
-            {...listeners}
-          />
-        </div>
-        <div className="relative">
-          <Input
-            placeholder="Button URL"
-            value={button.url}
-            onChange={(e) => handleInputChange("url", e.target.value)}
-            onClick={(e) => e.stopPropagation()}
-            {...listeners}
-          />
-        </div>
+        <Input
+          placeholder="Button Label"
+          value={button.label}
+          onChange={(e) => handleInputChange("label", e.target.value)}
+          onClick={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
+        />
+        <Input
+          placeholder="Button URL"
+          value={button.url}
+          onChange={(e) => handleInputChange("url", e.target.value)}
+          onClick={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
+        />
       </div>
       <Button
         variant="ghost"
