@@ -5,19 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import ChatbotSettingsForm from "@/components/dashboard/ChatbotSettingsForm";
 import PhonePreview from "@/components/dashboard/PhonePreview";
-
-type ButtonConfig = {
-  id: string;
-  label: string;
-  url: string;
-};
-
-type ChatbotSettings = {
-  bot_name: string;
-  greeting_message: string;
-  training_data: string;
-  buttons: ButtonConfig[];
-};
+import type { ButtonConfig, ChatbotSettings } from "@/types/chatbot";
 
 const ManagementDashboard = () => {
   const navigate = useNavigate();
@@ -56,7 +44,7 @@ const ManagementDashboard = () => {
         console.log("Existing settings found:", existingSettings);
         return {
           ...existingSettings,
-          buttons: existingSettings.buttons || []
+          buttons: (existingSettings.buttons || []) as ButtonConfig[]
         };
       }
 
@@ -80,7 +68,10 @@ const ManagementDashboard = () => {
       }
 
       console.log("Default settings created:", newSettings);
-      return newSettings;
+      return {
+        ...newSettings,
+        buttons: [] as ButtonConfig[]
+      };
     },
   });
 
@@ -122,7 +113,13 @@ const ManagementDashboard = () => {
           .eq("profile_id", user.id);
       }
 
-      return { settings: settingsData, assistant: assistantResponse.data };
+      return { 
+        settings: {
+          ...settingsData,
+          buttons: (settingsData.buttons || []) as ButtonConfig[]
+        }, 
+        assistant: assistantResponse.data 
+      };
     },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["chatbot-settings"] });
@@ -151,11 +148,11 @@ const ManagementDashboard = () => {
     );
   }
 
-  const defaultValues = {
+  const defaultValues: ChatbotSettings = {
     bot_name: settings?.bot_name || "",
     greeting_message: settings?.greeting_message || "",
     training_data: settings?.training_data || "",
-    buttons: settings?.buttons || [],
+    buttons: (settings?.buttons || []) as ButtonConfig[],
   };
 
   return (
@@ -176,7 +173,7 @@ const ManagementDashboard = () => {
             <PhonePreview
               botName={settings?.bot_name}
               greetingMessage={settings?.greeting_message}
-              buttons={settings?.buttons || []}
+              buttons={(settings?.buttons || []) as ButtonConfig[]}
             />
           </div>
         </div>
