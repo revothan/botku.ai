@@ -11,30 +11,28 @@ const UserPage = () => {
     queryFn: async () => {
       console.log("Fetching profile for username:", username);
       
-      const { data, error } = await supabase
-        .from("profiles")
-        .select(`
-          *,
-          links (*)
-        `)
-        .eq("username", username)
-        .single();
+      try {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select(`
+            *,
+            links (*)
+          `)
+          .eq("username", username)
+          .maybeSingle();
 
-      console.log("Query response:", { data, error });
+        console.log("Query response:", { data, error });
 
-      // If no data is found, return null instead of throwing an error
-      if (error && error.code === "PGRST116") {
-        console.log("No profile found for username:", username);
-        return null;
+        if (error) {
+          console.error("Supabase error:", error);
+          throw error;
+        }
+
+        return data;
+      } catch (err) {
+        console.error("Error in query:", err);
+        throw err;
       }
-
-      // For other errors, throw them to be handled by error boundary
-      if (error) {
-        console.error("Unexpected error:", error);
-        throw error;
-      }
-      
-      return data;
     },
   });
 
