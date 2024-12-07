@@ -1,1 +1,2 @@
-project_id = "wssgzuhdbtcrxrxojsfq"
+[functions.create-openai-assistant]
+verify_jwt = true

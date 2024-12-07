@@ -42,7 +42,6 @@ const ManagementDashboard = () => {
     queryFn: async () => {
       console.log("Fetching chatbot settings...");
       
-      // First get the current user
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError) {
         console.error("Error fetching user:", userError);
@@ -55,7 +54,6 @@ const ManagementDashboard = () => {
 
       console.log("User found:", user.id);
 
-      // Try to get existing settings
       const { data: existingSettings, error: fetchError } = await supabase
         .from("chatbot_settings")
         .select()
@@ -74,7 +72,6 @@ const ManagementDashboard = () => {
 
       console.log("No existing settings found, creating default settings...");
 
-      // If no settings exist, create default settings
       const { data: newSettings, error: insertError } = await supabase
         .from("chatbot_settings")
         .insert({
@@ -96,28 +93,40 @@ const ManagementDashboard = () => {
     },
   });
 
-  // Update settings mutation
+  // Update settings mutation with OpenAI Assistant creation
   const updateSettings = useMutation({
     mutationFn: async (values: ChatbotSettings) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      const { data, error } = await supabase
+      // First, update Supabase settings
+      const { data: settingsData, error: settingsError } = await supabase
         .from("chatbot_settings")
         .update(values)
         .eq("profile_id", user.id)
         .select()
         .single();
 
-      if (error) throw error;
-      return data;
+      if (settingsError) throw settingsError;
+
+      // Then, create OpenAI Assistant
+      const assistantResponse = await supabase.functions.invoke('create-openai-assistant', {
+        body: JSON.stringify(values)
+      });
+
+      if (assistantResponse.error) {
+        throw new Error(assistantResponse.error.message);
+      }
+
+      return { settings: settingsData, assistant: assistantResponse.data };
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["chatbot-settings"] });
       toast({
         title: "Settings saved",
-        description: "Your chatbot settings have been updated successfully.",
+        description: "Your chatbot settings and OpenAI Assistant have been created successfully.",
       });
+      console.log("OpenAI Assistant created:", result.assistant);
     },
     onError: (error) => {
       toast({
