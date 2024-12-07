@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import DomainSection from "@/components/dashboard/DomainSection";
 import SettingsSection from "@/components/dashboard/SettingsSection";
+import type { ButtonConfig, ChatbotSettings } from "@/types/chatbot";
 
 const ManagementDashboard = () => {
   const navigate = useNavigate();
@@ -46,7 +47,13 @@ const ManagementDashboard = () => {
 
       if (existingSettings) {
         console.log("Existing settings found:", existingSettings);
-        return existingSettings;
+        // Parse buttons from JSON to ensure correct typing
+        return {
+          ...existingSettings,
+          buttons: Array.isArray(existingSettings.buttons) 
+            ? existingSettings.buttons 
+            : []
+        } as ChatbotSettings;
       }
 
       console.log("No existing settings found, creating default settings...");
@@ -69,7 +76,7 @@ const ManagementDashboard = () => {
       }
 
       console.log("Default settings created:", newSettings);
-      return newSettings;
+      return newSettings as ChatbotSettings;
     },
     enabled: !!userId,
   });
