@@ -38,22 +38,31 @@ const SortableButton = ({ button, onRemove, onUpdate }: SortableButtonProps) => 
       className="flex items-center gap-3 p-3 bg-white rounded-lg border"
     >
       <div 
-        className="w-full flex items-center gap-3 cursor-move"
         {...attributes}
         {...listeners}
+        className="flex items-center justify-center w-8 h-8 cursor-move hover:bg-gray-100 rounded-md"
       >
-        <div className="flex-1 grid grid-cols-2 gap-3">
-          <Input
-            placeholder="Button Label"
-            value={button.label}
-            onChange={(e) => onUpdate(button.id, "label", e.target.value)}
-          />
-          <Input
-            placeholder="Button URL"
-            value={button.url}
-            onChange={(e) => onUpdate(button.id, "url", e.target.value)}
-          />
-        </div>
+        <svg 
+          width="16" 
+          height="16" 
+          viewBox="0 0 16 16" 
+          fill="currentColor"
+          className="text-gray-400"
+        >
+          <path d="M4 6h8v1H4V6zm0 3h8v1H4V9z" />
+        </svg>
+      </div>
+      <div className="flex-1 grid grid-cols-2 gap-3">
+        <Input
+          placeholder="Button Label"
+          value={button.label}
+          onChange={(e) => onUpdate(button.id, "label", e.target.value)}
+        />
+        <Input
+          placeholder="Button URL"
+          value={button.url}
+          onChange={(e) => onUpdate(button.id, "url", e.target.value)}
+        />
       </div>
       <Button
         variant="ghost"
