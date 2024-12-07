@@ -66,6 +66,7 @@ const UserPage = () => {
         title: "Domain updated successfully!",
         description: `Your custom domain is now botku.ai/${customDomain}`,
       });
+      navigate("/dashboard");
     },
     onError: (error) => {
       toast({

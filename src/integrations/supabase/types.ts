@@ -9,6 +9,44 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      chatbot_settings: {
+        Row: {
+          bot_name: string
+          created_at: string
+          greeting_message: string
+          id: string
+          profile_id: string
+          training_data: string | null
+          updated_at: string
+        }
+        Insert: {
+          bot_name?: string
+          created_at?: string
+          greeting_message?: string
+          id?: string
+          profile_id: string
+          training_data?: string | null
+          updated_at?: string
+        }
+        Update: {
+          bot_name?: string
+          created_at?: string
+          greeting_message?: string
+          id?: string
+          profile_id?: string
+          training_data?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chatbot_settings_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       links: {
         Row: {
           created_at: string
