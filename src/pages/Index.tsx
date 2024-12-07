@@ -1,9 +1,60 @@
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { Auth } from "@supabase/auth-ui-react";
+import { ThemeSupa } from "@supabase/auth-ui-shared";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
 
 const Index = () => {
   const navigate = useNavigate();
+  const [session, setSession] = useState(null);
+
+  useEffect(() => {
+    // Check current session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  if (!session) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
+        <div className="container mx-auto px-4 py-16">
+          <div className="max-w-md mx-auto">
+            <h1 className="text-2xl font-bold tracking-tight text-center mb-8">BOTKU</h1>
+            <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-100">
+              <Auth
+                supabaseClient={supabase}
+                appearance={{
+                  theme: ThemeSupa,
+                  variables: {
+                    default: {
+                      colors: {
+                        brand: '#9b87f5',
+                        brandAccent: '#7E69AB',
+                      },
+                    },
+                  },
+                }}
+                theme="light"
+                providers={[]}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
@@ -14,15 +65,12 @@ const Index = () => {
             <Button
               variant="ghost"
               className="text-gray-600 hover:text-gray-900"
-              onClick={() => navigate("/login")}
+              onClick={async () => {
+                await supabase.auth.signOut();
+                navigate("/");
+              }}
             >
-              Log in
-            </Button>
-            <Button
-              className="bg-primary hover:bg-primary/90 text-white"
-              onClick={() => navigate("/signup")}
-            >
-              Get Started
+              Sign Out
             </Button>
           </div>
         </nav>
@@ -35,71 +83,45 @@ const Index = () => {
             className="space-y-6"
           >
             <span className="px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium">
-              Welcome to the Future of Link Management
+              Welcome to Your Dashboard
             </span>
             
             <h2 className="text-5xl font-bold tracking-tight text-gray-900 sm:text-6xl">
-              One Link to Rule Them All
+              Create Your Landing Page
             </h2>
             
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Create a beautiful, customizable landing page for all your important links. Share your content, grow your audience, and track your success.
+              Start building your personalized landing page. Add your links, customize your profile, and share your content with the world.
             </p>
 
             <div className="flex justify-center gap-4 mt-8">
               <Button
                 size="lg"
                 className="bg-primary hover:bg-primary/90 text-white px-8"
-                onClick={() => navigate("/signup")}
+                onClick={() => navigate("/dashboard")}
               >
-                Start for Free
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-gray-200"
-                onClick={() => navigate("/demo")}
-              >
-                View Demo
+                Get Started
               </Button>
             </div>
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="mt-16"
-          >
-            <div className="relative mx-auto max-w-3xl">
-              <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent z-10" />
-              <img
-                src="/placeholder.svg"
-                alt="BOTKU Dashboard Preview"
-                className="rounded-lg shadow-2xl border border-gray-200"
-              />
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="mt-24 grid grid-cols-1 gap-8 sm:grid-cols-3"
-          >
-            {features.map((feature, index) => (
-              <div
-                key={index}
-                className="p-6 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow"
-              >
+          {features.map((feature, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.4 + index * 0.1 }}
+              className="mt-24 grid grid-cols-1 gap-8 sm:grid-cols-3"
+            >
+              <div className="p-6 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
                 <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4 mx-auto">
                   {feature.icon}
                 </div>
                 <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
                 <p className="text-gray-600">{feature.description}</p>
               </div>
-            ))}
-          </motion.div>
+            </motion.div>
+          ))}
         </main>
       </div>
     </div>

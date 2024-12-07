@@ -9,7 +9,125 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      links: {
+        Row: {
+          created_at: string
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          position: number | null
+          profile_id: string
+          title: string
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          position?: number | null
+          profile_id: string
+          title: string
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          position?: number | null
+          profile_id?: string
+          title?: string
+          updated_at?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "links_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          theme: string | null
+          updated_at: string
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name?: string | null
+          id: string
+          theme?: string | null
+          updated_at?: string
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          theme?: string | null
+          updated_at?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
+      visits: {
+        Row: {
+          created_at: string
+          id: string
+          link_id: string | null
+          profile_id: string | null
+          user_agent: string | null
+          visitor_ip: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          link_id?: string | null
+          profile_id?: string | null
+          user_agent?: string | null
+          visitor_ip?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          link_id?: string | null
+          profile_id?: string | null
+          user_agent?: string | null
+          visitor_ip?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "visits_link_id_fkey"
+            columns: ["link_id"]
+            isOneToOne: false
+            referencedRelation: "links"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visits_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
