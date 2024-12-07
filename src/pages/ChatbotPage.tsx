@@ -55,7 +55,7 @@ const ChatbotPage = () => {
         throw new Error("Chatbot settings not found");
       }
 
-      console.log("Existing settings found:", chatbotSettings[0]);
+      console.log("Chatbot settings found:", chatbotSettings[0]);
       return chatbotSettings[0];
     },
     enabled: !!customDomain,
