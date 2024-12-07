@@ -11,6 +11,7 @@ export type Database = {
     Tables: {
       chatbot_settings: {
         Row: {
+          assistant_id: string | null
           bot_name: string
           created_at: string
           greeting_message: string
@@ -20,6 +21,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          assistant_id?: string | null
           bot_name?: string
           created_at?: string
           greeting_message?: string
@@ -29,6 +31,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          assistant_id?: string | null
           bot_name?: string
           created_at?: string
           greeting_message?: string

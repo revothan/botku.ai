@@ -1,5 +1,5 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,28 +13,50 @@ serve(async (req) => {
   }
 
   try {
+    const { bot_name, training_data, assistant_id } = await req.json();
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+
     if (!openAIApiKey) {
       throw new Error('OpenAI API key not found');
     }
 
-    const { bot_name, training_data } = await req.json();
-    console.log('Creating OpenAI Assistant with:', { bot_name, training_data });
-
-    const response = await fetch('https://api.openai.com/v1/assistants', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-        'OpenAI-Beta': 'assistants=v2'
-      },
-      body: JSON.stringify({
-        name: bot_name,
-        instructions: training_data,
-        tools: [{"type": "code_interpreter"}],
-        model: "gpt-4o"
-      }),
-    });
+    let response;
+    
+    if (assistant_id) {
+      // Update existing assistant
+      console.log('Updating existing assistant:', assistant_id);
+      response = await fetch(`https://api.openai.com/v1/assistants/${assistant_id}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openAIApiKey}`,
+          'Content-Type': 'application/json',
+          'OpenAI-Beta': 'assistants=v2'
+        },
+        body: JSON.stringify({
+          name: bot_name,
+          instructions: training_data,
+          tools: [{"type": "code_interpreter"}],
+          model: "gpt-4o"
+        }),
+      });
+    } else {
+      // Create new assistant
+      console.log('Creating new assistant');
+      response = await fetch('https://api.openai.com/v1/assistants', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openAIApiKey}`,
+          'Content-Type': 'application/json',
+          'OpenAI-Beta': 'assistants=v2'
+        },
+        body: JSON.stringify({
+          name: bot_name,
+          instructions: training_data,
+          tools: [{"type": "code_interpreter"}],
+          model: "gpt-4o"
+        }),
+      });
+    }
 
     if (!response.ok) {
       const error = await response.json();
@@ -43,7 +65,7 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    console.log('OpenAI Assistant created successfully:', data);
+    console.log('OpenAI Assistant operation successful:', data);
 
     return new Response(JSON.stringify({ 
       status: 'success',
