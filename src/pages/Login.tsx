@@ -17,26 +17,7 @@ const Index = () => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session) {
-        // Fetch the user's profile to get their username
-        supabase
-          .from('profiles')
-          .select('username')
-          .eq('id', session.user.id)
-          .single()
-          .then(({ data: profile, error }) => {
-            if (error) {
-              console.error('Error fetching profile:', error);
-              toast({
-                title: "Error",
-                description: "Could not fetch your profile. Please try again.",
-                variant: "destructive",
-              });
-              return;
-            }
-            if (profile?.username) {
-              navigate(`/${profile.username}`);
-            }
-          });
+        navigate('/dashboard');
       }
     });
 
@@ -46,26 +27,7 @@ const Index = () => {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       if (session) {
-        // Fetch the user's profile to get their username
-        supabase
-          .from('profiles')
-          .select('username')
-          .eq('id', session.user.id)
-          .single()
-          .then(({ data: profile, error }) => {
-            if (error) {
-              console.error('Error fetching profile:', error);
-              toast({
-                title: "Error",
-                description: "Could not fetch your profile. Please try again.",
-                variant: "destructive",
-              });
-              return;
-            }
-            if (profile?.username) {
-              navigate(`/${profile.username}`);
-            }
-          });
+        navigate('/dashboard');
       }
     });
 
@@ -129,7 +91,7 @@ const Index = () => {
             className="space-y-6"
           >
             <span className="px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium">
-              Loading your profile...
+              Redirecting to dashboard...
             </span>
           </motion.div>
         </main>
