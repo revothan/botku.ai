@@ -2,12 +2,19 @@ import { Smartphone } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
+type ButtonConfig = {
+  id: string;
+  label: string;
+  url: string;
+};
+
 type PhonePreviewProps = {
   botName: string;
   greetingMessage: string;
+  buttons?: ButtonConfig[];
 };
 
-const PhonePreview = ({ botName, greetingMessage }: PhonePreviewProps) => {
+const PhonePreview = ({ botName, greetingMessage, buttons = [] }: PhonePreviewProps) => {
   return (
     <div className="relative mx-auto w-[300px] h-[600px] rounded-[3rem] border-8 border-gray-900 overflow-hidden">
       <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-1/3 h-6 bg-gray-900 rounded-b-2xl"></div>
@@ -22,6 +29,18 @@ const PhonePreview = ({ botName, greetingMessage }: PhonePreviewProps) => {
                 {greetingMessage || "Hello! How can I help you today?"}
               </p>
             </div>
+            {buttons.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-4">
+                {buttons.map((button) => (
+                  <button
+                    key={button.id}
+                    className="bg-primary/20 text-primary px-3 py-1 rounded-full text-sm hover:bg-primary/30 transition-colors"
+                  >
+                    {button.label || "Button"}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
           <div className="border-t pt-4">
             <div className="flex gap-2">
