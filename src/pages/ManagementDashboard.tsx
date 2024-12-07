@@ -95,7 +95,13 @@ const ManagementDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 p-8">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Domain Section at the top */}
+        <div>
+          <h2 className="text-2xl font-bold mb-6">Share Your Chatbot</h2>
+          <DomainSection userId={userId} />
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Settings Column */}
           <div className="lg:col-span-7 space-y-8">
@@ -109,8 +115,8 @@ const ManagementDashboard = () => {
             </div>
           </div>
 
-          {/* Preview and Share Column */}
-          <div className="lg:col-span-5 space-y-8">
+          {/* Preview Column */}
+          <div className="lg:col-span-5">
             <div>
               <h2 className="text-2xl font-bold mb-6">Preview</h2>
               <PhonePreview
@@ -118,10 +124,6 @@ const ManagementDashboard = () => {
                 greetingMessage={settings?.greeting_message || ""}
                 buttons={settings?.buttons || []}
               />
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold mb-6">Share Your Chatbot</h2>
-              <DomainSection userId={userId} />
             </div>
           </div>
         </div>
