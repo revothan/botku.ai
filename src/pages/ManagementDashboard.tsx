@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,28 +12,36 @@ const ManagementDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [userId, setUserId] = useState<string | null>(null);
+  const [isAuthChecking, setIsAuthChecking] = useState(true);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (error || !user) {
+        navigate("/login");
+        return;
+      }
+      setUserId(user.id);
+      setIsAuthChecking(false);
+    };
+
+    checkAuth();
+  }, [navigate]);
 
   const { data: settings, isLoading } = useQuery({
     queryKey: ["chatbot-settings"],
     queryFn: async () => {
       console.log("Fetching chatbot settings...");
       
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      if (userError) {
-        console.error("Error fetching user:", userError);
-        throw userError;
-      }
-      if (!user) {
-        console.error("No user found");
+      if (!userId) {
         throw new Error("Not authenticated");
       }
-
-      console.log("User found:", user.id);
 
       const { data: existingSettings, error: fetchError } = await supabase
         .from("chatbot_settings")
         .select()
-        .eq("profile_id", user.id)
+        .eq("profile_id", userId)
         .maybeSingle();
 
       if (fetchError) {
@@ -54,7 +62,7 @@ const ManagementDashboard = () => {
       const { data: newSettings, error: insertError } = await supabase
         .from("chatbot_settings")
         .insert({
-          profile_id: user.id,
+          profile_id: userId,
           bot_name: "My ChatBot",
           greeting_message: "Hello! How can I help you today?",
           training_data: "",
@@ -74,12 +82,12 @@ const ManagementDashboard = () => {
         buttons: [] as ButtonConfig[]
       };
     },
+    enabled: !!userId,
   });
 
   const updateSettings = useMutation({
     mutationFn: async (values: Omit<ChatbotSettings, 'buttons'>) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
+      if (!userId) throw new Error("Not authenticated");
 
       // First, update Supabase settings
       const { data: settingsData, error: settingsError } = await supabase
@@ -89,7 +97,7 @@ const ManagementDashboard = () => {
           greeting_message: values.greeting_message,
           training_data: values.training_data,
         })
-        .eq("profile_id", user.id)
+        .eq("profile_id", userId)
         .select()
         .single();
 
@@ -112,7 +120,7 @@ const ManagementDashboard = () => {
         await supabase
           .from("chatbot_settings")
           .update({ assistant_id: assistantResponse.data.assistant.id })
-          .eq("profile_id", user.id);
+          .eq("profile_id", userId);
       }
 
       return { 
@@ -139,7 +147,7 @@ const ManagementDashboard = () => {
     },
   });
 
-  if (isLoading) {
+  if (isAuthChecking || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-primary"></div>
@@ -147,8 +155,9 @@ const ManagementDashboard = () => {
     );
   }
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("Not authenticated");
+  if (!userId) {
+    return null;
+  }
 
   const defaultValues = {
     bot_name: settings?.bot_name || "",
@@ -171,7 +180,7 @@ const ManagementDashboard = () => {
               />
             </div>
             <ButtonsSection 
-              profileId={user.id}
+              profileId={userId}
               initialButtons={(settings?.buttons || []) as ButtonConfig[]}
             />
           </div>
