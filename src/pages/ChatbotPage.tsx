@@ -8,28 +8,33 @@ import { Smartphone } from "lucide-react";
 import type { ButtonConfig } from "@/types/chatbot";
 
 const ChatbotPage = () => {
-  const { customDomain } = useParams();
+  const { customDomain } = useParams<{ customDomain: string }>();
 
-  const { data: settings, isLoading } = useQuery({
+  const { data: settings, isLoading, error } = useQuery({
     queryKey: ["chatbot-settings", customDomain],
     queryFn: async () => {
+      if (!customDomain) {
+        throw new Error("No domain provided");
+      }
+
       console.log("Fetching chatbot settings for domain:", customDomain);
       
       // First get the profile by custom domain
-      const { data: profile, error: profileError } = await supabase
+      const { data: profiles, error: profileError } = await supabase
         .from("profiles")
         .select("id")
-        .eq("custom_domain", customDomain)
-        .single();
+        .eq("custom_domain", customDomain);
 
       if (profileError) {
         console.error("Error fetching profile:", profileError);
         throw profileError;
       }
 
-      if (!profile) {
+      if (!profiles || profiles.length === 0) {
         throw new Error("Profile not found");
       }
+
+      const profile = profiles[0];
 
       // Then get the chatbot settings for that profile
       const { data: chatbotSettings, error: settingsError } = await supabase
@@ -56,13 +61,13 @@ const ChatbotPage = () => {
     );
   }
 
-  if (!settings) {
+  if (error || !settings) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Card className="w-full max-w-md">
           <CardContent className="pt-6">
             <p className="text-center text-muted-foreground">
-              Chatbot not found or not configured
+              {error?.message || "Chatbot not found or not configured"}
             </p>
           </CardContent>
         </Card>
