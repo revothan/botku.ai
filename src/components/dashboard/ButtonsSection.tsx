@@ -2,6 +2,7 @@ import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import ButtonManager from "./ButtonManager";
+import { Button } from "@/components/ui/button";
 import type { ButtonConfig } from "@/types/chatbot";
 
 type ButtonsSectionProps = {
@@ -46,8 +47,8 @@ const ButtonsSection = ({ profileId, initialButtons }: ButtonsSectionProps) => {
     },
   });
 
-  const handleButtonsChange = (buttons: ButtonConfig[]) => {
-    console.log("Handling button change:", buttons);
+  const handleSaveChanges = (buttons: ButtonConfig[]) => {
+    console.log("Saving button changes:", buttons);
     updateButtons.mutate(buttons);
   };
 
@@ -55,7 +56,8 @@ const ButtonsSection = ({ profileId, initialButtons }: ButtonsSectionProps) => {
     <div className="space-y-4">
       <ButtonManager
         buttons={initialButtons}
-        onChange={handleButtonsChange}
+        onSave={handleSaveChanges}
+        isSaving={updateButtons.isPending}
       />
     </div>
   );
