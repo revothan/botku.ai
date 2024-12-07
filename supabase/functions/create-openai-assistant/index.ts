@@ -36,7 +36,7 @@ serve(async (req) => {
           name: bot_name,
           instructions: training_data,
           tools: [{"type": "code_interpreter"}],
-          model: "gpt-4o"
+          model: "gpt-4-1106-preview"
         }),
       });
     } else {
@@ -53,7 +53,7 @@ serve(async (req) => {
           name: bot_name,
           instructions: training_data,
           tools: [{"type": "code_interpreter"}],
-          model: "gpt-4o"
+          model: "gpt-4-1106-preview"
         }),
       });
     }

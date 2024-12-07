@@ -2,10 +2,6 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import OpenAI from "https://esm.sh/openai@4.28.0";
 
-const openai = new OpenAI({
-  apiKey: Deno.env.get('OPENAI_API_KEY')
-});
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -30,6 +26,13 @@ serve(async (req) => {
       console.error('Message is required');
       throw new Error('Message is required');
     }
+
+    const openai = new OpenAI({
+      apiKey: Deno.env.get('OPENAI_API_KEY'),
+      defaultHeaders: {
+        'OpenAI-Beta': 'assistants=v2'
+      }
+    });
 
     console.log('Creating thread...');
     const thread = await openai.beta.threads.create();
