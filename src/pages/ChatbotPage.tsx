@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { useState, useRef, useEffect } from "react";
@@ -33,7 +33,7 @@ const ChatbotPage = () => {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]); // Scroll whenever messages update
+  }, [messages]);
 
   const { data: settings, isLoading, error } = useQuery({
     queryKey: ["chatbot-settings", customDomain],
@@ -45,34 +45,55 @@ const ChatbotPage = () => {
 
       console.log("Fetching chatbot settings for domain:", customDomain);
       
-      const { data: profiles, error: profileError } = await supabase
+      // First get the profile ID from the custom domain
+      const { data: profile, error: profileError } = await supabase
         .from("profiles")
-        .select("id, custom_domain")
+        .select("id")
         .eq("custom_domain", customDomain)
-        .limit(1);
+        .single();
 
-      if (profileError) throw profileError;
-      if (!profiles?.length) throw new Error(`No chatbot found for domain: ${customDomain}`);
+      if (profileError) {
+        console.error("Error fetching profile:", profileError);
+        throw profileError;
+      }
 
+      if (!profile) {
+        throw new Error(`No chatbot found for domain: ${customDomain}`);
+      }
+
+      // Then get the chatbot settings using the profile ID
       const { data: chatbotSettings, error: settingsError } = await supabase
         .from("chatbot_settings")
         .select("*")
-        .eq("profile_id", profiles[0].id)
-        .limit(1);
+        .eq("profile_id", profile.id)
+        .single();
 
-      if (settingsError) throw settingsError;
-      if (!chatbotSettings?.length) throw new Error("Chatbot not configured for this domain");
+      if (settingsError) {
+        console.error("Error fetching chatbot settings:", settingsError);
+        throw settingsError;
+      }
 
-      return chatbotSettings[0];
+      if (!chatbotSettings) {
+        throw new Error("Chatbot not configured for this domain");
+      }
+
+      return chatbotSettings;
     },
-    enabled: !!customDomain,
+    retry: false,
   });
 
-  const sendMessage = useMutation({
-    mutationFn: async (message: string) => {
-      if (!settings?.assistant_id) {
-        throw new Error("Chatbot not configured properly");
-      }
+  const sendMessage = async (message: string) => {
+    if (!settings?.assistant_id) {
+      toast({
+        title: "Error",
+        description: "Chatbot not configured properly",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setMessages(prev => [...prev, { role: "user", content: message }]);
 
       const response = await supabase.functions.invoke<AssistantResponse>('chat-with-assistant', {
         body: JSON.stringify({
@@ -82,11 +103,12 @@ const ChatbotPage = () => {
       });
 
       if (response.error) throw response.error;
-      return response.data;
-    },
-    onSuccess: (response) => {
-      if (response?.response?.text?.value) {
-        setMessages(prev => [...prev, { role: "assistant", content: response.response.text.value }]);
+
+      if (response.data?.response?.text?.value) {
+        setMessages(prev => [...prev, { 
+          role: "assistant", 
+          content: response.data.response.text.value 
+        }]);
         setInputMessage("");
       } else {
         console.error("Unexpected response format:", response);
@@ -96,22 +118,19 @@ const ChatbotPage = () => {
           variant: "destructive",
         });
       }
-    },
-    onError: (error) => {
+    } catch (error: any) {
       toast({
         title: "Error",
         description: error.message || "Failed to send message",
         variant: "destructive",
       });
     }
-  });
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputMessage.trim()) return;
-
-    setMessages(prev => [...prev, { role: "user", content: inputMessage }]);
-    sendMessage.mutate(inputMessage);
+    sendMessage(inputMessage);
   };
 
   if (isLoading) {
@@ -156,18 +175,8 @@ const ChatbotPage = () => {
                   <ChatMessage key={index} message={message} />
                 ))}
 
-                {sendMessage.isPending && (
-                  <div className="bg-primary/10 rounded-lg p-3 max-w-[80%]">
-                    <div className="flex space-x-2">
-                      <div className="w-2 h-2 rounded-full bg-primary/50 animate-bounce" />
-                      <div className="w-2 h-2 rounded-full bg-primary/50 animate-bounce delay-100" />
-                      <div className="w-2 h-2 rounded-full bg-primary/50 animate-bounce delay-200" />
-                    </div>
-                  </div>
-                )}
-
                 <ChatButtons buttons={buttons} />
-                <div ref={messagesEndRef} /> {/* Invisible element to scroll to */}
+                <div ref={messagesEndRef} />
               </div>
             </ScrollArea>
             <div className="border-t pt-4">
@@ -175,7 +184,7 @@ const ChatbotPage = () => {
                 inputMessage={inputMessage}
                 setInputMessage={setInputMessage}
                 handleSubmit={handleSubmit}
-                isLoading={sendMessage.isPending}
+                isLoading={false}
               />
             </div>
           </CardContent>
