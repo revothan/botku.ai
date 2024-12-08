@@ -1,17 +1,17 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 
 const UserPage = () => {
-  const { username } = useParams();
+  const { username, customDomain } = useParams();
   const navigate = useNavigate();
+  const paramToCheck = username || customDomain;
 
   const { data: profile, isLoading } = useQuery({
-    queryKey: ["profile", username],
+    queryKey: ["profile", paramToCheck],
     queryFn: async () => {
-      console.log("Fetching profile for username:", username);
+      console.log("Fetching profile for param:", paramToCheck);
       
       try {
         const { data, error } = await supabase
@@ -20,7 +20,7 @@ const UserPage = () => {
             *,
             links (*)
           `)
-          .eq("username", username)
+          .or(`username.eq.${paramToCheck},custom_domain.eq.${paramToCheck}`)
           .maybeSingle();
 
         console.log("Query response:", { data, error });
@@ -30,8 +30,13 @@ const UserPage = () => {
           throw error;
         }
 
-        if (data?.custom_domain) {
-          navigate(`/bot/${data.custom_domain}`);
+        if (!data) {
+          return null;
+        }
+
+        // If accessed via username but has custom domain, redirect to custom domain
+        if (username && data.custom_domain) {
+          navigate(`/${data.custom_domain}`);
           return null;
         }
 
