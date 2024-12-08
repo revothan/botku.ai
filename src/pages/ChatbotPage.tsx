@@ -1,14 +1,11 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent } from "@/components/ui/card";
 import { useState, useRef, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
-import { ChatMessage } from "@/components/chatbot/ChatMessage";
-import { ChatInput } from "@/components/chatbot/ChatInput";
-import { ChatButtons } from "@/components/chatbot/ChatButtons";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import type { Message, ButtonConfig } from "@/types/chatbot";
+import { LoadingState, ErrorState, NotFoundState } from "@/components/chatbot/ChatbotStates";
+import { ChatbotInterface } from "@/components/chatbot/ChatbotInterface";
+import type { Message } from "@/types/chatbot";
 
 type AssistantResponse = {
   response: {
@@ -27,12 +24,8 @@ const ChatbotPage = () => {
   const [inputMessage, setInputMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
   useEffect(() => {
-    scrollToBottom();
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   const { data: settings, isLoading, error } = useQuery({
@@ -81,7 +74,6 @@ const ChatbotPage = () => {
 
       return chatbotSettings;
     },
-    retry: false,
   });
 
   const sendMessage = async (message: string) => {
@@ -136,77 +128,26 @@ const ChatbotPage = () => {
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#fcf5eb] to-white">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-primary"></div>
-      </div>
-    );
+    return <LoadingState />;
   }
 
   if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#fcf5eb] to-white">
-        <Card className="w-full max-w-md bg-white/80 backdrop-blur-sm">
-          <CardContent className="pt-6">
-            <p className="text-center text-muted-foreground">
-              {error.message || "An error occurred while loading the chatbot"}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    );
+    return <ErrorState message={error.message || "An error occurred while loading the chatbot"} />;
   }
 
   if (!settings) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#fcf5eb] to-white">
-        <Card className="w-full max-w-md bg-white/80 backdrop-blur-sm">
-          <CardContent className="pt-6">
-            <p className="text-center text-muted-foreground">
-              No chatbot found at this address. Please check the URL and try again.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    );
+    return <NotFoundState />;
   }
 
-  const buttons = (settings.buttons || []) as ButtonConfig[];
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#fcf5eb] to-white p-4">
-      <div className="max-w-lg mx-auto">
-        <Card className="border-none shadow-lg bg-white/80 backdrop-blur-sm">
-          <CardContent className="p-4">
-            <div className="text-center border-b pb-4">
-              <h3 className="font-bold text-secondary">{settings.bot_name}</h3>
-            </div>
-            <ScrollArea className="h-[400px] py-4">
-              <div className="space-y-4">
-                <div className="bg-primary/10 rounded-lg p-3 max-w-[80%]">
-                  <p className="text-sm">{settings.greeting_message}</p>
-                </div>
-
-                {messages.map((message, index) => (
-                  <ChatMessage key={index} message={message} />
-                ))}
-
-                <ChatButtons buttons={buttons} />
-                <div ref={messagesEndRef} />
-              </div>
-            </ScrollArea>
-            <div className="border-t pt-4">
-              <ChatInput
-                inputMessage={inputMessage}
-                setInputMessage={setInputMessage}
-                handleSubmit={handleSubmit}
-                isLoading={false}
-              />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+    <ChatbotInterface
+      settings={settings}
+      messages={messages}
+      inputMessage={inputMessage}
+      setInputMessage={setInputMessage}
+      handleSubmit={handleSubmit}
+      messagesEndRef={messagesEndRef}
+    />
   );
 };
 
