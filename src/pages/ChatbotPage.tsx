@@ -42,43 +42,43 @@ const ChatbotPage = () => {
 
       console.log("Fetching chatbot settings for domain:", customDomain);
       
-      // First get the profile ID from either username or custom domain
-      const { data: profile, error: profileError } = await supabase
+      // First get the profile and its chatbot settings in a single query
+      const { data: profileWithSettings, error: queryError } = await supabase
         .from("profiles")
-        .select("id")
+        .select(`
+          id,
+          chatbot_settings (
+            id,
+            profile_id,
+            bot_name,
+            greeting_message,
+            training_data,
+            created_at,
+            updated_at,
+            assistant_id,
+            buttons
+          )
+        `)
         .or(`username.eq.${customDomain},custom_domain.eq.${customDomain}`)
-        .maybeSingle();
+        .single();
 
-      if (profileError) {
-        console.error("Error fetching profile:", profileError);
-        throw profileError;
+      if (queryError) {
+        console.error("Error fetching profile and settings:", queryError);
+        throw queryError;
       }
 
-      if (!profile) {
+      if (!profileWithSettings) {
         console.log("No profile found for domain:", customDomain);
         return null;
       }
 
-      console.log("Found profile:", profile);
+      console.log("Found profile with settings:", profileWithSettings);
 
-      // Then get the chatbot settings using the profile ID
-      const { data: rawSettings, error: settingsError } = await supabase
-        .from("chatbot_settings")
-        .select("*")
-        .eq("profile_id", profile.id)
-        .maybeSingle();
-
-      if (settingsError) {
-        console.error("Error fetching chatbot settings:", settingsError);
-        throw settingsError;
-      }
-
+      const rawSettings = profileWithSettings.chatbot_settings;
       if (!rawSettings) {
-        console.log("No chatbot settings found for profile:", profile.id);
+        console.log("No chatbot settings found for profile:", profileWithSettings.id);
         return null;
       }
-
-      console.log("Found chatbot settings:", rawSettings);
 
       // Transform the raw settings to ensure buttons is properly typed
       const transformedSettings: ChatbotSettings = {
