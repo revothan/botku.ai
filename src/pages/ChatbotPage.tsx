@@ -2,11 +2,12 @@ import { useParams } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { ChatMessage } from "@/components/chatbot/ChatMessage";
 import { ChatInput } from "@/components/chatbot/ChatInput";
 import { ChatButtons } from "@/components/chatbot/ChatButtons";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import type { Message, ButtonConfig } from "@/types/chatbot";
 
 type AssistantResponse = {
@@ -24,6 +25,15 @@ const ChatbotPage = () => {
   const { toast } = useToast();
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState("");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]); // Scroll whenever messages update
 
   const { data: settings, isLoading, error } = useQuery({
     queryKey: ["chatbot-settings", customDomain],
@@ -136,27 +146,30 @@ const ChatbotPage = () => {
             <div className="text-center border-b pb-4">
               <h3 className="font-bold text-secondary">{settings.bot_name}</h3>
             </div>
-            <div className="h-[400px] overflow-y-auto py-4 space-y-4">
-              <div className="bg-primary/10 rounded-lg p-3 max-w-[80%]">
-                <p className="text-sm">{settings.greeting_message}</p>
-              </div>
-
-              {messages.map((message, index) => (
-                <ChatMessage key={index} message={message} />
-              ))}
-
-              {sendMessage.isPending && (
+            <ScrollArea className="h-[400px] py-4">
+              <div className="space-y-4">
                 <div className="bg-primary/10 rounded-lg p-3 max-w-[80%]">
-                  <div className="flex space-x-2">
-                    <div className="w-2 h-2 rounded-full bg-primary/50 animate-bounce" />
-                    <div className="w-2 h-2 rounded-full bg-primary/50 animate-bounce delay-100" />
-                    <div className="w-2 h-2 rounded-full bg-primary/50 animate-bounce delay-200" />
-                  </div>
+                  <p className="text-sm">{settings.greeting_message}</p>
                 </div>
-              )}
 
-              <ChatButtons buttons={buttons} />
-            </div>
+                {messages.map((message, index) => (
+                  <ChatMessage key={index} message={message} />
+                ))}
+
+                {sendMessage.isPending && (
+                  <div className="bg-primary/10 rounded-lg p-3 max-w-[80%]">
+                    <div className="flex space-x-2">
+                      <div className="w-2 h-2 rounded-full bg-primary/50 animate-bounce" />
+                      <div className="w-2 h-2 rounded-full bg-primary/50 animate-bounce delay-100" />
+                      <div className="w-2 h-2 rounded-full bg-primary/50 animate-bounce delay-200" />
+                    </div>
+                  </div>
+                )}
+
+                <ChatButtons buttons={buttons} />
+                <div ref={messagesEndRef} /> {/* Invisible element to scroll to */}
+              </div>
+            </ScrollArea>
             <div className="border-t pt-4">
               <ChatInput
                 inputMessage={inputMessage}
