@@ -76,10 +76,16 @@ const ChatbotPage = () => {
         return null;
       }
 
-      // Transform the raw settings to ensure buttons is an array
+      // Transform the raw settings to ensure buttons is properly typed
       const transformedSettings: ChatbotSettings = {
         ...rawSettings,
-        buttons: Array.isArray(rawSettings.buttons) ? rawSettings.buttons : []
+        buttons: Array.isArray(rawSettings.buttons) 
+          ? rawSettings.buttons.map((button: any) => ({
+              id: button.id || crypto.randomUUID(),
+              label: button.label || '',
+              url: button.url || ''
+            }))
+          : []
       };
 
       return transformedSettings;
