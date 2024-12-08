@@ -60,7 +60,8 @@ const ChatbotPage = () => {
 
       if (!domainError && profileByDomain?.chatbot_settings) {
         console.log("Found profile by custom domain:", profileByDomain);
-        return profileByDomain.chatbot_settings;
+        const rawSettings = profileByDomain.chatbot_settings;
+        return transformSettings(rawSettings);
       }
 
       // If not found by custom_domain, try username
@@ -94,9 +95,23 @@ const ChatbotPage = () => {
       }
 
       console.log("Found profile by username:", profileByUsername);
-      return profileByUsername.chatbot_settings;
+      return transformSettings(profileByUsername.chatbot_settings);
     },
   });
+
+  // Helper function to transform raw settings into the correct type
+  const transformSettings = (rawSettings: any): ChatbotSettings => {
+    return {
+      ...rawSettings,
+      buttons: Array.isArray(rawSettings.buttons) 
+        ? rawSettings.buttons.map((button: any) => ({
+            id: button.id || crypto.randomUUID(),
+            label: button.label || '',
+            url: button.url || ''
+          }))
+        : []
+    };
+  };
 
   const sendMessage = async (message: string) => {
     if (!settings?.assistant_id) {
