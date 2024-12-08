@@ -38,8 +38,7 @@ const ChatbotPage = () => {
 
       console.log("Fetching chatbot settings for domain:", customDomain);
       
-      // Get the profile and its chatbot settings in a single query with proper parameter binding
-      const { data: profileWithSettings, error: queryError } = await supabase
+      const query = supabase
         .from("profiles")
         .select(`
           id,
@@ -57,6 +56,8 @@ const ChatbotPage = () => {
         `)
         .or(`username.eq.${customDomain},custom_domain.eq.${customDomain}`)
         .single();
+
+      const { data: profileWithSettings, error: queryError } = await query;
 
       if (queryError) {
         console.error("Error fetching profile and settings:", queryError);
