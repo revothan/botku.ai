@@ -68,7 +68,7 @@ const ChatbotSettingsForm = ({
           name="training_data"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Tell Us More About You</FormLabel>
+              <FormLabel>Tell AI More About You</FormLabel>
               <FormControl>
                 <Textarea
                   placeholder="Jelaskan kebutuhan Anda secara detail, seperti jadwal operasional, lokasi, kontak WhatsApp, media sosial, atau informasi lain yang relevan untuk chatbot AI Anda."
