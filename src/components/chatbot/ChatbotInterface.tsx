@@ -12,6 +12,7 @@ type ChatbotInterfaceProps = {
   setInputMessage: (message: string) => void;
   handleSubmit: (e: React.FormEvent) => void;
   messagesEndRef: React.RefObject<HTMLDivElement>;
+  isLoading?: boolean;
 };
 
 export const ChatbotInterface = ({
@@ -21,6 +22,7 @@ export const ChatbotInterface = ({
   setInputMessage,
   handleSubmit,
   messagesEndRef,
+  isLoading = false,
 }: ChatbotInterfaceProps) => {
   const buttons = (settings.buttons || []) as ButtonConfig[];
 
@@ -42,6 +44,16 @@ export const ChatbotInterface = ({
                   <ChatMessage key={index} message={message} />
                 ))}
 
+                {isLoading && (
+                  <div className="bg-primary/10 rounded-lg p-3 max-w-[80%] animate-pulse">
+                    <div className="flex space-x-2">
+                      <div className="w-2 h-2 bg-primary/30 rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-primary/30 rounded-full animate-bounce [animation-delay:0.2s]"></div>
+                      <div className="w-2 h-2 bg-primary/30 rounded-full animate-bounce [animation-delay:0.4s]"></div>
+                    </div>
+                  </div>
+                )}
+
                 <ChatButtons buttons={buttons} />
                 <div ref={messagesEndRef} />
               </div>
@@ -51,7 +63,7 @@ export const ChatbotInterface = ({
                 inputMessage={inputMessage}
                 setInputMessage={setInputMessage}
                 handleSubmit={handleSubmit}
-                isLoading={false}
+                isLoading={isLoading}
               />
             </div>
           </CardContent>

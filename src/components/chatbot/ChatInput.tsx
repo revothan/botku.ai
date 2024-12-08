@@ -23,8 +23,9 @@ export const ChatInput = ({ inputMessage, setInputMessage, handleSubmit, isLoadi
         type="submit" 
         size="icon"
         disabled={isLoading || !inputMessage.trim()}
+        className={isLoading ? "opacity-50 cursor-not-allowed" : ""}
       >
-        <Send className="h-4 w-4" />
+        <Send className={`h-4 w-4 ${isLoading ? "animate-pulse" : ""}`} />
       </Button>
     </form>
   );

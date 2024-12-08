@@ -22,13 +22,14 @@ const ChatbotPage = () => {
   const { toast } = useToast();
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const { data: settings, isLoading, error } = useQuery({
+  const { data: settings, isLoading: settingsLoading, error } = useQuery({
     queryKey: ["chatbot-settings", customDomain],
     queryFn: async () => {
       if (!customDomain) {
@@ -122,7 +123,9 @@ const ChatbotPage = () => {
     }
 
     try {
+      setIsLoading(true);
       setMessages(prev => [...prev, { role: "user", content: message }]);
+      setInputMessage(""); // Clear input immediately after sending
 
       const response = await supabase.functions.invoke<AssistantResponse>('chat-with-assistant', {
         body: JSON.stringify({
@@ -138,7 +141,6 @@ const ChatbotPage = () => {
           role: "assistant", 
           content: response.data.response.text.value 
         }]);
-        setInputMessage("");
       } else {
         console.error("Unexpected response format:", response);
         toast({
@@ -153,6 +155,8 @@ const ChatbotPage = () => {
         description: error.message || "Failed to send message",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -162,7 +166,7 @@ const ChatbotPage = () => {
     sendMessage(inputMessage);
   };
 
-  if (isLoading) {
+  if (settingsLoading) {
     return <LoadingState />;
   }
 
@@ -182,6 +186,7 @@ const ChatbotPage = () => {
       setInputMessage={setInputMessage}
       handleSubmit={handleSubmit}
       messagesEndRef={messagesEndRef}
+      isLoading={isLoading}
     />
   );
 };
