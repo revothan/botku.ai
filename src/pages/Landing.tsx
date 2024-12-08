@@ -2,12 +2,37 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Link as LinkIcon, MessageSquare, Users, Settings } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
 
 const Landing = () => {
   const scrollToFeatures = () => {
     const featuresSection = document.querySelector("#features");
     featuresSection?.scrollIntoView({ behavior: "smooth" });
   };
+
+  // Chat animation state
+  const [messages, setMessages] = useState<Array<{ content: string; role: 'assistant' | 'user' }>>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const demoMessages = [
+    { content: "Halo! Saya YourAI, asisten virtual Anda. Ada yang bisa saya bantu?", role: 'assistant' as const },
+    { content: "Jam berapa toko buka?", role: 'user' as const },
+    { content: "Toko kami buka setiap hari dari jam 09.00 - 21.00 WIB. Ada yang bisa saya bantu lagi?", role: 'assistant' as const },
+    { content: "Apakah tersedia layanan delivery?", role: 'user' as const },
+    { content: "Ya, kami menyediakan layanan delivery melalui GoJek dan Grab. Silakan hubungi kami di WhatsApp 081234567890 untuk informasi lebih lanjut.", role: 'assistant' as const },
+  ];
+
+  useEffect(() => {
+    if (currentIndex < demoMessages.length) {
+      const timer = setTimeout(() => {
+        setMessages(prev => [...prev, demoMessages[currentIndex]]);
+        setCurrentIndex(prev => prev + 1);
+      }, currentIndex === 0 ? 1000 : 2000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [currentIndex]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#fcf5eb] to-white">
@@ -39,92 +64,136 @@ const Landing = () => {
           </div>
         </nav>
 
-        {/* Hero Section */}
-        <main className="max-w-4xl mx-auto text-center py-16">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="space-y-6"
-          >
-            <h1 className="text-4xl md:text-6xl font-bold text-[#075e54] leading-tight">
-              BOTKU.AI
-              <span className="block text-xl md:text-2xl mt-4 text-[#128c7e]">
-                🇮🇩 Solusi Digital Karya Anak Bangsa untuk Produktivitas Maksimal
-              </span>
-            </h1>
-            
-            <Button 
-              size="lg" 
-              className="mt-8 bg-[#25d366] hover:bg-[#128c7e] text-white px-8"
-              asChild
+        {/* Hero Section with Chat Preview */}
+        <main className="max-w-6xl mx-auto py-16">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            {/* Text Content */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="space-y-6"
             >
-              <Link to="/login">Coba Gratis Sekarang</Link>
-            </Button>
-          </motion.div>
+              <h1 className="text-4xl md:text-6xl font-bold text-[#075e54] leading-tight">
+                BOTKU.AI
+                <span className="block text-xl md:text-2xl mt-4 text-[#128c7e]">
+                  🇮🇩 Solusi Digital Karya Anak Bangsa untuk Produktivitas Maksimal
+                </span>
+              </h1>
+              
+              <Button 
+                size="lg" 
+                className="mt-8 bg-[#25d366] hover:bg-[#128c7e] text-white px-8"
+                asChild
+              >
+                <Link to="/login">Coba Gratis Sekarang</Link>
+              </Button>
+            </motion.div>
 
-          {/* Features Section */}
-          <div className="mt-32" id="features">
-            <h2 className="text-3xl font-bold text-[#075e54] mb-16">
-              Apa yang Bisa BOTKU.AI Lakukan untuk Anda?
-            </h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {features.map((feature, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 0.2 * index }}
-                  className="p-6 rounded-2xl bg-white/80 shadow-sm hover:shadow-md transition-shadow"
-                >
-                  <div className="w-12 h-12 rounded-full bg-[#25d366]/10 flex items-center justify-center mb-4 mx-auto">
-                    {feature.icon}
+            {/* Chat Preview */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+            >
+              <Card className="border-none shadow-lg bg-white/80 backdrop-blur-sm">
+                <CardContent className="p-4">
+                  <div className="text-center border-b pb-4">
+                    <h3 className="font-bold text-secondary">YourAI</h3>
                   </div>
-                  <h3 className="text-lg font-semibold mb-2 text-[#075e54]">{feature.title}</h3>
-                  <p className="text-[#128c7e]">{feature.description}</p>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-
-          {/* Why Choose Section */}
-          <div className="mt-32">
-            <h2 className="text-3xl font-bold text-[#075e54] mb-16">
-              Mengapa Pilih BOTKU.AI?
-            </h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {reasons.map((reason, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 0.2 * index }}
-                  className="p-6 rounded-2xl bg-white/80 shadow-sm"
-                >
-                  <h3 className="text-xl font-semibold mb-2 text-[#075e54]">{reason.title}</h3>
-                  <p className="text-[#128c7e]">{reason.description}</p>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-
-          {/* CTA Section */}
-          <div className="mt-32 p-12 rounded-3xl bg-gradient-to-r from-[#25d366] to-[#128c7e]">
-            <h2 className="text-3xl font-bold text-white mb-4">Mulai Sekarang</h2>
-            <p className="text-white/90 mb-8 max-w-2xl mx-auto">
-              Gabung dengan kreator dan pengusaha lainnya yang telah meningkatkan produktivitas mereka dengan BOTKU.AI.
-            </p>
-            <Button 
-              size="lg" 
-              className="bg-white text-[#075e54] hover:bg-white/90"
-              asChild
-            >
-              <Link to="/login">Coba Gratis Sekarang</Link>
-            </Button>
+                  <div className="h-[400px] py-4 space-y-4 overflow-y-auto">
+                    {messages.map((message, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className={`${
+                          message.role === 'assistant'
+                            ? "bg-primary/10 rounded-lg p-3 max-w-[80%]"
+                            : "bg-primary/5 rounded-lg p-3 max-w-[80%] ml-auto"
+                        }`}
+                      >
+                        <p className="text-sm">{message.content}</p>
+                      </motion.div>
+                    ))}
+                    {currentIndex < demoMessages.length && (
+                      <div className="bg-primary/10 rounded-lg p-3 max-w-[80%]">
+                        <div className="flex space-x-2">
+                          <div className="w-2 h-2 bg-primary/30 rounded-full animate-bounce"></div>
+                          <div className="w-2 h-2 bg-primary/30 rounded-full animate-bounce [animation-delay:0.2s]"></div>
+                          <div className="w-2 h-2 bg-primary/30 rounded-full animate-bounce [animation-delay:0.4s]"></div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
           </div>
         </main>
+
+        {/* Features Section */}
+        <div className="mt-32" id="features">
+          <h2 className="text-3xl font-bold text-[#075e54] mb-16">
+            Apa yang Bisa BOTKU.AI Lakukan untuk Anda?
+          </h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {features.map((feature, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.2 * index }}
+                className="p-6 rounded-2xl bg-white/80 shadow-sm hover:shadow-md transition-shadow"
+              >
+                <div className="w-12 h-12 rounded-full bg-[#25d366]/10 flex items-center justify-center mb-4 mx-auto">
+                  {feature.icon}
+                </div>
+                <h3 className="text-lg font-semibold mb-2 text-[#075e54]">{feature.title}</h3>
+                <p className="text-[#128c7e]">{feature.description}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        {/* Why Choose Section */}
+        <div className="mt-32">
+          <h2 className="text-3xl font-bold text-[#075e54] mb-16">
+            Mengapa Pilih BOTKU.AI?
+          </h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {reasons.map((reason, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.2 * index }}
+                className="p-6 rounded-2xl bg-white/80 shadow-sm"
+              >
+                <h3 className="text-xl font-semibold mb-2 text-[#075e54]">{reason.title}</h3>
+                <p className="text-[#128c7e]">{reason.description}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        {/* CTA Section */}
+        <div className="mt-32 p-12 rounded-3xl bg-gradient-to-r from-[#25d366] to-[#128c7e]">
+          <h2 className="text-3xl font-bold text-white mb-4">Mulai Sekarang</h2>
+          <p className="text-white/90 mb-8 max-w-2xl mx-auto">
+            Gabung dengan kreator dan pengusaha lainnya yang telah meningkatkan produktivitas mereka dengan BOTKU.AI.
+          </p>
+          <Button 
+            size="lg" 
+            className="bg-white text-[#075e54] hover:bg-white/90"
+            asChild
+          >
+            <Link to="/login">Coba Gratis Sekarang</Link>
+          </Button>
+        </div>
       </div>
 
       {/* Footer */}
