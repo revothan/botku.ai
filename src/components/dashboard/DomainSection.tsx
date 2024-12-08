@@ -67,7 +67,9 @@ const DomainSection = ({ userId }: DomainSectionProps) => {
 
   const copyToClipboard = () => {
     if (profile?.custom_domain) {
-      navigator.clipboard.writeText(`${window.location.origin}/${profile.custom_domain}`);
+      // Remove any trailing slashes and ensure proper URL formatting
+      const baseUrl = window.location.origin.replace(/\/$/, '');
+      navigator.clipboard.writeText(`${baseUrl}/${profile.custom_domain}`);
       toast({
         title: "Link copied!",
         description: "The chatbot link has been copied to your clipboard.",
@@ -96,7 +98,7 @@ const DomainSection = ({ userId }: DomainSectionProps) => {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="flex items-center space-x-2">
             <div className="text-sm text-muted-foreground">
-              {window.location.origin}/
+              {window.location.origin.replace(/\/$/, '')}/
             </div>
             <Input
               value={customDomain}
@@ -117,7 +119,7 @@ const DomainSection = ({ userId }: DomainSectionProps) => {
         {profile?.custom_domain && (
           <>
             <div className="p-3 bg-muted rounded-md break-all">
-              {window.location.origin}/{profile.custom_domain}
+              {window.location.origin.replace(/\/$/, '')}/{profile.custom_domain}
             </div>
             <Button onClick={copyToClipboard} className="w-full">
               Copy Link
