@@ -60,8 +60,7 @@ const ChatbotPage = () => {
 
       if (!domainError && profileByDomain?.chatbot_settings) {
         console.log("Found profile by custom domain:", profileByDomain);
-        const rawSettings = profileByDomain.chatbot_settings;
-        return transformSettings(rawSettings);
+        return transformSettings(profileByDomain.chatbot_settings);
       }
 
       // If not found by custom_domain, try username
@@ -99,7 +98,6 @@ const ChatbotPage = () => {
     },
   });
 
-  // Helper function to transform raw settings into the correct type
   const transformSettings = (rawSettings: any): ChatbotSettings => {
     return {
       ...rawSettings,
