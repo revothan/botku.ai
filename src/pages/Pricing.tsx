@@ -14,7 +14,7 @@ const Pricing = () => {
       {/* Header Section */}
       <div className="container mx-auto px-4 py-6">
         <nav className="flex justify-between items-center mb-16">
-          <h1 className="text-2xl font-bold tracking-tight text-[#075e54]">BOTKU.AI</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-[#075e54]">MENYAPA</h1>
           <div className="hidden md:flex space-x-8 text-[#075e54]">
             <Button variant="ghost" asChild className="hover:text-[#128c7e]">
               <Link to="/">Beranda</Link>
@@ -50,7 +50,7 @@ const Pricing = () => {
               Gratis untuk Semua
             </h1>
             <p className="text-lg text-[#128c7e] mb-12">
-              BOTKU.AI berkomitmen untuk memberikan solusi terbaik untuk Anda
+              MENYAPA berkomitmen untuk memberikan solusi terbaik untuk Anda
             </p>
 
             <div className="bg-white rounded-2xl shadow-lg p-8 mb-12">
