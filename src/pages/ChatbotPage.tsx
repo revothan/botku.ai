@@ -42,11 +42,11 @@ const ChatbotPage = () => {
 
       console.log("Fetching chatbot settings for domain:", customDomain);
       
-      // First get the profile ID from the custom domain
+      // First get the profile ID from either username or custom domain
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("id")
-        .eq("custom_domain", customDomain)
+        .or(`username.eq.${customDomain},custom_domain.eq.${customDomain}`)
         .maybeSingle();
 
       if (profileError) {
@@ -58,6 +58,8 @@ const ChatbotPage = () => {
         console.log("No profile found for domain:", customDomain);
         return null;
       }
+
+      console.log("Found profile:", profile);
 
       // Then get the chatbot settings using the profile ID
       const { data: rawSettings, error: settingsError } = await supabase
@@ -75,6 +77,8 @@ const ChatbotPage = () => {
         console.log("No chatbot settings found for profile:", profile.id);
         return null;
       }
+
+      console.log("Found chatbot settings:", rawSettings);
 
       // Transform the raw settings to ensure buttons is properly typed
       const transformedSettings: ChatbotSettings = {
