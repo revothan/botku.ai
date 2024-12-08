@@ -53,7 +53,7 @@ const Pricing = () => {
             Gratis untuk Semua
           </h1>
           <p className="text-lg text-[#128c7e] mb-12">
-            BOTKU.AI berkomitmen untuk memberikan solusi terbaik tanpa biaya tambahan
+            BOTKU.AI berkomitmen untuk memberikan solusi terbaik untuk Anda
           </p>
 
           <div className="bg-white rounded-2xl shadow-lg p-8 mb-12">
