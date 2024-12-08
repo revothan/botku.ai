@@ -23,7 +23,7 @@ export const WhyChooseSection = () => {
   return (
     <div className="mt-32">
       <h2 className="text-3xl font-bold text-[#075e54] mb-16">
-        Mengapa Pilih BOTKU.AI?
+        Mengapa Pilih MENYAPA?
       </h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

@@ -39,7 +39,7 @@ const Index = () => {
       <div className="min-h-screen bg-gradient-to-b from-[#fcf5eb] to-white">
         <div className="container mx-auto px-4 py-16">
           <div className="max-w-md mx-auto">
-            <h1 className="text-2xl font-bold tracking-tight text-center mb-8 text-secondary">BOTKU</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-center mb-8 text-secondary">MENYAPA</h1>
             <div className="bg-white/80 backdrop-blur-sm p-8 rounded-lg shadow-sm border border-primary/10">
               <Auth
                 supabaseClient={supabase}
@@ -68,7 +68,7 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-b from-[#fcf5eb] to-white">
       <div className="container mx-auto px-4 py-16">
         <nav className="flex justify-between items-center mb-16">
-          <h1 className="text-2xl font-bold tracking-tight text-secondary">BOTKU</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-secondary">MENYAPA</h1>
           <div className="space-x-4">
             <Button
               variant="ghost"

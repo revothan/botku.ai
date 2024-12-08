@@ -39,7 +39,7 @@ export const HeroSection = () => {
           className="space-y-6"
         >
           <h1 className="text-4xl md:text-6xl font-bold text-[#075e54] leading-tight">
-            BOTKU.AI
+            MENYAPA
             <span className="block text-xl md:text-2xl mt-4 text-[#128c7e]">
               🇮🇩 Solusi Digital Karya Anak Bangsa untuk Produktivitas Maksimal
             </span>

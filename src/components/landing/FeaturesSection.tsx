@@ -28,7 +28,7 @@ export const FeaturesSection = () => {
   return (
     <div className="mt-32" id="features">
       <h2 className="text-3xl font-bold text-[#075e54] mb-16">
-        Apa yang Bisa BOTKU.AI Lakukan untuk Anda?
+        Apa yang Bisa MENYAPA Lakukan untuk Anda?
       </h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
