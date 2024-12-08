@@ -16,6 +16,11 @@ export type ChatbotSettings = {
   buttons: ButtonConfig[];
 };
 
+export type Message = {
+  role: "user" | "assistant";
+  content: string;
+};
+
 // Helper type for form data (subset of ChatbotSettings)
 export type ChatbotFormData = {
   bot_name: string;
