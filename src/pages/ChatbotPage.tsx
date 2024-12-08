@@ -50,7 +50,7 @@ const ChatbotPage = () => {
         .from("profiles")
         .select("id")
         .eq("custom_domain", customDomain)
-        .single();
+        .maybeSingle();
 
       if (profileError) {
         console.error("Error fetching profile:", profileError);
@@ -66,7 +66,7 @@ const ChatbotPage = () => {
         .from("chatbot_settings")
         .select("*")
         .eq("profile_id", profile.id)
-        .single();
+        .maybeSingle();
 
       if (settingsError) {
         console.error("Error fetching chatbot settings:", settingsError);
