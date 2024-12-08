@@ -17,10 +17,6 @@ type AssistantResponse = {
   };
 };
 
-type RawChatbotSettings = Omit<ChatbotSettings, 'buttons'> & {
-  buttons: any;
-};
-
 const ChatbotPage = () => {
   const { customDomain } = useParams<{ customDomain: string }>();
   const { toast } = useToast();
@@ -42,7 +38,7 @@ const ChatbotPage = () => {
 
       console.log("Fetching chatbot settings for domain:", customDomain);
       
-      // First get the profile and its chatbot settings in a single query
+      // Get the profile and its chatbot settings in a single query with proper parameter binding
       const { data: profileWithSettings, error: queryError } = await supabase
         .from("profiles")
         .select(`
