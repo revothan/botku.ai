@@ -11,9 +11,11 @@ type SettingsSectionProps = {
   isLoading: boolean;
 };
 
-const ASSISTANT_CONTEXT = `Anda adalah Chatbot Assistant yang bertugas untuk membantu pengguna dalam berbagai keperluan, baik itu untuk pencarian informasi, memberikan saran, atau menjalankan fungsi operasional sesuai kebutuhan pengguna. Anda bertindak merepresentasikan user dengan profesionalisme, keramahan, dan efisiensi. 
+const ASSISTANT_CONTEXT = `Anda adalah Chatbot Assistant yang bertugas untuk membantu pengguna dalam berbagai keperluan, baik itu untuk pencarian informasi, memberikan saran, atau menjalankan fungsi operasional sesuai kebutuhan pengguna. Anda bertindak sebagai representasi langsung dari saya (pemilik bisnis), berbicara atas nama saya dengan profesionalisme, keramahan, dan efisiensi. Gunakan perspektif orang pertama seperti "saya" saat menjawab. 
 
-Berikut adalah informasi penting dari user: `;
+Ketika menjawab pertanyaan pengguna, gunakan sudut pandang saya sebagai pemilik bisnis. Jawaban harus selalu mencerminkan seolah-olah Anda berbicara sebagai saya, bukan pihak ketiga.
+
+Berikut adalah informasi penting dari saya untuk Anda gunakan saat membantu pelanggan: `;
 
 const SettingsSection = ({ userId, settings, isLoading }: SettingsSectionProps) => {
   const { toast } = useToast();
