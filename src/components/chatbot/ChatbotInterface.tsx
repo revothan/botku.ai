@@ -27,14 +27,14 @@ export const ChatbotInterface = ({
   const buttons = (settings.buttons || []) as ButtonConfig[];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#fcf5eb] to-white p-4">
-      <div className="max-w-lg mx-auto">
+    <div className="min-h-[100dvh] bg-gradient-to-b from-[#fcf5eb] to-white p-4 flex items-center justify-center">
+      <div className="w-full max-w-lg">
         <Card className="border-none shadow-lg bg-white/80 backdrop-blur-sm">
           <CardContent className="p-4">
             <div className="text-center border-b pb-4">
               <h3 className="font-bold text-secondary">{settings.bot_name}</h3>
             </div>
-            <ScrollArea className="h-[400px] py-4">
+            <ScrollArea className="h-[calc(100dvh-16rem)] py-4">
               <div className="space-y-4">
                 <div className="bg-primary/10 rounded-lg p-3 max-w-[80%]">
                   <p className="text-sm">{settings.greeting_message}</p>
