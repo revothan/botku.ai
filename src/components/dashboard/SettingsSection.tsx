@@ -11,6 +11,10 @@ type SettingsSectionProps = {
   isLoading: boolean;
 };
 
+const ASSISTANT_CONTEXT = `Anda adalah Chatbot Assistant yang bertugas untuk membantu pengguna dalam berbagai keperluan, baik itu untuk pencarian informasi, memberikan saran, atau menjalankan fungsi operasional sesuai kebutuhan pengguna. Anda bertindak merepresentasikan user dengan profesionalisme, keramahan, dan efisiensi. 
+
+Berikut adalah informasi penting dari user: `;
+
 const SettingsSection = ({ userId, settings, isLoading }: SettingsSectionProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -19,12 +23,17 @@ const SettingsSection = ({ userId, settings, isLoading }: SettingsSectionProps) 
     mutationFn: async (values: ChatbotFormData) => {
       if (!userId) throw new Error("Not authenticated");
 
+      // Prepend the assistant context to the training data
+      const enhancedTrainingData = values.training_data 
+        ? `${ASSISTANT_CONTEXT}${values.training_data}`
+        : ASSISTANT_CONTEXT;
+
       const { data: settingsData, error: settingsError } = await supabase
         .from("chatbot_settings")
         .update({
           bot_name: values.bot_name,
           greeting_message: values.greeting_message,
-          training_data: values.training_data,
+          training_data: values.training_data, // Store original training data
         })
         .eq("profile_id", userId)
         .select()
@@ -35,6 +44,7 @@ const SettingsSection = ({ userId, settings, isLoading }: SettingsSectionProps) 
       const assistantResponse = await supabase.functions.invoke('create-openai-assistant', {
         body: JSON.stringify({
           ...values,
+          training_data: enhancedTrainingData, // Send enhanced training data to OpenAI
           assistant_id: settings?.assistant_id
         })
       });
