@@ -91,12 +91,9 @@ const Pricing = () => {
 
 const benefits = [
   "Chatbot AI yang Cerdas dan Responsif",
-  "Manajemen Link Tanpa Batas",
+  "Manajemen",
   "Domain Kustom Gratis",
-  "Analitik Pengunjung Real-time",
-  "Personalisasi Tampilan",
   "Dukungan Bahasa Indonesia",
-  "Integrasi dengan WhatsApp",
   "Update Fitur Berkala",
 ];
 
