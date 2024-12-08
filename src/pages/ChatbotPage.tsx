@@ -5,7 +5,7 @@ import { useState, useRef, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { LoadingState, ErrorState, NotFoundState } from "@/components/chatbot/ChatbotStates";
 import { ChatbotInterface } from "@/components/chatbot/ChatbotInterface";
-import type { Message } from "@/types/chatbot";
+import type { Message, ButtonConfig, ChatbotSettings } from "@/types/chatbot";
 
 type AssistantResponse = {
   response: {
@@ -15,6 +15,10 @@ type AssistantResponse = {
       annotations: any[];
     };
   };
+};
+
+type RawChatbotSettings = Omit<ChatbotSettings, 'buttons'> & {
+  buttons: any;
 };
 
 const ChatbotPage = () => {
@@ -56,7 +60,7 @@ const ChatbotPage = () => {
       }
 
       // Then get the chatbot settings using the profile ID
-      const { data: chatbotSettings, error: settingsError } = await supabase
+      const { data: rawSettings, error: settingsError } = await supabase
         .from("chatbot_settings")
         .select("*")
         .eq("profile_id", profile.id)
@@ -67,12 +71,18 @@ const ChatbotPage = () => {
         throw settingsError;
       }
 
-      if (!chatbotSettings) {
+      if (!rawSettings) {
         console.log("No chatbot settings found for profile:", profile.id);
         return null;
       }
 
-      return chatbotSettings;
+      // Transform the raw settings to ensure buttons is an array
+      const transformedSettings: ChatbotSettings = {
+        ...rawSettings,
+        buttons: Array.isArray(rawSettings.buttons) ? rawSettings.buttons : []
+      };
+
+      return transformedSettings;
     },
   });
 
