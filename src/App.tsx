@@ -21,8 +21,8 @@ const App = () => (
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<ManagementDashboard />} />
-          <Route path="/:username" element={<UserPage />} />
           <Route path="/:customDomain" element={<ChatbotPage />} />
+          <Route path="/u/:username" element={<UserPage />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
