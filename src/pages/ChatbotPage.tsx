@@ -58,7 +58,8 @@ const ChatbotPage = () => {
       }
 
       if (!profile) {
-        throw new Error(`No chatbot found for domain: ${customDomain}`);
+        console.log("No profile found for domain:", customDomain);
+        return null;
       }
 
       // Then get the chatbot settings using the profile ID
@@ -74,7 +75,8 @@ const ChatbotPage = () => {
       }
 
       if (!chatbotSettings) {
-        throw new Error("Chatbot not configured for this domain");
+        console.log("No chatbot settings found for profile:", profile.id);
+        return null;
       }
 
       return chatbotSettings;
@@ -141,13 +143,27 @@ const ChatbotPage = () => {
     );
   }
 
-  if (error || !settings) {
+  if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#fcf5eb] to-white">
         <Card className="w-full max-w-md bg-white/80 backdrop-blur-sm">
           <CardContent className="pt-6">
             <p className="text-center text-muted-foreground">
-              {error?.message || "Chatbot not found or not configured"}
+              {error.message || "An error occurred while loading the chatbot"}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!settings) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#fcf5eb] to-white">
+        <Card className="w-full max-w-md bg-white/80 backdrop-blur-sm">
+          <CardContent className="pt-6">
+            <p className="text-center text-muted-foreground">
+              No chatbot found at this address. Please check the URL and try again.
             </p>
           </CardContent>
         </Card>
