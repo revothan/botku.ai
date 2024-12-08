@@ -54,7 +54,7 @@ const ChatbotPage = () => {
             buttons
           )
         `)
-        .or(`username.eq.${customDomain},custom_domain.eq.${customDomain}`)
+        .or('username.eq.' + customDomain + ',custom_domain.eq.' + customDomain)
         .single();
 
       const { data: profileWithSettings, error: queryError } = await query;
