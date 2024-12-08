@@ -5,10 +5,14 @@ import { supabase } from "@/integrations/supabase/client";
 import DomainSection from "@/components/dashboard/DomainSection";
 import SettingsSection from "@/components/dashboard/SettingsSection";
 import PhonePreview from "@/components/dashboard/PhonePreview";
+import { Button } from "@/components/ui/button";
+import { LogOut } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 import type { ButtonConfig, ChatbotSettings } from "@/types/chatbot";
 
 const ManagementDashboard = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [userId, setUserId] = useState<string | null>(null);
   const [isAuthChecking, setIsAuthChecking] = useState(true);
 
@@ -25,6 +29,19 @@ const ManagementDashboard = () => {
 
     checkAuth();
   }, [navigate]);
+
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to sign out. Please try again.",
+        variant: "destructive",
+      });
+    } else {
+      navigate("/");
+    }
+  };
 
   const { data: settings, isLoading } = useQuery({
     queryKey: ["chatbot-settings"],
@@ -96,7 +113,19 @@ const ManagementDashboard = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#fcf5eb] to-white p-8">
       <div className="max-w-7xl mx-auto space-y-8">
-        {/* Domain Section at the top */}
+        {/* Header with Logout Button */}
+        <div className="flex justify-end">
+          <Button
+            variant="outline"
+            onClick={handleLogout}
+            className="gap-2"
+          >
+            <LogOut className="h-4 w-4" />
+            Sign Out
+          </Button>
+        </div>
+
+        {/* Domain Section */}
         <div>
           <h2 className="text-2xl font-bold mb-6 text-secondary">Share Your Chatbot</h2>
           <DomainSection userId={userId} />
