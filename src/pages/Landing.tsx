@@ -4,6 +4,11 @@ import { Link } from "react-router-dom";
 import { Link as LinkIcon, MessageSquare, Users, Settings } from "lucide-react";
 
 const Landing = () => {
+  const scrollToFeatures = () => {
+    const featuresSection = document.querySelector("#features");
+    featuresSection?.scrollIntoView({ behavior: "smooth" });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#fcf5eb] to-white">
       {/* Header Section */}
@@ -11,10 +16,15 @@ const Landing = () => {
         <nav className="flex justify-between items-center mb-16">
           <h1 className="text-2xl font-bold tracking-tight text-[#075e54]">BOTKU.AI</h1>
           <div className="hidden md:flex space-x-8 text-[#075e54]">
-            <Button variant="ghost" className="hover:text-[#128c7e]">Beranda</Button>
-            <Button variant="ghost" className="hover:text-[#128c7e]">Fitur</Button>
-            <Button variant="ghost" className="hover:text-[#128c7e]">Harga</Button>
-            <Button variant="ghost" className="hover:text-[#128c7e]">Kontak</Button>
+            <Button variant="ghost" asChild className="hover:text-[#128c7e]">
+              <Link to="/">Beranda</Link>
+            </Button>
+            <Button variant="ghost" onClick={scrollToFeatures} className="hover:text-[#128c7e]">
+              Fitur
+            </Button>
+            <Button variant="ghost" asChild className="hover:text-[#128c7e]">
+              <Link to="/pricing">Harga</Link>
+            </Button>
           </div>
           <div className="flex space-x-4">
             <Button variant="ghost" asChild className="hidden md:inline-flex">
@@ -54,7 +64,7 @@ const Landing = () => {
           </motion.div>
 
           {/* Features Section */}
-          <div className="mt-32">
+          <div className="mt-32" id="features">
             <h2 className="text-3xl font-bold text-[#075e54] mb-16">
               Apa yang Bisa BOTKU.AI Lakukan untuk Anda?
             </h2>
@@ -129,8 +139,7 @@ const Landing = () => {
               <ul className="space-y-2">
                 <li><a href="#" className="hover:text-[#25d366]">Beranda</a></li>
                 <li><a href="#" className="hover:text-[#25d366]">Fitur</a></li>
-                <li><a href="#" className="hover:text-[#25d366]">Harga</a></li>
-                <li><a href="#" className="hover:text-[#25d366]">Kontak</a></li>
+                <li><a href="/pricing" className="hover:text-[#25d366]">Harga</a></li>
               </ul>
             </div>
           </div>

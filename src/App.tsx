@@ -8,6 +8,7 @@ import Login from "./pages/Login";
 import UserPage from "./pages/UserPage";
 import ManagementDashboard from "./pages/ManagementDashboard";
 import ChatbotPage from "./pages/ChatbotPage";
+import Pricing from "./pages/Pricing";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +24,7 @@ const App = () => (
           <Route path="/dashboard" element={<ManagementDashboard />} />
           <Route path="/:customDomain" element={<ChatbotPage />} />
           <Route path="/u/:username" element={<UserPage />} />
+          <Route path="/pricing" element={<Pricing />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
