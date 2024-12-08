@@ -144,9 +144,9 @@ const ManagementDashboard = () => {
             </div>
           </div>
 
-          {/* Preview Column */}
+          {/* Preview Column - Now with sticky positioning */}
           <div className="lg:col-span-5">
-            <div>
+            <div className="lg:sticky lg:top-8">
               <h2 className="text-2xl font-bold mb-6 text-secondary">Preview</h2>
               <PhonePreview
                 botName={settings?.bot_name || ""}
