@@ -29,6 +29,13 @@ export const HeroSection = () => {
     }
   }, [currentIndex]);
 
+  const scrollToFeatures = () => {
+    const featuresSection = document.getElementById('features');
+    if (featuresSection) {
+      featuresSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <main className="relative max-w-6xl mx-auto py-16">
       {/* Background decorative elements */}
@@ -93,32 +100,11 @@ export const HeroSection = () => {
               size="lg" 
               variant="outline"
               className="gap-2"
-              asChild
+              onClick={scrollToFeatures}
             >
-              <Link to="#features">
-                <Zap className="w-5 h-5" />
-                Lihat Fitur
-              </Link>
+              <Zap className="w-5 h-5" />
+              Lihat Fitur
             </Button>
-          </motion.div>
-
-          {/* Stats */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.8 }}
-            className="grid grid-cols-3 gap-4 pt-8 border-t"
-          >
-            {[
-              { label: "Pengguna Aktif", value: "1,000+" },
-              { label: "Pesan/Hari", value: "10,000+" },
-              { label: "Tingkat Kepuasan", value: "98%" },
-            ].map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="text-2xl font-bold text-primary">{stat.value}</div>
-                <div className="text-sm text-gray-600">{stat.label}</div>
-              </div>
-            ))}
           </motion.div>
         </motion.div>
 
