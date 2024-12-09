@@ -1,18 +1,8 @@
 import { useSession } from "@supabase/auth-helpers-react";
-import { LogOut, LayoutDashboard, Package, Menu, PanelLeft } from "lucide-react";
-import { useNavigate, useLocation } from "react-router-dom";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarFooter,
-  useSidebar,
-} from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Sidebar, useSidebar } from "@/components/ui/sidebar";
+import { SidebarHeader } from "./sidebar/SidebarHeader";
+import { NavigationMenu } from "./sidebar/NavigationMenu";
+import { SidebarFooter } from "./sidebar/SidebarFooter";
 
 interface SideNavProps {
   onSignOut: () => Promise<void>;
@@ -20,90 +10,23 @@ interface SideNavProps {
 
 export function SideNav({ onSignOut }: SideNavProps) {
   const session = useSession();
-  const navigate = useNavigate();
-  const location = useLocation();
   const { state, toggleSidebar } = useSidebar();
   
   const userEmail = session?.user?.email;
   const displayName = userEmail ? userEmail.split('@')[0] : 'User';
 
-  const menuItems = [
-    {
-      title: "Main Dashboard",
-      icon: LayoutDashboard,
-      path: "/dashboard",
-    },
-    {
-      title: "Manajemen Produk",
-      icon: Package,
-      path: "/dashboard/products",
-    },
-  ];
-
   return (
     <Sidebar variant="sidebar" className="border-r">
-      <SidebarHeader className="flex items-center justify-between p-4 border-b">
-        {state === 'expanded' && (
-          <h2 className="text-lg font-semibold text-secondary">
-            Hello, {displayName}
-          </h2>
-        )}
-        <Button 
-          variant="ghost" 
-          size="sm"
-          className={`hover:bg-muted ${state === 'expanded' ? 'ml-auto' : 'mx-auto'}`}
-          onClick={toggleSidebar}
-          aria-label={state === 'expanded' ? 'Collapse Sidebar' : 'Expand Sidebar'}
-        >
-          {state === 'expanded' ? <PanelLeft className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </Button>
-      </SidebarHeader>
-      
-      <SidebarContent className="p-2">
-        <SidebarMenu>
-          {menuItems.map((item) => (
-            <SidebarMenuItem key={item.title}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <SidebarMenuButton
-                    onClick={() => navigate(item.path)}
-                    isActive={location.pathname === item.path}
-                    className="w-full flex items-center gap-2 p-2"
-                  >
-                    <item.icon className="h-5 w-5 shrink-0" />
-                    {state === 'expanded' && <span>{item.title}</span>}
-                  </SidebarMenuButton>
-                </TooltipTrigger>
-                {state === 'collapsed' && (
-                  <TooltipContent side="right">
-                    {item.title}
-                  </TooltipContent>
-                )}
-              </Tooltip>
-            </SidebarMenuItem>
-          ))}
-        </SidebarMenu>
-      </SidebarContent>
-
-      <SidebarFooter className="p-4 mt-auto border-t">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <SidebarMenuButton
-              onClick={onSignOut}
-              variant="outline"
-              className="w-full flex items-center gap-2 p-2"
-            >
-              <LogOut className="h-5 w-5 shrink-0" />
-              {state === 'expanded' && <span>Logout</span>}
-            </SidebarMenuButton>
-          </TooltipTrigger>
-          {state === 'collapsed' && (
-            <TooltipContent side="right">
-              Logout
-            </TooltipContent>
-          )}
-        </Tooltip>
-      </SidebarFooter>
+      <SidebarHeader 
+        displayName={displayName}
+        state={state}
+        toggleSidebar={toggleSidebar}
+      />
+      <NavigationMenu state={state} />
+      <SidebarFooter 
+        state={state}
+        onSignOut={onSignOut}
+      />
     </Sidebar>
   );
 }
