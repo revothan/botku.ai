@@ -1,4 +1,5 @@
 import { useForm } from "react-hook-form";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -44,7 +45,7 @@ const ChatbotSettingsForm = ({
   const userType = form.watch('user_type');
 
   // Watch for changes in user_type and clear other type answers
-  React.useEffect(() => {
+  useEffect(() => {
     if (userType) {
       const emptyAnswers = {
         business: Array(5).fill(""),
