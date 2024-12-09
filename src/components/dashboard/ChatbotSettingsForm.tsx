@@ -129,19 +129,44 @@ const ChatbotSettingsForm = ({
                 <RadioGroup
                   onValueChange={field.onChange}
                   defaultValue={field.value}
-                  className="flex flex-col space-y-1"
+                  className="grid grid-cols-3 gap-4"
                 >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="business" id="business" />
-                    <Label htmlFor="business">Pengguna Bisnis</Label>
+                  <div className="flex flex-col space-y-2 rounded-lg border p-4 hover:bg-accent">
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="business" id="business" />
+                      <Label htmlFor="business" className="font-medium">Pengguna Bisnis</Label>
+                    </div>
+                    <ul className="ml-6 text-sm text-muted-foreground list-disc space-y-1">
+                      <li>Nama bisnis</li>
+                      <li>Deskripsi produk/jasa</li>
+                      <li>Target pelanggan</li>
+                      <li>Pertanyaan umum</li>
+                      <li>Tambahan</li>
+                    </ul>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="creator" id="creator" />
-                    <Label htmlFor="creator">Pengguna Kreator</Label>
+                  <div className="flex flex-col space-y-2 rounded-lg border p-4 hover:bg-accent">
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="creator" id="creator" />
+                      <Label htmlFor="creator" className="font-medium">Pengguna Kreator</Label>
+                    </div>
+                    <ul className="ml-6 text-sm text-muted-foreground list-disc space-y-1">
+                      <li>Jenis konten utama</li>
+                      <li>Audiens utama</li>
+                      <li>Pertanyaan umum pengikut</li>
+                      <li>Tambahan</li>
+                    </ul>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="other" id="other" />
-                    <Label htmlFor="other">Pengguna Lainnya</Label>
+                  <div className="flex flex-col space-y-2 rounded-lg border p-4 hover:bg-accent">
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="other" id="other" />
+                      <Label htmlFor="other" className="font-medium">Pengguna Lainnya</Label>
+                    </div>
+                    <ul className="ml-6 text-sm text-muted-foreground list-disc space-y-1">
+                      <li>Tujuan utama AI</li>
+                      <li>Topik/fokus utama</li>
+                      <li>Gaya komunikasi</li>
+                      <li>Tambahan</li>
+                    </ul>
                   </div>
                 </RadioGroup>
               </FormControl>
