@@ -8,7 +8,7 @@ import SettingsSection from "@/components/dashboard/SettingsSection";
 import PhonePreview from "@/components/dashboard/PhonePreview";
 import { useToast } from "@/components/ui/use-toast";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import type { UserType } from "@/types/chatbot";
+import type { UserType, ChatbotSettings } from "@/types/chatbot";
 
 const ManagementDashboard = () => {
   const navigate = useNavigate();
@@ -92,17 +92,19 @@ const ManagementDashboard = () => {
 
         if (existingSettings) {
           console.log("Existing settings found:", existingSettings);
+          const userType = existingSettings.user_type as UserType | undefined;
+          
           return {
             ...existingSettings,
-            user_type: existingSettings.user_type as UserType | undefined,
+            user_type: userType,
             answers: existingSettings.answers ? {
-              business: (existingSettings.answers as any)?.business || [],
-              creator: (existingSettings.answers as any)?.creator || [],
-              other: (existingSettings.answers as any)?.other || []
+              business: ((existingSettings.answers as any)?.business || []) as string[],
+              creator: ((existingSettings.answers as any)?.creator || []) as string[],
+              other: ((existingSettings.answers as any)?.other || []) as string[]
             } : {
-              business: [],
-              creator: [],
-              other: []
+              business: [] as string[],
+              creator: [] as string[],
+              other: [] as string[]
             },
             buttons: Array.isArray(existingSettings.buttons) 
               ? existingSettings.buttons.map((button: any) => ({
@@ -111,7 +113,7 @@ const ManagementDashboard = () => {
                   url: button.url || ''
                 }))
               : []
-          };
+          } as ChatbotSettings;
         }
 
         console.log("No existing settings found, creating default settings...");
@@ -136,13 +138,14 @@ const ManagementDashboard = () => {
         console.log("Default settings created:", newSettings);
         return {
           ...newSettings,
+          user_type: undefined as UserType | undefined,
           answers: {
-            business: [],
-            creator: [],
-            other: []
+            business: [] as string[],
+            creator: [] as string[],
+            other: [] as string[]
           },
           buttons: []
-        };
+        } as ChatbotSettings;
       } catch (error) {
         console.error("Error in settings query:", error);
         toast({
