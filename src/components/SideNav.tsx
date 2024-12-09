@@ -12,6 +12,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface SideNavProps {
   onSignOut: () => Promise<void>;
@@ -40,7 +41,7 @@ export function SideNav({ onSignOut }: SideNavProps) {
   ];
 
   return (
-    <Sidebar className="border-r">
+    <Sidebar variant="sidebar" className="border-r">
       <SidebarHeader className="flex items-center justify-between p-4 border-b">
         {state === 'expanded' && (
           <h2 className="text-lg font-semibold text-secondary">
@@ -52,7 +53,7 @@ export function SideNav({ onSignOut }: SideNavProps) {
           size="sm"
           className={`hover:bg-muted ${state === 'expanded' ? 'ml-auto' : 'mx-auto'}`}
           onClick={toggleSidebar}
-          aria-label={state === 'expanded' ? 'Close Sidebar' : 'Open Sidebar'}
+          aria-label={state === 'expanded' ? 'Collapse Sidebar' : 'Expand Sidebar'}
         >
           {state === 'expanded' ? <PanelLeft className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </Button>
@@ -62,30 +63,46 @@ export function SideNav({ onSignOut }: SideNavProps) {
         <SidebarMenu>
           {menuItems.map((item) => (
             <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton
-                onClick={() => navigate(item.path)}
-                isActive={location.pathname === item.path}
-                className="w-full flex items-center gap-2 p-2"
-                tooltip={state === 'collapsed' ? item.title : undefined}
-              >
-                <item.icon className="h-5 w-5 shrink-0" />
-                {state === 'expanded' && <span>{item.title}</span>}
-              </SidebarMenuButton>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <SidebarMenuButton
+                    onClick={() => navigate(item.path)}
+                    isActive={location.pathname === item.path}
+                    className="w-full flex items-center gap-2 p-2"
+                  >
+                    <item.icon className="h-5 w-5 shrink-0" />
+                    {state === 'expanded' && <span>{item.title}</span>}
+                  </SidebarMenuButton>
+                </TooltipTrigger>
+                {state === 'collapsed' && (
+                  <TooltipContent side="right">
+                    {item.title}
+                  </TooltipContent>
+                )}
+              </Tooltip>
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
       </SidebarContent>
 
       <SidebarFooter className="p-4 mt-auto border-t">
-        <SidebarMenuButton
-          onClick={onSignOut}
-          variant="outline"
-          className="w-full flex items-center gap-2 p-2"
-          tooltip={state === 'collapsed' ? 'Logout' : undefined}
-        >
-          <LogOut className="h-5 w-5 shrink-0" />
-          {state === 'expanded' && <span>Logout</span>}
-        </SidebarMenuButton>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <SidebarMenuButton
+              onClick={onSignOut}
+              variant="outline"
+              className="w-full flex items-center gap-2 p-2"
+            >
+              <LogOut className="h-5 w-5 shrink-0" />
+              {state === 'expanded' && <span>Logout</span>}
+            </SidebarMenuButton>
+          </TooltipTrigger>
+          {state === 'collapsed' && (
+            <TooltipContent side="right">
+              Logout
+            </TooltipContent>
+          )}
+        </Tooltip>
       </SidebarFooter>
     </Sidebar>
   );
