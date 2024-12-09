@@ -16,7 +16,7 @@ const ManagementDashboard = () => {
   const [userId, setUserId] = useState<string | null>(null);
   const [isAuthChecking, setIsAuthChecking] = useState(true);
 
-  const { data: settings, isLoading: isSettingsLoading } = useSettingsQuery(userId, isAuthChecking);
+  const { data: settings, isLoading } = useSettingsQuery(userId, isAuthChecking);
 
   const handleLogout = async () => {
     try {
@@ -36,10 +36,7 @@ const ManagementDashboard = () => {
     }
   };
 
-  console.log("Dashboard render - Auth checking:", isAuthChecking, "Settings loading:", isSettingsLoading, "UserId:", userId);
-
-  // If no userId and still checking auth, show loading
-  if (isAuthChecking && !userId) {
+  if (isAuthChecking || (isLoading && !settings)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#fcf5eb]">
         <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-primary"></div>
@@ -47,9 +44,7 @@ const ManagementDashboard = () => {
     );
   }
 
-  // If auth check is complete but no userId, return null (AuthCheck will handle redirect)
-  if (!userId && !isAuthChecking) {
-    console.log("No user ID found after auth check");
+  if (!userId) {
     return null;
   }
 
@@ -76,7 +71,7 @@ const ManagementDashboard = () => {
                     <SettingsSection
                       userId={userId}
                       settings={settings}
-                      isLoading={isSettingsLoading}
+                      isLoading={isLoading}
                     />
                   </div>
                 </div>

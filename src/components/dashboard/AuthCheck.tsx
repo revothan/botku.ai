@@ -13,12 +13,9 @@ const AuthCheck = ({ onAuthChecked, onAuthCheckingChange }: AuthCheckProps) => {
   const { toast } = useToast();
 
   useEffect(() => {
-    let isMounted = true;
-
     const checkAuth = async () => {
       try {
-        console.log("Starting auth check...");
-        
+        console.log("Checking authentication...");
         const { data: { user }, error } = await supabase.auth.getUser();
         
         if (error) {
@@ -28,53 +25,25 @@ const AuthCheck = ({ onAuthChecked, onAuthCheckingChange }: AuthCheckProps) => {
         
         if (!user) {
           console.log("No user found, redirecting to login");
-          if (isMounted) {
-            onAuthChecked(null);
-            navigate("/login");
-          }
+          navigate("/login");
           return;
         }
         
         console.log("User authenticated:", user.id);
-        if (isMounted) {
-          onAuthChecked(user.id);
-        }
-      } catch (error: any) {
+        onAuthChecked(user.id);
+        onAuthCheckingChange(false);
+      } catch (error) {
         console.error("Error during auth check:", error);
-        if (isMounted) {
-          toast({
-            title: "Authentication Error",
-            description: "Please try logging in again",
-            variant: "destructive",
-          });
-          navigate("/login");
-        }
-      } finally {
-        if (isMounted) {
-          onAuthCheckingChange(false);
-        }
+        toast({
+          title: "Authentication Error",
+          description: "Please try logging in again",
+          variant: "destructive",
+        });
+        navigate("/login");
       }
     };
 
     checkAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("Auth state changed:", event, session?.user?.id);
-      if (isMounted) {
-        if (session?.user) {
-          onAuthChecked(session.user.id);
-        } else {
-          onAuthChecked(null);
-          navigate("/login");
-        }
-        onAuthCheckingChange(false);
-      }
-    });
-
-    return () => {
-      isMounted = false;
-      subscription.unsubscribe();
-    };
   }, [navigate, toast, onAuthChecked, onAuthCheckingChange]);
 
   return null;
