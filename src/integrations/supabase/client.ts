@@ -4,16 +4,16 @@ import type { Database } from './types/database';
 const SUPABASE_URL = "https://wssgzuhdbtcrxrxojsfq.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indzc2d6dWhkYnRjcnhyeG9qc2ZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM2MDI3NjMsImV4cCI6MjA0OTE3ODc2M30.LboN0ORnD6kNhI7KcBXy9jtv7jmHONyJv18HtUj1A7c";
 
-// Get the current site URL
-const siteUrl = window.location.origin;
-
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-  auth: {
-    flowType: 'pkce',
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
-    persistSession: true,
-    storage: window?.localStorage,
-    redirect_to: siteUrl
-  },
-});
+export const supabase = createClient<Database>(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY,
+  {
+    auth: {
+      flowType: 'pkce',
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+      persistSession: true,
+      storage: window?.localStorage,
+    },
+  }
+);

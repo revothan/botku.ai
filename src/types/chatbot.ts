@@ -6,6 +6,12 @@ export type ButtonConfig = {
 
 export type UserType = 'business' | 'creator' | 'other';
 
+export type ChatbotAnswers = {
+  business: string[];
+  creator: string[];
+  other: string[];
+};
+
 export type ChatbotSettings = {
   id: string;
   profile_id: string;
@@ -17,11 +23,7 @@ export type ChatbotSettings = {
   assistant_id: string | null;
   buttons: ButtonConfig[];
   user_type?: UserType;
-  answers?: {
-    business: string[];
-    creator: string[];
-    other: string[];
-  };
+  answers?: ChatbotAnswers;
 };
 
 export type Message = {
@@ -34,9 +36,5 @@ export type ChatbotFormData = {
   greeting_message: string;
   training_data: string | null;
   user_type?: UserType;
-  answers?: {
-    business: string[];
-    creator: string[];
-    other: string[];
-  };
+  answers?: ChatbotAnswers;
 };

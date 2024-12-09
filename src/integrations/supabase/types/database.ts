@@ -49,140 +49,105 @@ export interface Database {
           updated_at?: string
           user_type?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "chatbot_settings_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: true
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      links: {
-        Row: {
-          created_at: string
-          icon: string | null
-          id: string
-          is_active: boolean | null
-          position: number | null
-          profile_id: string
-          title: string
-          updated_at: string
-          url: string
-        }
-        Insert: {
-          created_at?: string
-          icon?: string | null
-          id?: string
-          is_active?: boolean | null
-          position?: number | null
-          profile_id: string
-          title: string
-          updated_at?: string
-          url: string
-        }
-        Update: {
-          created_at?: string
-          icon?: string | null
-          id?: string
-          is_active?: boolean | null
-          position?: number | null
-          profile_id?: string
-          title?: string
-          updated_at?: string
-          url?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "links_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          }
-        ]
       }
       profiles: {
         Row: {
-          avatar_url: string | null
-          bio: string | null
-          created_at: string
-          custom_domain: string | null
-          display_name: string | null
-          has_customized_domain: boolean | null
           id: string
-          theme: string | null
-          updated_at: string
           username: string | null
+          display_name: string | null
+          bio: string | null
+          avatar_url: string | null
+          theme: string | null
+          created_at: string
+          updated_at: string
+          custom_domain: string | null
+          has_customized_domain: boolean | null
         }
         Insert: {
-          avatar_url?: string | null
-          bio?: string | null
-          created_at?: string
-          custom_domain?: string | null
-          display_name?: string | null
-          has_customized_domain?: boolean | null
           id: string
-          theme?: string | null
-          updated_at?: string
           username?: string | null
+          display_name?: string | null
+          bio?: string | null
+          avatar_url?: string | null
+          theme?: string | null
+          created_at?: string
+          updated_at?: string
+          custom_domain?: string | null
+          has_customized_domain?: boolean | null
         }
         Update: {
-          avatar_url?: string | null
-          bio?: string | null
-          created_at?: string
-          custom_domain?: string | null
-          display_name?: string | null
-          has_customized_domain?: boolean | null
           id?: string
-          theme?: string | null
-          updated_at?: string
           username?: string | null
+          display_name?: string | null
+          bio?: string | null
+          avatar_url?: string | null
+          theme?: string | null
+          created_at?: string
+          updated_at?: string
+          custom_domain?: string | null
+          has_customized_domain?: boolean | null
         }
-        Relationships: []
+      }
+      links: {
+        Row: {
+          id: string
+          profile_id: string
+          title: string
+          url: string
+          icon: string | null
+          position: number | null
+          is_active: boolean | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          profile_id: string
+          title: string
+          url: string
+          icon?: string | null
+          position?: number | null
+          is_active?: boolean | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          profile_id?: string
+          title?: string
+          url?: string
+          icon?: string | null
+          position?: number | null
+          is_active?: boolean | null
+          created_at?: string
+          updated_at?: string
+        }
       }
       visits: {
         Row: {
-          created_at: string
           id: string
           link_id: string | null
           profile_id: string | null
-          user_agent: string | null
           visitor_ip: string | null
+          user_agent: string | null
+          created_at: string
         }
         Insert: {
-          created_at?: string
           id?: string
           link_id?: string | null
           profile_id?: string | null
-          user_agent?: string | null
           visitor_ip?: string | null
+          user_agent?: string | null
+          created_at?: string
         }
         Update: {
-          created_at?: string
           id?: string
           link_id?: string | null
           profile_id?: string | null
-          user_agent?: string | null
           visitor_ip?: string | null
+          user_agent?: string | null
+          created_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "visits_link_id_fkey"
-            columns: ["link_id"]
-            isOneToOne: false
-            referencedRelation: "links"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "visits_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          }
-        ]
       }
     }
     Views: {
