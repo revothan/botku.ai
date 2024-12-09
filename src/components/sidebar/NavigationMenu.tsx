@@ -29,7 +29,7 @@ export function NavigationMenu() {
             key={item.title}
             title={item.title}
             icon={item.icon}
-            isActive={location.pathname === item.path}
+            isActive={location.pathname.startsWith(item.path)}
             onClick={() => handleNavigation(item.path)}
           />
         ))}
