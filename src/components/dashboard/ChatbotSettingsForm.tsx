@@ -129,44 +129,19 @@ const ChatbotSettingsForm = ({
                 <RadioGroup
                   onValueChange={field.onChange}
                   defaultValue={field.value}
-                  className="grid grid-cols-3 gap-4"
+                  className="flex flex-col space-y-1"
                 >
-                  <div className="flex flex-col space-y-2 rounded-lg border p-4 hover:bg-accent">
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="business" id="business" />
-                      <Label htmlFor="business" className="font-medium">Pengguna Bisnis</Label>
-                    </div>
-                    <ul className="ml-6 text-sm text-muted-foreground list-disc space-y-1">
-                      <li>Nama bisnis</li>
-                      <li>Deskripsi produk/jasa</li>
-                      <li>Target pelanggan</li>
-                      <li>Pertanyaan umum</li>
-                      <li>Tambahan</li>
-                    </ul>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="business" id="business" />
+                    <Label htmlFor="business">Pengguna Bisnis</Label>
                   </div>
-                  <div className="flex flex-col space-y-2 rounded-lg border p-4 hover:bg-accent">
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="creator" id="creator" />
-                      <Label htmlFor="creator" className="font-medium">Pengguna Kreator</Label>
-                    </div>
-                    <ul className="ml-6 text-sm text-muted-foreground list-disc space-y-1">
-                      <li>Jenis konten utama</li>
-                      <li>Audiens utama</li>
-                      <li>Pertanyaan umum pengikut</li>
-                      <li>Tambahan</li>
-                    </ul>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="creator" id="creator" />
+                    <Label htmlFor="creator">Pengguna Kreator</Label>
                   </div>
-                  <div className="flex flex-col space-y-2 rounded-lg border p-4 hover:bg-accent">
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="other" id="other" />
-                      <Label htmlFor="other" className="font-medium">Pengguna Lainnya</Label>
-                    </div>
-                    <ul className="ml-6 text-sm text-muted-foreground list-disc space-y-1">
-                      <li>Tujuan utama AI</li>
-                      <li>Topik/fokus utama</li>
-                      <li>Gaya komunikasi</li>
-                      <li>Tambahan</li>
-                    </ul>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="other" id="other" />
+                    <Label htmlFor="other">Pengguna Lainnya</Label>
                   </div>
                 </RadioGroup>
               </FormControl>
@@ -175,9 +150,18 @@ const ChatbotSettingsForm = ({
           )}
         />
 
-        <BusinessQuestions form={form} visible={userType === 'business'} />
-        <CreatorQuestions form={form} visible={userType === 'creator'} />
-        <OtherQuestions form={form} visible={userType === 'other'} />
+        {userType && (
+          <div className="rounded-lg border p-6 bg-card">
+            <h3 className="text-lg font-medium mb-4">
+              {userType === 'business' ? 'Detail Bisnis' : 
+               userType === 'creator' ? 'Detail Kreator' : 
+               'Detail Lainnya'}
+            </h3>
+            <BusinessQuestions form={form} visible={userType === 'business'} />
+            <CreatorQuestions form={form} visible={userType === 'creator'} />
+            <OtherQuestions form={form} visible={userType === 'other'} />
+          </div>
+        )}
 
         <Button
           type="submit"

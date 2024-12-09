@@ -31,20 +31,20 @@ const OtherQuestions = ({ form, visible }: OtherQuestionsProps) => {
   if (!visible) return null;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {otherQuestions.map((question, index) => (
         <FormField
           key={index}
           control={form.control}
           name={`answers.other.${index}`}
           render={({ field }) => (
-            <FormItem className="grid grid-cols-2 gap-4 items-start">
-              <FormLabel className="mt-2.5">{question.label}</FormLabel>
-              <div>
+            <FormItem>
+              <div className="flex flex-col space-y-3">
+                <FormLabel className="text-base">{question.label}</FormLabel>
                 <FormControl>
                   <Textarea
                     placeholder={question.placeholder}
-                    className="resize-none h-24"
+                    className="min-h-[100px] resize-none"
                     {...field}
                   />
                 </FormControl>
