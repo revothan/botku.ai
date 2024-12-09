@@ -43,6 +43,23 @@ const ChatbotSettingsForm = ({
 
   const userType = form.watch('user_type');
 
+  // Watch for changes in user_type and clear other type answers
+  React.useEffect(() => {
+    if (userType) {
+      const emptyAnswers = {
+        business: Array(5).fill(""),
+        creator: Array(5).fill(""),
+        other: Array(4).fill("")
+      };
+      
+      // Only keep the current user type answers, clear others
+      form.setValue('answers', {
+        ...emptyAnswers,
+        [userType]: form.getValues(`answers.${userType}`)
+      });
+    }
+  }, [userType, form]);
+
   const generateTrainingData = (type: string, answers: Record<string, string[]>) => {
     let trainingData = '';
     const typeAnswers = answers[type as keyof typeof answers] || [];
@@ -71,7 +88,6 @@ const ChatbotSettingsForm = ({
           ];
 
     typeAnswers.forEach((answer, index) => {
-      // Add null check and ensure answer exists and is not empty
       if (answer && typeof answer === 'string' && answer.trim() && questions[index]) {
         trainingData += `${questions[index]}\n${answer.trim()}\n\n`;
       }
@@ -82,7 +98,16 @@ const ChatbotSettingsForm = ({
 
   const handleFormSubmit = (values: ChatbotFormData) => {
     if (userType && values.answers) {
-      values.training_data = generateTrainingData(userType, values.answers);
+      // Only include the current user type answers in the submission
+      const currentTypeAnswers = {
+        business: Array(5).fill(""),
+        creator: Array(5).fill(""),
+        other: Array(4).fill("")
+      };
+      
+      currentTypeAnswers[userType] = values.answers[userType];
+      values.answers = currentTypeAnswers;
+      values.training_data = generateTrainingData(userType, currentTypeAnswers);
     }
     onSubmit(values);
   };
@@ -175,7 +200,6 @@ const ChatbotSettingsForm = ({
       </form>
     </Form>
   );
-
 };
 
 export default ChatbotSettingsForm;
