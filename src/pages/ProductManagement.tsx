@@ -35,12 +35,11 @@ const ProductManagement = () => {
     },
   });
 
-  const handleProductAdded = () => {
+  const handleProductChange = () => {
     refetch();
-    setIsDialogOpen(false);
     toast({
       title: "Success",
-      description: "Product has been added successfully.",
+      description: "Products updated successfully.",
     });
   };
 
@@ -63,14 +62,17 @@ const ProductManagement = () => {
         ) : !products?.length ? (
           <p>No products found. Add your first product!</p>
         ) : (
-          <ProductList products={products} />
+          <ProductList 
+            products={products} 
+            onProductUpdated={handleProductChange}
+          />
         )}
       </Card>
 
       <AddProductDialog
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
-        onProductAdded={handleProductAdded}
+        onProductAdded={handleProductChange}
       />
     </div>
   );
