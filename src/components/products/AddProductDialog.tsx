@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useSession } from "@supabase/auth-helpers-react";
 
 const formSchema = z.object({
   name: z.string().min(1, "Nama produk harus diisi"),
@@ -29,6 +30,7 @@ interface AddProductDialogProps {
 const AddProductDialog = ({ open, onOpenChange, onProductAdded }: AddProductDialogProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const session = useSession();
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -40,6 +42,15 @@ const AddProductDialog = ({ open, onOpenChange, onProductAdded }: AddProductDial
   });
 
   const onSubmit = async (values: FormValues) => {
+    if (!session?.user?.id) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to add products",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       setIsSubmitting(true);
       
@@ -71,12 +82,18 @@ const AddProductDialog = ({ open, onOpenChange, onProductAdded }: AddProductDial
           details: values.details,
           price: parseFloat(values.price),
           image_url: imageUrl,
+          profile_id: session.user.id,
         });
 
       if (insertError) throw insertError;
 
       form.reset();
       onProductAdded();
+      onOpenChange(false);
+      toast({
+        title: "Success",
+        description: "Product added successfully",
+      });
     } catch (error: any) {
       console.error('Error adding product:', error);
       toast({
