@@ -46,16 +46,15 @@ export function SideNav({ onSignOut }: SideNavProps) {
         <h2 className="text-lg font-semibold text-secondary">
           Hello, {displayName}
         </h2>
-        <SidebarTrigger asChild>
-          <Button 
-            variant="ghost" 
-            size="sm"
-            className="hover:bg-muted"
-            aria-label={state === 'expanded' ? 'Close Sidebar' : 'Open Sidebar'}
-          >
-            <Menu className="h-5 w-5" />
-          </Button>
-        </SidebarTrigger>
+        <Button 
+          variant="ghost" 
+          size="sm"
+          className="hover:bg-muted"
+          onClick={() => useSidebar().toggleSidebar()}
+          aria-label={state === 'expanded' ? 'Close Sidebar' : 'Open Sidebar'}
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
       </SidebarHeader>
       
       <SidebarContent className="p-2">
