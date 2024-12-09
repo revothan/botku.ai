@@ -11,6 +11,7 @@ export type Database = {
     Tables: {
       chatbot_settings: {
         Row: {
+          answers: Json | null
           assistant_id: string | null
           bot_name: string
           buttons: Json | null
@@ -20,8 +21,10 @@ export type Database = {
           profile_id: string
           training_data: string | null
           updated_at: string
+          user_type: string | null
         }
         Insert: {
+          answers?: Json | null
           assistant_id?: string | null
           bot_name?: string
           buttons?: Json | null
@@ -31,8 +34,10 @@ export type Database = {
           profile_id: string
           training_data?: string | null
           updated_at?: string
+          user_type?: string | null
         }
         Update: {
+          answers?: Json | null
           assistant_id?: string | null
           bot_name?: string
           buttons?: Json | null
@@ -42,6 +47,7 @@ export type Database = {
           profile_id?: string
           training_data?: string | null
           updated_at?: string
+          user_type?: string | null
         }
         Relationships: [
           {

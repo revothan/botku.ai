@@ -71,8 +71,9 @@ const ChatbotSettingsForm = ({
           ];
 
     typeAnswers.forEach((answer, index) => {
-      if (answer.trim() && questions[index]) {
-        trainingData += `${questions[index]}\n${answer}\n\n`;
+      // Add null check and ensure answer exists and is not empty
+      if (answer && typeof answer === 'string' && answer.trim() && questions[index]) {
+        trainingData += `${questions[index]}\n${answer.trim()}\n\n`;
       }
     });
 
@@ -174,6 +175,7 @@ const ChatbotSettingsForm = ({
       </form>
     </Form>
   );
+
 };
 
 export default ChatbotSettingsForm;
