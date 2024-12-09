@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard } from "lucide-react";
+import { LayoutDashboard, Package } from "lucide-react";
 import { SidebarContent, SidebarMenu } from "@/components/ui/sidebar";
 import { NavigationItem } from "./NavigationItem";
 
@@ -13,6 +13,11 @@ export function NavigationMenu() {
       title: "Dashboard",
       icon: LayoutDashboard,
       path: "/dashboard",
+    },
+    {
+      title: "Manajemen Produk",
+      icon: Package,
+      path: "/dashboard/products",
     }
   ];
 

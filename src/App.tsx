@@ -11,6 +11,7 @@ import UserPage from "./pages/UserPage";
 import ManagementDashboard from "./pages/ManagementDashboard";
 import ChatbotPage from "./pages/ChatbotPage";
 import Pricing from "./pages/Pricing";
+import ProductManagement from "./pages/ProductManagement";
 
 const queryClient = new QueryClient({
   defaultOptions: {
