@@ -18,87 +18,128 @@ const ManagementDashboard = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { user }, error } = await supabase.auth.getUser();
-      if (error || !user) {
+      try {
+        console.log("Checking authentication...");
+        const { data: { user }, error } = await supabase.auth.getUser();
+        
+        if (error) {
+          console.error("Auth error:", error);
+          throw error;
+        }
+        
+        if (!user) {
+          console.log("No user found, redirecting to login");
+          navigate("/login");
+          return;
+        }
+        
+        console.log("User authenticated:", user.id);
+        setUserId(user.id);
+        setIsAuthChecking(false);
+      } catch (error) {
+        console.error("Error during auth check:", error);
+        toast({
+          title: "Authentication Error",
+          description: "Please try logging in again",
+          variant: "destructive",
+        });
         navigate("/login");
-        return;
       }
-      setUserId(user.id);
-      setIsAuthChecking(false);
     };
 
     checkAuth();
-  }, [navigate]);
+  }, [navigate, toast]);
 
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error("Logout error:", error);
+        throw error;
+      }
+      navigate("/");
+    } catch (error: any) {
+      console.error("Error during logout:", error);
       toast({
         title: "Error",
-        description: "Failed to sign out. Please try again.",
+        description: error.message || "Failed to sign out. Please try again.",
         variant: "destructive",
       });
-    } else {
-      navigate("/");
     }
   };
 
   const { data: settings, isLoading } = useQuery({
-    queryKey: ["chatbot-settings"],
+    queryKey: ["chatbot-settings", userId],
     queryFn: async () => {
-      if (!userId) return null;
-
-      const { data: existingSettings, error: fetchError } = await supabase
-        .from("chatbot_settings")
-        .select()
-        .eq("profile_id", userId)
-        .maybeSingle();
-
-      if (fetchError) {
-        console.error("Error fetching settings:", fetchError);
-        throw fetchError;
+      if (!userId) {
+        console.log("No userId available for fetching settings");
+        return null;
       }
 
-      if (existingSettings) {
-        console.log("Existing settings found:", existingSettings);
+      console.log("Fetching settings for user:", userId);
+
+      try {
+        const { data: existingSettings, error: fetchError } = await supabase
+          .from("chatbot_settings")
+          .select()
+          .eq("profile_id", userId)
+          .maybeSingle();
+
+        if (fetchError) {
+          console.error("Error fetching settings:", fetchError);
+          throw fetchError;
+        }
+
+        if (existingSettings) {
+          console.log("Existing settings found:", existingSettings);
+          return {
+            ...existingSettings,
+            buttons: Array.isArray(existingSettings.buttons) 
+              ? existingSettings.buttons.map((button: any) => ({
+                  id: button.id || crypto.randomUUID(),
+                  label: button.label || '',
+                  url: button.url || ''
+                }))
+              : []
+          };
+        }
+
+        console.log("No existing settings found, creating default settings...");
+
+        const { data: newSettings, error: insertError } = await supabase
+          .from("chatbot_settings")
+          .insert({
+            profile_id: userId,
+            bot_name: "My ChatBot",
+            greeting_message: "Hello! How can I help you today?",
+            training_data: "",
+            buttons: []
+          })
+          .select()
+          .single();
+
+        if (insertError) {
+          console.error("Error creating settings:", insertError);
+          throw insertError;
+        }
+
+        console.log("Default settings created:", newSettings);
         return {
-          ...existingSettings,
-          buttons: Array.isArray(existingSettings.buttons) 
-            ? existingSettings.buttons.map((button: any) => ({
-                id: button.id || crypto.randomUUID(),
-                label: button.label || '',
-                url: button.url || ''
-              }))
-            : []
-        };
-      }
-
-      console.log("No existing settings found, creating default settings...");
-
-      const { data: newSettings, error: insertError } = await supabase
-        .from("chatbot_settings")
-        .insert({
-          profile_id: userId,
-          bot_name: "My ChatBot",
-          greeting_message: "Hello! How can I help you today?",
-          training_data: "",
+          ...newSettings,
           buttons: []
-        })
-        .select()
-        .single();
-
-      if (insertError) {
-        console.error("Error creating settings:", insertError);
-        throw insertError;
+        };
+      } catch (error) {
+        console.error("Error in settings query:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load chatbot settings. Please try refreshing the page.",
+          variant: "destructive",
+        });
+        throw error;
       }
-
-      console.log("Default settings created:", newSettings);
-      return {
-        ...newSettings,
-        buttons: []
-      };
     },
-    enabled: !!userId,
+    enabled: !!userId && !isAuthChecking,
+    retry: 2,
   });
 
   if (isAuthChecking || (isLoading && !settings)) {
