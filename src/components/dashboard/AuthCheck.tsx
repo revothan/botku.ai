@@ -18,7 +18,6 @@ const AuthCheck = ({ onAuthChecked, onAuthCheckingChange }: AuthCheckProps) => {
     const checkAuth = async () => {
       try {
         console.log("Starting auth check...");
-        if (isMounted) onAuthCheckingChange(true);
         
         const { data: { user }, error } = await supabase.auth.getUser();
         
@@ -29,30 +28,52 @@ const AuthCheck = ({ onAuthChecked, onAuthCheckingChange }: AuthCheckProps) => {
         
         if (!user) {
           console.log("No user found, redirecting to login");
-          navigate("/login");
+          if (isMounted) {
+            onAuthChecked(null);
+            navigate("/login");
+          }
           return;
         }
         
         console.log("User authenticated:", user.id);
-        if (isMounted) onAuthChecked(user.id);
+        if (isMounted) {
+          onAuthChecked(user.id);
+        }
       } catch (error: any) {
         console.error("Error during auth check:", error);
-        toast({
-          title: "Authentication Error",
-          description: "Please try logging in again",
-          variant: "destructive",
-        });
-        navigate("/login");
+        if (isMounted) {
+          toast({
+            title: "Authentication Error",
+            description: "Please try logging in again",
+            variant: "destructive",
+          });
+          navigate("/login");
+        }
       } finally {
-        console.log("Auth check complete");
-        if (isMounted) onAuthCheckingChange(false);
+        if (isMounted) {
+          onAuthCheckingChange(false);
+        }
       }
     };
 
     checkAuth();
 
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("Auth state changed:", event, session?.user?.id);
+      if (isMounted) {
+        if (session?.user) {
+          onAuthChecked(session.user.id);
+        } else {
+          onAuthChecked(null);
+          navigate("/login");
+        }
+        onAuthCheckingChange(false);
+      }
+    });
+
     return () => {
       isMounted = false;
+      subscription.unsubscribe();
     };
   }, [navigate, toast, onAuthChecked, onAuthCheckingChange]);
 
