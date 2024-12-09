@@ -1,5 +1,19 @@
 import { useState } from "react";
 import { formatCurrency } from "@/lib/utils";
+import { Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import EditProductDialog from "./EditProductDialog";
 import type { Product } from "@/types/product";
 
@@ -11,10 +25,48 @@ interface ProductListProps {
 const ProductList = ({ products, onProductUpdated }: ProductListProps) => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+  const { toast } = useToast();
 
   const handleProductClick = (product: Product) => {
     setSelectedProduct(product);
     setIsEditDialogOpen(true);
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent, product: Product) => {
+    e.stopPropagation(); // Prevent opening edit dialog
+    setProductToDelete(product);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!productToDelete) return;
+
+    try {
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', productToDelete.id);
+
+      if (error) throw error;
+
+      onProductUpdated();
+      toast({
+        title: "Success",
+        description: "Product deleted successfully",
+      });
+    } catch (error: any) {
+      console.error('Error deleting product:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete product. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleteDialogOpen(false);
+      setProductToDelete(null);
+    }
   };
 
   return (
@@ -23,9 +75,18 @@ const ProductList = ({ products, onProductUpdated }: ProductListProps) => {
         {products.map((product) => (
           <div
             key={product.id}
-            className="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
+            className="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer relative"
             onClick={() => handleProductClick(product)}
           >
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-2 right-2 text-destructive hover:text-destructive/90"
+              onClick={(e) => handleDeleteClick(e, product)}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+
             {product.image_url && (
               <img
                 src={product.image_url}
@@ -70,6 +131,27 @@ const ProductList = ({ products, onProductUpdated }: ProductListProps) => {
           }}
         />
       )}
+
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the product
+              "{productToDelete?.name}".
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };
