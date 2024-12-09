@@ -1,28 +1,19 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Package } from "lucide-react";
+import { LayoutDashboard } from "lucide-react";
 import { SidebarContent, SidebarMenu } from "@/components/ui/sidebar";
 import { NavigationItem } from "./NavigationItem";
 
-interface NavigationMenuProps {
-  state: 'expanded' | 'collapsed';
-}
-
-export function NavigationMenu({ state }: NavigationMenuProps) {
+export function NavigationMenu() {
   const navigate = useNavigate();
   const location = useLocation();
   console.log('Current location:', location.pathname);
 
   const menuItems = [
     {
-      title: "Main Dashboard",
+      title: "Dashboard",
       icon: LayoutDashboard,
       path: "/dashboard",
-    },
-    {
-      title: "Manajemen Produk",
-      icon: Package,
-      path: "/dashboard/products",
-    },
+    }
   ];
 
   const handleNavigation = (path: string) => {
@@ -39,7 +30,6 @@ export function NavigationMenu({ state }: NavigationMenuProps) {
             title={item.title}
             icon={item.icon}
             isActive={location.pathname === item.path}
-            state={state}
             onClick={() => handleNavigation(item.path)}
           />
         ))}

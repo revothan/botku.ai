@@ -1,8 +1,12 @@
 import { useSession } from "@supabase/auth-helpers-react";
-import { Sidebar, useSidebar } from "@/components/ui/sidebar";
+import { Sidebar } from "@/components/ui/sidebar";
 import { SidebarHeader } from "./sidebar/SidebarHeader";
 import { NavigationMenu } from "./sidebar/NavigationMenu";
 import { SidebarFooter } from "./sidebar/SidebarFooter";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Menu } from "lucide-react";
+import { Button } from "./ui/button";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface SideNavProps {
   onSignOut: () => Promise<void>;
@@ -10,24 +14,39 @@ interface SideNavProps {
 
 export function SideNav({ onSignOut }: SideNavProps) {
   const session = useSession();
-  const { state, toggleSidebar } = useSidebar();
-  console.log('Sidebar state:', state);
+  const isMobile = useIsMobile();
   
   const userEmail = session?.user?.email;
   const displayName = userEmail ? userEmail.split('@')[0] : 'User';
 
-  return (
-    <Sidebar variant="sidebar" className="border-r">
-      <SidebarHeader 
-        displayName={displayName}
-        state={state}
-        toggleSidebar={toggleSidebar}
-      />
-      <NavigationMenu state={state} />
-      <SidebarFooter 
-        state={state}
-        onSignOut={onSignOut}
-      />
+  const sidebarContent = (
+    <Sidebar className="border-r w-52">
+      <SidebarHeader displayName={displayName} />
+      <NavigationMenu />
+      <SidebarFooter onSignOut={onSignOut} />
     </Sidebar>
   );
+
+  if (isMobile) {
+    return (
+      <>
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button 
+              variant="ghost" 
+              size="icon"
+              className="fixed top-4 left-4 z-50"
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="p-0 w-52">
+            {sidebarContent}
+          </SheetContent>
+        </Sheet>
+      </>
+    );
+  }
+
+  return sidebarContent;
 }
