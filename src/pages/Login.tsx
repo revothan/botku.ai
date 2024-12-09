@@ -14,34 +14,50 @@ const Index = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check current session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log("Initial session check:", session);
-      setSession(session);
+    // Initial session check
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      console.log("Initial session check:", { session, error });
+      if (error) {
+        console.error("Session check error:", error);
+        toast({
+          title: "Error",
+          description: "Failed to check authentication status",
+          variant: "destructive",
+        });
+        return;
+      }
+      
       if (session) {
+        console.log("Valid session found, redirecting to dashboard");
+        setSession(session);
         navigate('/dashboard');
       }
-    }).catch(error => {
-      console.error("Error checking session:", error);
-      toast({
-        title: "Error",
-        description: "Failed to check authentication status",
-        variant: "destructive",
-      });
     });
 
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      console.log("Auth state changed:", session);
-      setSession(session);
-      if (session) {
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      console.log("Auth state changed:", { event: _event, session });
+      
+      if (_event === 'SIGNED_IN') {
+        console.log("User signed in, redirecting to dashboard");
+        setSession(session);
         navigate('/dashboard');
+      } else if (_event === 'SIGNED_OUT') {
+        console.log("User signed out");
+        setSession(null);
+      } else if (_event === 'TOKEN_REFRESHED') {
+        console.log("Token refreshed successfully");
+        setSession(session);
       }
     });
 
-    return () => subscription.unsubscribe();
+    // Cleanup subscription
+    return () => {
+      console.log("Cleaning up auth subscription");
+      subscription.unsubscribe();
+    };
   }, [navigate, toast]);
 
   if (session) {
@@ -55,8 +71,11 @@ const Index = () => {
                 variant="ghost"
                 className="text-gray-600 hover:text-gray-900"
                 onClick={async () => {
-                  const { error } = await supabase.auth.signOut();
-                  if (error) {
+                  try {
+                    const { error } = await supabase.auth.signOut();
+                    if (error) throw error;
+                    navigate("/");
+                  } catch (error: any) {
                     console.error("Error signing out:", error);
                     toast({
                       title: "Error",
@@ -64,7 +83,6 @@ const Index = () => {
                       variant: "destructive",
                     });
                   }
-                  navigate("/");
                 }}
               >
                 Sign Out
