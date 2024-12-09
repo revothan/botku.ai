@@ -40,7 +40,7 @@ export function SideNav({ onSignOut }: SideNavProps) {
   ];
 
   return (
-    <Sidebar className="border-r h-screen">
+    <Sidebar className="border-r">
       <SidebarHeader className="flex items-center justify-between p-4 border-b">
         {state === 'expanded' && (
           <h2 className="text-lg font-semibold text-secondary">
