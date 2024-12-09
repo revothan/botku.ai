@@ -6,6 +6,9 @@ import { ChatButtons } from "@/components/chatbot/ChatButtons";
 import { formatCurrency } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { useState } from "react";
 import type { Message, ButtonConfig, ChatbotSettings } from "@/types/chatbot";
 import type { Product } from "@/types/product";
 
@@ -28,9 +31,9 @@ export const ChatbotInterface = ({
   messagesEndRef,
   isLoading = false,
 }: ChatbotInterfaceProps) => {
+  const [isProductsOpen, setIsProductsOpen] = useState(true);
   const buttons = (settings.buttons || []) as ButtonConfig[];
 
-  // Fetch products for the current profile
   const { data: products, isLoading: productsLoading } = useQuery({
     queryKey: ["chatbot-products", settings.profile_id],
     queryFn: async () => {
@@ -86,40 +89,55 @@ export const ChatbotInterface = ({
             </ScrollArea>
 
             <div className="border-t pt-4">
-              {/* Products Horizontal Scroll */}
+              {/* Products Collapsible Section */}
               {productsLoading ? (
                 <div className="mb-4">
                   <div className="h-48 bg-gray-100 animate-pulse rounded-lg"></div>
                 </div>
               ) : products && products.length > 0 ? (
-                <div className="mb-4">
-                  <p className="text-sm font-medium text-muted-foreground mb-2">Available Products:</p>
-                  <div className="overflow-x-auto flex space-x-4 pb-4 scrollbar-thin scrollbar-thumb-gray-300">
-                    {products.map((product) => (
-                      <div
-                        key={product.id}
-                        className="flex-none w-48 border rounded-lg p-3 bg-white shadow-sm hover:shadow-md transition-shadow"
-                      >
-                        {product.image_url && (
-                          <img
-                            src={product.image_url}
-                            alt={product.name}
-                            className="w-full h-32 object-cover rounded-md mb-2"
-                          />
-                        )}
-                        <h4 className="font-medium text-sm">{product.name}</h4>
-                        <p className="text-primary font-medium text-sm mt-1">
-                          {formatCurrency(product.price)}
-                        </p>
-                        {product.stock !== undefined && (
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Stock: {product.stock}
-                          </p>
-                        )}
-                      </div>
-                    ))}
+                <Collapsible
+                  open={isProductsOpen}
+                  onOpenChange={setIsProductsOpen}
+                  className="mb-4"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm font-medium text-muted-foreground">Available Products</p>
+                    <CollapsibleTrigger className="hover:bg-gray-100 p-1 rounded-full transition-colors">
+                      {isProductsOpen ? (
+                        <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </CollapsibleTrigger>
                   </div>
-                </div>
+                  <CollapsibleContent>
+                    <div className="overflow-x-auto flex space-x-4 pb-4 scrollbar-thin scrollbar-thumb-gray-300">
+                      {products.map((product) => (
+                        <div
+                          key={product.id}
+                          className="flex-none w-48 border rounded-lg p-3 bg-white shadow-sm hover:shadow-md transition-shadow"
+                        >
+                          {product.image_url && (
+                            <img
+                              src={product.image_url}
+                              alt={product.name}
+                              className="w-full h-32 object-cover rounded-md mb-2"
+                            />
+                          )}
+                          <h4 className="font-medium text-sm">{product.name}</h4>
+                          <p className="text-primary font-medium text-sm mt-1">
+                            {formatCurrency(product.price)}
+                          </p>
+                          {product.stock !== undefined && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Stock: {product.stock}
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
               ) : null}
 
               {/* Chat Input */}
