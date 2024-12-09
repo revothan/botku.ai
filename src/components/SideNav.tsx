@@ -20,36 +20,38 @@ export function SideNav({ onSignOut }: SideNavProps) {
   const displayName = userEmail ? userEmail.split('@')[0] : 'User';
 
   const sidebarContent = (
-    <Sidebar className="border-r w-52 bg-background">
+    <>
       <SidebarHeader displayName={displayName} />
       <NavigationMenu />
       <SidebarFooter onSignOut={onSignOut} />
-    </Sidebar>
+    </>
   );
 
   if (isMobile) {
     return (
-      <>
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button 
-              variant="ghost" 
-              size="icon"
-              className="fixed top-4 right-4 z-50"
-            >
-              <Menu className="h-5 w-5" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent 
-            side="top" 
-            className="w-full h-full p-0 bg-background"
+      <Sheet>
+        <SheetTrigger asChild>
+          <Button 
+            variant="ghost" 
+            size="icon"
+            className="fixed top-4 right-4 z-50"
           >
-            {sidebarContent}
-          </SheetContent>
-        </Sheet>
-      </>
+            <Menu className="h-5 w-5" />
+          </Button>
+        </SheetTrigger>
+        <SheetContent 
+          side="top" 
+          className="w-full h-[100dvh] flex flex-col bg-background p-0"
+        >
+          {sidebarContent}
+        </SheetContent>
+      </Sheet>
     );
   }
 
-  return sidebarContent;
+  return (
+    <Sidebar className="border-r w-52 bg-background">
+      {sidebarContent}
+    </Sidebar>
+  );
 }
