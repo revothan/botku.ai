@@ -4,11 +4,22 @@ import { UseFormReturn } from "react-hook-form";
 import type { ChatbotFormData } from "@/types/chatbot";
 
 const creatorQuestions = [
-  "Jenis konten utama yang dibuat",
-  "Audiens utama atau target pengikut",
-  "Pertanyaan yang sering diajukan pengikut",
-  "Cara AI membantu audiens",
-  "Kebutuhan untuk merekomendasikan konten atau produk"
+  {
+    label: "Jenis konten utama",
+    placeholder: "Contoh: Video edukasi, tips kecantikan, vlog harian."
+  },
+  {
+    label: "Audiens utama",
+    placeholder: "Contoh: Remaja, ibu rumah tangga, profesional muda."
+  },
+  {
+    label: "Pertanyaan umum pengikut",
+    placeholder: "Contoh: Bagaimana cara mulai investasi?"
+  },
+  {
+    label: "Tambahan",
+    placeholder: "Isi jika ada informasi tambahan"
+  }
 ];
 
 type CreatorQuestionsProps = {
@@ -28,11 +39,11 @@ const CreatorQuestions = ({ form, visible }: CreatorQuestionsProps) => {
           name={`answers.creator.${index}`}
           render={({ field }) => (
             <FormItem className="grid grid-cols-2 gap-4 items-start">
-              <FormLabel className="mt-2.5">{question}</FormLabel>
+              <FormLabel className="mt-2.5">{question.label}</FormLabel>
               <div>
                 <FormControl>
                   <Textarea
-                    placeholder="Ketik jawaban Anda di sini..."
+                    placeholder={question.placeholder}
                     className="resize-none h-24"
                     {...field}
                   />

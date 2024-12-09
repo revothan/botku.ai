@@ -4,10 +4,22 @@ import { UseFormReturn } from "react-hook-form";
 import type { ChatbotFormData } from "@/types/chatbot";
 
 const otherQuestions = [
-  "Tujuan utama pembuatan AI",
-  "Topik atau fokus utama AI",
-  "Gaya komunikasi yang diinginkan",
-  "Masalah yang ingin diselesaikan oleh AI"
+  {
+    label: "Tujuan utama AI",
+    placeholder: "Contoh: Tingkatkan interaksi atau solusi otomatis."
+  },
+  {
+    label: "Topik/fokus utama",
+    placeholder: "Contoh: Kesehatan mental, tips keuangan."
+  },
+  {
+    label: "Gaya komunikasi",
+    placeholder: "Contoh: Santai, profesional, ramah."
+  },
+  {
+    label: "Tambahan",
+    placeholder: "Isi jika ada informasi tambahan"
+  }
 ];
 
 type OtherQuestionsProps = {
@@ -27,11 +39,11 @@ const OtherQuestions = ({ form, visible }: OtherQuestionsProps) => {
           name={`answers.other.${index}`}
           render={({ field }) => (
             <FormItem className="grid grid-cols-2 gap-4 items-start">
-              <FormLabel className="mt-2.5">{question}</FormLabel>
+              <FormLabel className="mt-2.5">{question.label}</FormLabel>
               <div>
                 <FormControl>
                   <Textarea
-                    placeholder="Ketik jawaban Anda di sini..."
+                    placeholder={question.placeholder}
                     className="resize-none h-24"
                     {...field}
                   />
