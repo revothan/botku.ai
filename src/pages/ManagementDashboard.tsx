@@ -36,9 +36,10 @@ const ManagementDashboard = () => {
     }
   };
 
-  // Show loading state only when auth is being checked
+  console.log("Dashboard render - Auth checking:", isAuthChecking, "Settings loading:", isSettingsLoading, "UserId:", userId);
+
+  // Only show loading during initial auth check
   if (isAuthChecking) {
-    console.log("Auth checking in progress...");
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#fcf5eb]">
         <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-primary"></div>
@@ -46,7 +47,7 @@ const ManagementDashboard = () => {
     );
   }
 
-  // If auth check is complete but no userId, return null (AuthCheck component will handle redirect)
+  // If no userId after auth check, return null (AuthCheck will handle redirect)
   if (!userId) {
     console.log("No user ID found after auth check");
     return null;

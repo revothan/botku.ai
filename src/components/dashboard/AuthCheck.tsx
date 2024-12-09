@@ -13,10 +13,12 @@ const AuthCheck = ({ onAuthChecked, onAuthCheckingChange }: AuthCheckProps) => {
   const { toast } = useToast();
 
   useEffect(() => {
+    let isMounted = true;
+
     const checkAuth = async () => {
       try {
         console.log("Starting auth check...");
-        onAuthCheckingChange(true);
+        if (isMounted) onAuthCheckingChange(true);
         
         const { data: { user }, error } = await supabase.auth.getUser();
         
@@ -32,7 +34,7 @@ const AuthCheck = ({ onAuthChecked, onAuthCheckingChange }: AuthCheckProps) => {
         }
         
         console.log("User authenticated:", user.id);
-        onAuthChecked(user.id);
+        if (isMounted) onAuthChecked(user.id);
       } catch (error: any) {
         console.error("Error during auth check:", error);
         toast({
@@ -43,11 +45,15 @@ const AuthCheck = ({ onAuthChecked, onAuthCheckingChange }: AuthCheckProps) => {
         navigate("/login");
       } finally {
         console.log("Auth check complete");
-        onAuthCheckingChange(false);
+        if (isMounted) onAuthCheckingChange(false);
       }
     };
 
     checkAuth();
+
+    return () => {
+      isMounted = false;
+    };
   }, [navigate, toast, onAuthChecked, onAuthCheckingChange]);
 
   return null;
