@@ -1,4 +1,5 @@
 import { useForm } from "react-hook-form";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -32,7 +33,8 @@ const ChatbotSettingsForm = ({
   const form = useForm<ChatbotFormData>({
     defaultValues: {
       ...defaultValues,
-      answers: {
+      user_type: defaultValues.user_type || undefined,
+      answers: defaultValues.answers || {
         business: Array(5).fill(""),
         creator: Array(5).fill(""),
         other: Array(4).fill("")
@@ -41,6 +43,23 @@ const ChatbotSettingsForm = ({
   });
 
   const userType = form.watch('user_type');
+
+  // Watch for changes in user_type and clear other type answers
+  useEffect(() => {
+    if (userType) {
+      const emptyAnswers = {
+        business: Array(5).fill(""),
+        creator: Array(5).fill(""),
+        other: Array(4).fill("")
+      };
+      
+      // Only keep the current user type answers, clear others
+      form.setValue('answers', {
+        ...emptyAnswers,
+        [userType]: form.getValues(`answers.${userType}`)
+      });
+    }
+  }, [userType, form]);
 
   const generateTrainingData = (type: string, answers: Record<string, string[]>) => {
     let trainingData = '';
@@ -70,8 +89,8 @@ const ChatbotSettingsForm = ({
           ];
 
     typeAnswers.forEach((answer, index) => {
-      if (answer.trim() && questions[index]) {
-        trainingData += `${questions[index]}\n${answer}\n\n`;
+      if (answer && typeof answer === 'string' && answer.trim() && questions[index]) {
+        trainingData += `${questions[index]}\n${answer.trim()}\n\n`;
       }
     });
 
@@ -80,7 +99,16 @@ const ChatbotSettingsForm = ({
 
   const handleFormSubmit = (values: ChatbotFormData) => {
     if (userType && values.answers) {
-      values.training_data = generateTrainingData(userType, values.answers);
+      // Only include the current user type answers in the submission
+      const currentTypeAnswers = {
+        business: Array(5).fill(""),
+        creator: Array(5).fill(""),
+        other: Array(4).fill("")
+      };
+      
+      currentTypeAnswers[userType] = values.answers[userType];
+      values.answers = currentTypeAnswers;
+      values.training_data = generateTrainingData(userType, currentTypeAnswers);
     }
     onSubmit(values);
   };
