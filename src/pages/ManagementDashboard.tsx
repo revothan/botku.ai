@@ -8,6 +8,7 @@ import SettingsSection from "@/components/dashboard/SettingsSection";
 import PhonePreview from "@/components/dashboard/PhonePreview";
 import { useToast } from "@/components/ui/use-toast";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import type { UserType } from "@/types/chatbot";
 
 const ManagementDashboard = () => {
   const navigate = useNavigate();
@@ -93,6 +94,7 @@ const ManagementDashboard = () => {
           console.log("Existing settings found:", existingSettings);
           return {
             ...existingSettings,
+            user_type: existingSettings.user_type as UserType | undefined,
             buttons: Array.isArray(existingSettings.buttons) 
               ? existingSettings.buttons.map((button: any) => ({
                   id: button.id || crypto.randomUUID(),
