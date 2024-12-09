@@ -63,6 +63,7 @@ const DashboardContent = ({ userId, settings, isLoading }: DashboardContentProps
               botName={settings?.bot_name || ""}
               greetingMessage={settings?.greeting_message || ""}
               buttons={settings?.buttons || []}
+              userId={userId}
             />
           </div>
         </div>
@@ -73,8 +74,8 @@ const DashboardContent = ({ userId, settings, isLoading }: DashboardContentProps
         <div className="fixed left-1/2 bottom-8 -translate-x-1/2 z-50">
           <Button
             onClick={() => setShowPreview(true)}
-            variant="secondary"  // Changed from 'outline' to 'secondary'
-            className="gap-2 shadow-lg animate-fade-in bg-primary text-white px-6 py-3 rounded-full"  // Added more prominent styling
+            variant="secondary"
+            className="gap-2 shadow-lg animate-fade-in bg-primary text-white px-6 py-3 rounded-full"
           >
             <Eye className="h-5 w-5" />
             Preview
