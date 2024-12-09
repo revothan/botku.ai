@@ -29,12 +29,12 @@ export const ChatbotInterface = ({
   return (
     <div className="min-h-[100dvh] bg-gradient-to-b from-[#fcf5eb] to-white p-4 flex items-center justify-center">
       <div className="w-full max-w-lg">
-        <Card className="border-none shadow-lg bg-white/80 backdrop-blur-sm">
-          <CardContent className="p-4">
+        <Card className="border-none shadow-lg bg-white/80 backdrop-blur-sm h-[calc(100dvh-2rem)]">
+          <CardContent className="p-4 h-full flex flex-col">
             <div className="text-center border-b pb-4">
               <h3 className="font-bold text-secondary">{settings.bot_name}</h3>
             </div>
-            <ScrollArea className="h-[calc(100dvh-16rem)] py-4">
+            <ScrollArea className="flex-1 py-4">
               <div className="space-y-4">
                 <div className="bg-primary/10 rounded-lg p-3 max-w-[80%]">
                   <p className="text-sm">{settings.greeting_message}</p>
@@ -58,7 +58,7 @@ export const ChatbotInterface = ({
                 <div ref={messagesEndRef} />
               </div>
             </ScrollArea>
-            <div className="border-t pt-4">
+            <div className="border-t pt-4 mt-4">
               <ChatInput
                 inputMessage={inputMessage}
                 setInputMessage={setInputMessage}

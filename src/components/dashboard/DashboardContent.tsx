@@ -12,7 +12,7 @@ type DashboardContentProps = {
 
 const DashboardContent = ({ userId, settings, isLoading }: DashboardContentProps) => {
   return (
-    <div className="p-4 md:p-8">
+    <div className="h-[calc(100dvh-1rem)] overflow-y-auto p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Domain Section */}
         <div>
