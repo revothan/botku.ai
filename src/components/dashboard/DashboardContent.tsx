@@ -46,16 +46,19 @@ const DashboardContent = ({ userId, settings, isLoading }: DashboardContentProps
           <div className="sticky top-8">
             {/* Close Preview Button (Mobile Only) */}
             {isMobile && showPreview && (
-              <Button
-                onClick={() => setShowPreview(false)}
-                variant="outline"
-                className="absolute right-0 top-0 z-10"
-                size="icon"
-              >
-                <X className="h-4 w-4" />
-              </Button>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-bold text-secondary">Preview</h2>
+                <Button
+                  onClick={() => setShowPreview(false)}
+                  variant="outline"
+                  className="gap-2"
+                >
+                  <X className="h-4 w-4" />
+                  Close Preview
+                </Button>
+              </div>
             )}
-            <h2 className="text-2xl font-bold mb-6 text-secondary">Preview</h2>
+            {!isMobile && <h2 className="text-2xl font-bold mb-6 text-secondary">Preview</h2>}
             <PhonePreview
               botName={settings?.bot_name || ""}
               greetingMessage={settings?.greeting_message || ""}
