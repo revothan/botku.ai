@@ -31,10 +31,10 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/dashboard" element={<ManagementDashboard />} />
+            <Route path="/dashboard/*" element={<ManagementDashboard />} />
             <Route path="/pricing" element={<Pricing />} />
-            <Route path="/:customDomain/*" element={<ChatbotPage />} />
             <Route path="/u/:username" element={<UserPage />} />
+            <Route path="/:customDomain/*" element={<ChatbotPage />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>

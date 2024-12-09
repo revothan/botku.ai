@@ -8,6 +8,7 @@ import SettingsSection from "@/components/dashboard/SettingsSection";
 import PhonePreview from "@/components/dashboard/PhonePreview";
 import { useToast } from "@/components/ui/use-toast";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import type { ButtonConfig } from "@/types/chatbot";
 
 const ManagementDashboard = () => {
   const navigate = useNavigate();
@@ -45,6 +46,8 @@ const ManagementDashboard = () => {
   const { data: settings, isLoading } = useQuery({
     queryKey: ["chatbot-settings"],
     queryFn: async () => {
+      if (!userId) return null;
+
       const { data: existingSettings, error: fetchError } = await supabase
         .from("chatbot_settings")
         .select()
@@ -61,7 +64,11 @@ const ManagementDashboard = () => {
         return {
           ...existingSettings,
           buttons: Array.isArray(existingSettings.buttons) 
-            ? existingSettings.buttons 
+            ? existingSettings.buttons.map((button: any) => ({
+                id: button.id || crypto.randomUUID(),
+                label: button.label || '',
+                url: button.url || ''
+              }))
             : []
         };
       }
@@ -86,7 +93,10 @@ const ManagementDashboard = () => {
       }
 
       console.log("Default settings created:", newSettings);
-      return newSettings;
+      return {
+        ...newSettings,
+        buttons: []
+      };
     },
     enabled: !!userId,
   });
