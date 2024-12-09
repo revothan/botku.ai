@@ -15,6 +15,11 @@ export type ChatbotSettings = {
   assistant_id: string | null;
   buttons: ButtonConfig[];
   user_type?: 'business' | 'creator' | 'other';
+  answers?: {
+    business: string[];
+    creator: string[];
+    other: string[];
+  };
 };
 
 export type Message = {
