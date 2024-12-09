@@ -27,9 +27,9 @@ export const ChatbotInterface = ({
   const buttons = (settings.buttons || []) as ButtonConfig[];
 
   return (
-    <div className="min-h-[100dvh] bg-gradient-to-b from-[#fcf5eb] to-white p-4 flex items-center justify-center">
-      <div className="w-full max-w-lg">
-        <Card className="border-none shadow-lg bg-white/80 backdrop-blur-sm h-[calc(100dvh-2rem)]">
+    <div className="h-[100dvh] bg-gradient-to-b from-[#fcf5eb] to-white p-4 flex items-center justify-center overflow-hidden">
+      <div className="w-full max-w-lg h-full">
+        <Card className="border-none shadow-lg bg-white/80 backdrop-blur-sm h-full">
           <CardContent className="p-4 h-full flex flex-col">
             <div className="text-center border-b pb-4">
               <h3 className="font-bold text-secondary">{settings.bot_name}</h3>
