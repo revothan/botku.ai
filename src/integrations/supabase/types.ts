@@ -106,32 +106,41 @@ export type Database = {
       products: {
         Row: {
           created_at: string
+          delivery_fee: number | null
           details: string | null
           id: string
           image_url: string | null
           name: string
           price: number
           profile_id: string
+          sku: string | null
+          stock: number | null
           updated_at: string
         }
         Insert: {
           created_at?: string
+          delivery_fee?: number | null
           details?: string | null
           id?: string
           image_url?: string | null
           name: string
           price: number
           profile_id: string
+          sku?: string | null
+          stock?: number | null
           updated_at?: string
         }
         Update: {
           created_at?: string
+          delivery_fee?: number | null
           details?: string | null
           id?: string
           image_url?: string | null
           name?: string
           price?: number
           profile_id?: string
+          sku?: string | null
+          stock?: number | null
           updated_at?: string
         }
         Relationships: [

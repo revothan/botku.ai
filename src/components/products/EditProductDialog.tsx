@@ -1,25 +1,9 @@
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import type { Product } from "@/types/product";
-
-const formSchema = z.object({
-  name: z.string().min(1, "Nama produk harus diisi"),
-  details: z.string().optional(),
-  price: z.string().min(1, "Harga harus diisi").regex(/^\d+$/, "Harga harus berupa angka"),
-  image: z.instanceof(File).optional(),
-});
-
-type FormValues = z.infer<typeof formSchema>;
+import ProductForm, { ProductFormValues } from "./ProductForm";
 
 interface EditProductDialogProps {
   product: Product;
@@ -31,17 +15,8 @@ interface EditProductDialogProps {
 const EditProductDialog = ({ product, open, onOpenChange, onProductUpdated }: EditProductDialogProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
-  
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: product.name,
-      details: product.details || "",
-      price: product.price.toString(),
-    },
-  });
 
-  const onSubmit = async (values: FormValues) => {
+  const handleSubmit = async (values: ProductFormValues) => {
     try {
       setIsSubmitting(true);
       
@@ -72,6 +47,9 @@ const EditProductDialog = ({ product, open, onOpenChange, onProductUpdated }: Ed
           name: values.name,
           details: values.details,
           price: parseFloat(values.price),
+          stock: values.stock ? parseInt(values.stock) : 0,
+          sku: values.sku,
+          delivery_fee: values.delivery_fee ? parseFloat(values.delivery_fee) : 0,
           image_url: imageUrl,
         })
         .eq('id', product.id);
@@ -103,98 +81,13 @@ const EditProductDialog = ({ product, open, onOpenChange, onProductUpdated }: Ed
           <DialogTitle>Edit Product</DialogTitle>
         </DialogHeader>
         
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nama Produk</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Masukkan nama produk" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="details"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Details</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Masukkan detail produk"
-                      className="resize-none"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="price"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Harga</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="Masukkan harga"
-                      type="number"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="image"
-              render={({ field: { onChange, value, ...field } }) => (
-                <FormItem>
-                  <FormLabel>Upload Foto Produk Baru</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          onChange(file);
-                        }
-                      }}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="flex justify-end gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-                disabled={isSubmitting}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Update Product
-              </Button>
-            </div>
-          </form>
-        </Form>
+        <ProductForm
+          defaultValues={product}
+          onSubmit={handleSubmit}
+          onCancel={() => onOpenChange(false)}
+          submitLabel="Update Product"
+          isSubmitting={isSubmitting}
+        />
       </DialogContent>
     </Dialog>
   );

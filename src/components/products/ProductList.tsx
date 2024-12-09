@@ -37,9 +37,24 @@ const ProductList = ({ products, onProductUpdated }: ProductListProps) => {
             {product.details && (
               <p className="text-gray-600 text-sm mt-1">{product.details}</p>
             )}
-            <p className="text-primary font-medium mt-2">
-              {formatCurrency(product.price)}
-            </p>
+            <div className="mt-2 space-y-1">
+              <p className="text-primary font-medium">
+                {formatCurrency(product.price)}
+              </p>
+              <p className="text-sm text-gray-600">
+                Stock: {product.stock || 0}
+              </p>
+              {product.sku && (
+                <p className="text-sm text-gray-600">
+                  SKU: {product.sku}
+                </p>
+              )}
+              {product.delivery_fee !== undefined && product.delivery_fee > 0 && (
+                <p className="text-sm text-gray-600">
+                  Delivery Fee: {formatCurrency(product.delivery_fee)}
+                </p>
+              )}
+            </div>
           </div>
         ))}
       </div>
