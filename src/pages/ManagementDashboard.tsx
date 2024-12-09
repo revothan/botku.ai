@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { SideNav } from "@/components/SideNav";
@@ -11,6 +11,7 @@ import type { ChatbotSettings } from "@/types/chatbot";
 
 const ManagementDashboard = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const session = useAuthRedirect();
   const userId = session?.user?.id;
@@ -118,17 +119,22 @@ const ManagementDashboard = () => {
     return null;
   }
 
+  const isDashboardRoot = location.pathname === "/dashboard";
+
   return (
     <SidebarProvider defaultOpen={true}>
       <div className="flex h-screen w-full overflow-hidden bg-gradient-to-b from-[#fcf5eb] to-white">
         <SideNav onSignOut={handleLogout} />
         <main className="flex-1 overflow-auto">
-          <Outlet />
-          <DashboardContent 
-            userId={userId}
-            settings={settings}
-            isLoading={isLoading}
-          />
+          {isDashboardRoot ? (
+            <DashboardContent 
+              userId={userId}
+              settings={settings}
+              isLoading={isLoading}
+            />
+          ) : (
+            <Outlet />
+          )}
         </main>
       </div>
     </SidebarProvider>
