@@ -42,13 +42,15 @@ export function SideNav({ onSignOut }: SideNavProps) {
   return (
     <Sidebar className="border-r">
       <SidebarHeader className="flex items-center justify-between p-4 border-b">
-        <h2 className="text-lg font-semibold text-secondary">
-          Hello, {displayName}
-        </h2>
+        {state === 'expanded' && (
+          <h2 className="text-lg font-semibold text-secondary">
+            Hello, {displayName}
+          </h2>
+        )}
         <Button 
           variant="ghost" 
           size="sm"
-          className="hover:bg-muted"
+          className="hover:bg-muted ml-auto"
           onClick={toggleSidebar}
           aria-label={state === 'expanded' ? 'Close Sidebar' : 'Open Sidebar'}
         >
@@ -64,10 +66,10 @@ export function SideNav({ onSignOut }: SideNavProps) {
                 onClick={() => navigate(item.path)}
                 isActive={location.pathname === item.path}
                 className="w-full"
-                tooltip={item.title}
+                tooltip={state === 'collapsed' ? item.title : undefined}
               >
-                <item.icon className="h-4 w-4" />
-                <span>{item.title}</span>
+                <item.icon className="h-4 w-4 shrink-0" />
+                {state === 'expanded' && <span>{item.title}</span>}
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
@@ -79,10 +81,10 @@ export function SideNav({ onSignOut }: SideNavProps) {
           onClick={onSignOut}
           variant="outline"
           className="w-full"
-          tooltip="Logout"
+          tooltip={state === 'collapsed' ? 'Logout' : undefined}
         >
-          <LogOut className="h-4 w-4" />
-          <span>Logout</span>
+          <LogOut className="h-4 w-4 shrink-0" />
+          {state === 'expanded' && <span>Logout</span>}
         </SidebarMenuButton>
       </SidebarFooter>
     </Sidebar>

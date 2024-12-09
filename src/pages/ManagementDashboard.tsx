@@ -8,7 +8,6 @@ import SettingsSection from "@/components/dashboard/SettingsSection";
 import PhonePreview from "@/components/dashboard/PhonePreview";
 import { useToast } from "@/components/ui/use-toast";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import type { ButtonConfig } from "@/types/chatbot";
 
 const ManagementDashboard = () => {
   const navigate = useNavigate();
@@ -155,11 +154,11 @@ const ManagementDashboard = () => {
   }
 
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={true}>
       <div className="flex min-h-screen w-full bg-gradient-to-b from-[#fcf5eb] to-white">
         <SideNav onSignOut={handleLogout} />
         
-        <main className="flex-1 p-8">
+        <main className="flex-1 p-4 md:p-8 overflow-auto">
           <div className="max-w-7xl mx-auto space-y-8">
             {/* Domain Section */}
             <div>
