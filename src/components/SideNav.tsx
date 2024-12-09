@@ -1,5 +1,5 @@
 import { useSession } from "@supabase/auth-helpers-react";
-import { LogOut, LayoutDashboard, Package, PanelLeft } from "lucide-react";
+import { LogOut, LayoutDashboard, Package, Menu } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   Sidebar,
@@ -10,8 +10,9 @@ import {
   SidebarMenuButton,
   SidebarFooter,
   SidebarTrigger,
-  SidebarProvider,
 } from "@/components/ui/sidebar";
+import { Button } from "@/components/ui/button";
+import { useSidebar } from "@/components/ui/sidebar";
 
 interface SideNavProps {
   onSignOut: () => Promise<void>;
@@ -21,6 +22,7 @@ export function SideNav({ onSignOut }: SideNavProps) {
   const session = useSession();
   const navigate = useNavigate();
   const location = useLocation();
+  const { state } = useSidebar();
   
   const userEmail = session?.user?.email;
   const displayName = userEmail ? userEmail.split('@')[0] : 'User';
@@ -44,7 +46,16 @@ export function SideNav({ onSignOut }: SideNavProps) {
         <h2 className="text-lg font-semibold text-secondary">
           Hello, {displayName}
         </h2>
-        <SidebarTrigger />
+        <SidebarTrigger asChild>
+          <Button 
+            variant="ghost" 
+            size="sm"
+            className="hover:bg-muted"
+            aria-label={state === 'expanded' ? 'Close Sidebar' : 'Open Sidebar'}
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+        </SidebarTrigger>
       </SidebarHeader>
       
       <SidebarContent className="p-2">
