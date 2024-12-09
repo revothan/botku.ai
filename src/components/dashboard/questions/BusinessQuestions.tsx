@@ -4,16 +4,26 @@ import { UseFormReturn } from "react-hook-form";
 import type { ChatbotFormData } from "@/types/chatbot";
 
 const businessQuestions = [
-  "Apa nama bisnis Anda, dan apa produk/jasa utama yang Anda tawarkan?",
-  "Apa keunikan dari bisnis Anda yang ingin disampaikan kepada pelanggan?",
-  "Siapa target pelanggan utama Anda? (contoh: anak muda, profesional, keluarga, dll.)",
-  "Apa pertanyaan umum yang sering ditanyakan oleh pelanggan tentang bisnis Anda?",
-  "Bagaimana cara pelanggan biasanya menghubungi Anda? (contoh: WhatsApp, email, media sosial)",
-  "Apa tujuan utama Anda menggunakan chatbot ini?",
-  "Jika pelanggan mengeluh atau memiliki masalah, bagaimana cara Anda ingin chatbot merespons?",
-  "Apakah ada promosi, diskon, atau penawaran khusus yang ingin Anda informasikan melalui chatbot?",
-  "Bahasa apa yang ingin digunakan AI Anda untuk berbicara dengan pelanggan?",
-  "Apakah Anda ingin AI dapat menjadwalkan pertemuan atau mengarahkan pelanggan ke tim Anda?"
+  {
+    label: "Nama bisnis",
+    placeholder: "Contoh: Warung Suka Rasa, Kedai Kopi Bahagia"
+  },
+  {
+    label: "Deskripsi produk/jasa",
+    placeholder: "Contoh: Kopi premium dan makanan ringan."
+  },
+  {
+    label: "Target pelanggan",
+    placeholder: "Contoh: Mahasiswa, pekerja kantoran."
+  },
+  {
+    label: "Pertanyaan umum",
+    placeholder: "Contoh: Buka jam berapa? 08.00-22.00."
+  },
+  {
+    label: "Tambahan",
+    placeholder: "Isi jika ada informasi tambahan"
+  }
 ];
 
 type BusinessQuestionsProps = {
@@ -25,7 +35,7 @@ const BusinessQuestions = ({ form, visible }: BusinessQuestionsProps) => {
   if (!visible) return null;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {businessQuestions.map((question, index) => (
         <FormField
           key={index}
@@ -33,15 +43,17 @@ const BusinessQuestions = ({ form, visible }: BusinessQuestionsProps) => {
           name={`answers.business.${index}`}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{question}</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Ketik jawaban Anda di sini..."
-                  className="resize-none"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
+              <div className="flex flex-col space-y-3">
+                <FormLabel className="text-base">{question.label}</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder={question.placeholder}
+                    className="min-h-[100px] resize-none"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </div>
             </FormItem>
           )}
         />
