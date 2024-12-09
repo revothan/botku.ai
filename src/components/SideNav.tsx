@@ -40,7 +40,10 @@ export function SideNav({ onSignOut }: SideNavProps) {
               <Menu className="h-5 w-5" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="p-0 w-52">
+          <SheetContent 
+            side="top" 
+            className="w-full h-full p-0 bg-background"
+          >
             {sidebarContent}
           </SheetContent>
         </Sheet>
