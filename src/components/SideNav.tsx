@@ -20,7 +20,7 @@ export function SideNav({ onSignOut }: SideNavProps) {
   const displayName = userEmail ? userEmail.split('@')[0] : 'User';
 
   const sidebarContent = (
-    <Sidebar className="border-r w-52">
+    <Sidebar className="border-r w-52 bg-background">
       <SidebarHeader displayName={displayName} />
       <NavigationMenu />
       <SidebarFooter onSignOut={onSignOut} />
@@ -35,7 +35,7 @@ export function SideNav({ onSignOut }: SideNavProps) {
             <Button 
               variant="ghost" 
               size="icon"
-              className="fixed top-4 left-4 z-50"
+              className="fixed top-4 right-4 z-50"
             >
               <Menu className="h-5 w-5" />
             </Button>
