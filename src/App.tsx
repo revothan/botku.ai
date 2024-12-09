@@ -1,3 +1,4 @@
+import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -68,40 +69,48 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-const App = () => {
+const AppRoutes = () => {
   console.log("App rendering, initializing Supabase session");
   
   return (
-    <QueryClientProvider client={queryClient}>
-      <SessionContextProvider 
-        supabaseClient={supabase}
-        initialSession={null}
+    <Routes>
+      <Route path="/" element={<Landing />} />
+      <Route path="/login" element={<Login />} />
+      <Route 
+        path="/dashboard" 
+        element={
+          <ProtectedRoute>
+            <ManagementDashboard />
+          </ProtectedRoute>
+        }
       >
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Landing />} />
-              <Route path="/login" element={<Login />} />
-              <Route 
-                path="/dashboard" 
-                element={
-                  <ProtectedRoute>
-                    <ManagementDashboard />
-                  </ProtectedRoute>
-                }
-              >
-                <Route path="products" element={<ProductManagement />} />
-              </Route>
-              <Route path="/pricing" element={<Pricing />} />
-              <Route path="/u/:username" element={<UserPage />} />
-              <Route path="/:customDomain/*" element={<ChatbotPage />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
-      </SessionContextProvider>
-    </QueryClientProvider>
+        <Route path="products" element={<ProductManagement />} />
+      </Route>
+      <Route path="/pricing" element={<Pricing />} />
+      <Route path="/u/:username" element={<UserPage />} />
+      <Route path="/:customDomain/*" element={<ChatbotPage />} />
+    </Routes>
+  );
+};
+
+const App = () => {
+  return (
+    <React.StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <SessionContextProvider 
+          supabaseClient={supabase}
+          initialSession={null}
+        >
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <AppRoutes />
+            </BrowserRouter>
+          </TooltipProvider>
+        </SessionContextProvider>
+      </QueryClientProvider>
+    </React.StrictMode>
   );
 };
 
