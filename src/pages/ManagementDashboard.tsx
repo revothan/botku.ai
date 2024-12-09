@@ -95,6 +95,15 @@ const ManagementDashboard = () => {
           return {
             ...existingSettings,
             user_type: existingSettings.user_type as UserType | undefined,
+            answers: existingSettings.answers ? {
+              business: (existingSettings.answers as any)?.business || [],
+              creator: (existingSettings.answers as any)?.creator || [],
+              other: (existingSettings.answers as any)?.other || []
+            } : {
+              business: [],
+              creator: [],
+              other: []
+            },
             buttons: Array.isArray(existingSettings.buttons) 
               ? existingSettings.buttons.map((button: any) => ({
                   id: button.id || crypto.randomUUID(),
@@ -127,6 +136,11 @@ const ManagementDashboard = () => {
         console.log("Default settings created:", newSettings);
         return {
           ...newSettings,
+          answers: {
+            business: [],
+            creator: [],
+            other: []
+          },
           buttons: []
         };
       } catch (error) {
