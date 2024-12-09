@@ -14,8 +14,11 @@ export const supabase = createClient<Database>(
       detectSessionInUrl: true,
       persistSession: true,
       storage: window?.localStorage,
-      // Remove the redirect_to option and let Supabase handle it automatically
-      // based on the current window location
+      // Add these options to handle redirects properly
+      cookieOptions: {
+        domain: window.location.hostname,
+        secure: window.location.protocol === 'https:',
+      }
     },
   }
 );
