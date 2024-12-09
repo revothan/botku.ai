@@ -15,22 +15,29 @@ const DashboardContent = ({ userId, settings, isLoading }: DashboardContentProps
     <div className="h-[100dvh] overflow-hidden p-4 md:p-8">
       <div className="h-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Main Content Column */}
-        <div className="lg:col-span-7 h-full overflow-y-auto pr-4">
-          <div className="space-y-8">
-            {/* Domain Section */}
-            <div>
-              <h2 className="text-2xl font-bold mb-6 text-secondary">Share Your Chatbot</h2>
-              <DomainSection userId={userId} />
-            </div>
+        <div className="lg:col-span-7 flex flex-col h-full">
+          {/* Fixed Header */}
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-secondary">Share Your Chatbot</h2>
+          </div>
+          
+          {/* Scrollable Content */}
+          <div className="overflow-y-auto pr-4 flex-1">
+            <div className="space-y-8">
+              {/* Domain Section */}
+              <div>
+                <DomainSection userId={userId} />
+              </div>
 
-            {/* Settings Section */}
-            <div>
-              <h1 className="text-2xl font-bold mb-6 text-secondary">Chatbot Settings</h1>
-              <SettingsSection
-                userId={userId}
-                settings={settings}
-                isLoading={isLoading}
-              />
+              {/* Settings Section */}
+              <div>
+                <h2 className="text-2xl font-bold mb-6 text-secondary">Chatbot Settings</h2>
+                <SettingsSection
+                  userId={userId}
+                  settings={settings}
+                  isLoading={isLoading}
+                />
+              </div>
             </div>
           </div>
         </div>
