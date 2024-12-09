@@ -31,18 +31,24 @@ export const ChatbotInterface = ({
   const buttons = (settings.buttons || []) as ButtonConfig[];
 
   // Fetch products for the current profile
-  const { data: products } = useQuery({
+  const { data: products, isLoading: productsLoading } = useQuery({
     queryKey: ["chatbot-products", settings.profile_id],
     queryFn: async () => {
+      console.log("Fetching products for profile:", settings.profile_id);
       const { data, error } = await supabase
         .from("products")
         .select("*")
         .eq("profile_id", settings.profile_id)
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching products:", error);
+        throw error;
+      }
+      console.log("Products fetched:", data);
       return data as Product[];
     },
+    enabled: !!settings.profile_id,
   });
 
   return (
@@ -81,14 +87,18 @@ export const ChatbotInterface = ({
 
             <div className="border-t pt-4">
               {/* Products Horizontal Scroll */}
-              {products && products.length > 0 && (
+              {productsLoading ? (
+                <div className="mb-4">
+                  <div className="h-48 bg-gray-100 animate-pulse rounded-lg"></div>
+                </div>
+              ) : products && products.length > 0 ? (
                 <div className="mb-4">
                   <p className="text-sm font-medium text-muted-foreground mb-2">Available Products:</p>
-                  <div className="overflow-x-auto flex space-x-4 pb-4">
+                  <div className="overflow-x-auto flex space-x-4 pb-4 scrollbar-thin scrollbar-thumb-gray-300">
                     {products.map((product) => (
                       <div
                         key={product.id}
-                        className="flex-none w-48 border rounded-lg p-3 bg-white/50 backdrop-blur-sm hover:shadow-md transition-shadow"
+                        className="flex-none w-48 border rounded-lg p-3 bg-white shadow-sm hover:shadow-md transition-shadow"
                       >
                         {product.image_url && (
                           <img
@@ -110,7 +120,7 @@ export const ChatbotInterface = ({
                     ))}
                   </div>
                 </div>
-              )}
+              ) : null}
 
               {/* Chat Input */}
               <ChatInput
