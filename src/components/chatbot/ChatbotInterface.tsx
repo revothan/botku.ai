@@ -3,7 +3,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ChatMessage } from "@/components/chatbot/ChatMessage";
 import { ChatInput } from "@/components/chatbot/ChatInput";
 import { ChatButtons } from "@/components/chatbot/ChatButtons";
+import { formatCurrency } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import type { Message, ButtonConfig, ChatbotSettings } from "@/types/chatbot";
+import type { Product } from "@/types/product";
 
 type ChatbotInterfaceProps = {
   settings: ChatbotSettings;
@@ -26,6 +30,21 @@ export const ChatbotInterface = ({
 }: ChatbotInterfaceProps) => {
   const buttons = (settings.buttons || []) as ButtonConfig[];
 
+  // Fetch products for the current profile
+  const { data: products } = useQuery({
+    queryKey: ["chatbot-products", settings.profile_id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .eq("profile_id", settings.profile_id)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return data as Product[];
+    },
+  });
+
   return (
     <div className="h-[100dvh] bg-gradient-to-b from-[#fcf5eb] to-white p-4 flex items-center justify-center overflow-hidden">
       <div className="w-full max-w-lg h-full">
@@ -34,6 +53,7 @@ export const ChatbotInterface = ({
             <div className="text-center border-b pb-4">
               <h3 className="font-bold text-secondary">{settings.bot_name}</h3>
             </div>
+            
             <ScrollArea className="flex-1 py-4">
               <div className="space-y-4">
                 <div className="bg-primary/10 rounded-lg p-3 max-w-[80%]">
@@ -58,7 +78,41 @@ export const ChatbotInterface = ({
                 <div ref={messagesEndRef} />
               </div>
             </ScrollArea>
-            <div className="border-t pt-4 mt-4">
+
+            <div className="border-t pt-4">
+              {/* Products Horizontal Scroll */}
+              {products && products.length > 0 && (
+                <div className="mb-4">
+                  <p className="text-sm font-medium text-muted-foreground mb-2">Available Products:</p>
+                  <div className="overflow-x-auto flex space-x-4 pb-4">
+                    {products.map((product) => (
+                      <div
+                        key={product.id}
+                        className="flex-none w-48 border rounded-lg p-3 bg-white/50 backdrop-blur-sm hover:shadow-md transition-shadow"
+                      >
+                        {product.image_url && (
+                          <img
+                            src={product.image_url}
+                            alt={product.name}
+                            className="w-full h-32 object-cover rounded-md mb-2"
+                          />
+                        )}
+                        <h4 className="font-medium text-sm">{product.name}</h4>
+                        <p className="text-primary font-medium text-sm mt-1">
+                          {formatCurrency(product.price)}
+                        </p>
+                        {product.stock !== undefined && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Stock: {product.stock}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Chat Input */}
               <ChatInput
                 inputMessage={inputMessage}
                 setInputMessage={setInputMessage}
