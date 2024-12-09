@@ -1,5 +1,5 @@
 import { useSession } from "@supabase/auth-helpers-react";
-import { LogOut, LayoutDashboard, Package, Menu } from "lucide-react";
+import { LogOut, LayoutDashboard, Package, Menu, PanelLeft } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   Sidebar,
@@ -40,7 +40,7 @@ export function SideNav({ onSignOut }: SideNavProps) {
   ];
 
   return (
-    <Sidebar className="border-r">
+    <Sidebar className="border-r relative">
       <SidebarHeader className="flex items-center justify-between p-4 border-b">
         {state === 'expanded' && (
           <h2 className="text-lg font-semibold text-secondary">
@@ -50,11 +50,11 @@ export function SideNav({ onSignOut }: SideNavProps) {
         <Button 
           variant="ghost" 
           size="sm"
-          className="hover:bg-muted ml-auto"
+          className={`hover:bg-muted ${state === 'expanded' ? 'ml-auto' : 'mx-auto'}`}
           onClick={toggleSidebar}
           aria-label={state === 'expanded' ? 'Close Sidebar' : 'Open Sidebar'}
         >
-          <Menu className="h-5 w-5" />
+          {state === 'expanded' ? <PanelLeft className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </Button>
       </SidebarHeader>
       
