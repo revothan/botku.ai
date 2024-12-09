@@ -11,43 +11,47 @@ export interface Database {
     Tables: {
       chatbot_settings: {
         Row: {
-          answers: Json | null
-          assistant_id: string | null
-          bot_name: string
-          buttons: Json | null
-          created_at: string
-          greeting_message: string
           id: string
           profile_id: string
+          bot_name: string
+          greeting_message: string
           training_data: string | null
+          created_at: string
           updated_at: string
+          assistant_id: string | null
+          buttons: Json | null
           user_type: string | null
+          answers: {
+            business: string[]
+            creator: string[]
+            other: string[]
+          } | null
         }
         Insert: {
-          answers?: Json | null
-          assistant_id?: string | null
-          bot_name?: string
-          buttons?: Json | null
-          created_at?: string
-          greeting_message?: string
           id?: string
           profile_id: string
+          bot_name?: string
+          greeting_message?: string
           training_data?: string | null
+          created_at?: string
           updated_at?: string
+          assistant_id?: string | null
+          buttons?: Json | null
           user_type?: string | null
+          answers?: Json | null
         }
         Update: {
-          answers?: Json | null
-          assistant_id?: string | null
-          bot_name?: string
-          buttons?: Json | null
-          created_at?: string
-          greeting_message?: string
           id?: string
           profile_id?: string
+          bot_name?: string
+          greeting_message?: string
           training_data?: string | null
+          created_at?: string
           updated_at?: string
+          assistant_id?: string | null
+          buttons?: Json | null
           user_type?: string | null
+          answers?: Json | null
         }
       }
       profiles: {

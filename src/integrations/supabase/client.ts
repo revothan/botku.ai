@@ -13,12 +13,7 @@ export const supabase = createClient<Database>(
       autoRefreshToken: true,
       detectSessionInUrl: true,
       persistSession: true,
-      storage: window?.localStorage,
-      // Add these options to handle redirects properly
-      cookieOptions: {
-        domain: window.location.hostname,
-        secure: window.location.protocol === 'https:',
-      }
+      storage: window?.localStorage
     },
   }
 );
