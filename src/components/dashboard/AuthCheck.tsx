@@ -15,7 +15,9 @@ const AuthCheck = ({ onAuthChecked, onAuthCheckingChange }: AuthCheckProps) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        console.log("Checking authentication...");
+        console.log("Starting auth check...");
+        onAuthCheckingChange(true);
+        
         const { data: { user }, error } = await supabase.auth.getUser();
         
         if (error) {
@@ -31,8 +33,7 @@ const AuthCheck = ({ onAuthChecked, onAuthCheckingChange }: AuthCheckProps) => {
         
         console.log("User authenticated:", user.id);
         onAuthChecked(user.id);
-        onAuthCheckingChange(false);
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error during auth check:", error);
         toast({
           title: "Authentication Error",
@@ -40,6 +41,9 @@ const AuthCheck = ({ onAuthChecked, onAuthCheckingChange }: AuthCheckProps) => {
           variant: "destructive",
         });
         navigate("/login");
+      } finally {
+        console.log("Auth check complete");
+        onAuthCheckingChange(false);
       }
     };
 
