@@ -1,7 +1,10 @@
 import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import DomainSection from "@/components/dashboard/DomainSection";
 import SettingsSection from "@/components/dashboard/SettingsSection";
 import PhonePreview from "@/components/dashboard/PhonePreview";
+import { Button } from "@/components/ui/button";
+import { useIsMobile } from "@/hooks/use-mobile";
 import type { ChatbotSettings } from "@/types/chatbot";
 
 type DashboardContentProps = {
@@ -11,6 +14,9 @@ type DashboardContentProps = {
 };
 
 const DashboardContent = ({ userId, settings, isLoading }: DashboardContentProps) => {
+  const [showPreview, setShowPreview] = useState(false);
+  const isMobile = useIsMobile();
+
   return (
     <div className="h-[100dvh] overflow-hidden p-4 md:p-8">
       <div className="h-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -23,8 +29,22 @@ const DashboardContent = ({ userId, settings, isLoading }: DashboardContentProps
               <DomainSection userId={userId} />
             </div>
 
+            {/* Preview Toggle Button (Mobile Only) */}
+            {isMobile && (
+              <div className="flex justify-center my-4">
+                <Button
+                  onClick={() => setShowPreview(!showPreview)}
+                  variant="outline"
+                  className="gap-2"
+                >
+                  {showPreview ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showPreview ? 'Hide Preview' : 'Show Preview'}
+                </Button>
+              </div>
+            )}
+
             {/* Settings Section */}
-            <div>
+            <div className={isMobile && showPreview ? 'hidden' : ''}>
               <h1 className="text-2xl font-bold mb-6 text-secondary">Chatbot Settings</h1>
               <SettingsSection
                 userId={userId}
@@ -36,7 +56,7 @@ const DashboardContent = ({ userId, settings, isLoading }: DashboardContentProps
         </div>
 
         {/* Preview Column - Fixed */}
-        <div className="lg:col-span-5 h-full">
+        <div className={`lg:col-span-5 h-full ${isMobile && !showPreview ? 'hidden' : ''}`}>
           <div className="sticky top-8">
             <h2 className="text-2xl font-bold mb-6 text-secondary">Preview</h2>
             <PhonePreview
