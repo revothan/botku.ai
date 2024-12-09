@@ -27,4 +27,9 @@ export type ChatbotFormData = {
   greeting_message: string;
   training_data: string | null;
   user_type?: 'business' | 'creator' | 'other';
+  answers?: {
+    business: string[];
+    creator: string[];
+    other: string[];
+  };
 };
