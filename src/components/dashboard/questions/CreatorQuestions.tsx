@@ -20,23 +20,25 @@ const CreatorQuestions = ({ form, visible }: CreatorQuestionsProps) => {
   if (!visible) return null;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="space-y-4">
       {creatorQuestions.map((question, index) => (
         <FormField
           key={index}
           control={form.control}
           name={`answers.creator.${index}`}
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>{question}</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Ketik jawaban Anda di sini..."
-                  className="resize-none h-24"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
+            <FormItem className="grid grid-cols-2 gap-4 items-start">
+              <FormLabel className="mt-2.5">{question}</FormLabel>
+              <div>
+                <FormControl>
+                  <Textarea
+                    placeholder="Ketik jawaban Anda di sini..."
+                    className="resize-none h-24"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </div>
             </FormItem>
           )}
         />
