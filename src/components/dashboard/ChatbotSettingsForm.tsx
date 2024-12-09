@@ -32,7 +32,8 @@ const ChatbotSettingsForm = ({
   const form = useForm<ChatbotFormData>({
     defaultValues: {
       ...defaultValues,
-      answers: {
+      user_type: defaultValues.user_type || undefined,
+      answers: defaultValues.answers || {
         business: Array(5).fill(""),
         creator: Array(5).fill(""),
         other: Array(4).fill("")

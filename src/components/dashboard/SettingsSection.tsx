@@ -36,6 +36,8 @@ const SettingsSection = ({ userId, settings, isLoading }: SettingsSectionProps) 
           bot_name: values.bot_name,
           greeting_message: values.greeting_message,
           training_data: values.training_data, // Store original training data
+          user_type: values.user_type,
+          answers: values.answers
         })
         .eq("profile_id", userId)
         .select()
@@ -98,6 +100,12 @@ const SettingsSection = ({ userId, settings, isLoading }: SettingsSectionProps) 
     bot_name: settings?.bot_name || "",
     greeting_message: settings?.greeting_message || "",
     training_data: settings?.training_data || "",
+    user_type: settings?.user_type,
+    answers: settings?.answers || {
+      business: Array(5).fill(""),
+      creator: Array(5).fill(""),
+      other: Array(4).fill("")
+    }
   };
 
   return (
