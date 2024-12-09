@@ -9,10 +9,9 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarFooter,
-  SidebarTrigger,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { useSidebar } from "@/components/ui/sidebar";
 
 interface SideNavProps {
   onSignOut: () => Promise<void>;
@@ -22,7 +21,7 @@ export function SideNav({ onSignOut }: SideNavProps) {
   const session = useSession();
   const navigate = useNavigate();
   const location = useLocation();
-  const { state } = useSidebar();
+  const { state, toggleSidebar } = useSidebar();
   
   const userEmail = session?.user?.email;
   const displayName = userEmail ? userEmail.split('@')[0] : 'User';
@@ -50,7 +49,7 @@ export function SideNav({ onSignOut }: SideNavProps) {
           variant="ghost" 
           size="sm"
           className="hover:bg-muted"
-          onClick={() => useSidebar().toggleSidebar()}
+          onClick={toggleSidebar}
           aria-label={state === 'expanded' ? 'Close Sidebar' : 'Open Sidebar'}
         >
           <Menu className="h-5 w-5" />
