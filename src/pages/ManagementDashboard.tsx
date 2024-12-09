@@ -5,6 +5,7 @@ import { SideNav } from "@/components/SideNav";
 import { useToast } from "@/components/ui/use-toast";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
+import { Outlet } from "react-router-dom";
 import DashboardContent from "@/components/dashboard/DashboardContent";
 import type { ChatbotSettings } from "@/types/chatbot";
 
@@ -122,6 +123,7 @@ const ManagementDashboard = () => {
       <div className="flex h-screen w-full overflow-hidden bg-gradient-to-b from-[#fcf5eb] to-white">
         <SideNav onSignOut={handleLogout} />
         <main className="flex-1 overflow-auto">
+          <Outlet />
           <DashboardContent 
             userId={userId}
             settings={settings}

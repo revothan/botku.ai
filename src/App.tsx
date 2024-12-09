@@ -85,13 +85,15 @@ const App = () => {
               <Route path="/" element={<Landing />} />
               <Route path="/login" element={<Login />} />
               <Route 
-                path="/dashboard/*" 
+                path="/dashboard" 
                 element={
                   <ProtectedRoute>
                     <ManagementDashboard />
                   </ProtectedRoute>
-                } 
-              />
+                }
+              >
+                <Route path="products" element={<ProductManagement />} />
+              </Route>
               <Route path="/pricing" element={<Pricing />} />
               <Route path="/u/:username" element={<UserPage />} />
               <Route path="/:customDomain/*" element={<ChatbotPage />} />
