@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, X } from "lucide-react";
 import DomainSection from "@/components/dashboard/DomainSection";
 import SettingsSection from "@/components/dashboard/SettingsSection";
 import PhonePreview from "@/components/dashboard/PhonePreview";
@@ -29,20 +29,6 @@ const DashboardContent = ({ userId, settings, isLoading }: DashboardContentProps
               <DomainSection userId={userId} />
             </div>
 
-            {/* Preview Toggle Button (Mobile Only) */}
-            {isMobile && (
-              <div className="flex justify-center my-4">
-                <Button
-                  onClick={() => setShowPreview(!showPreview)}
-                  variant="outline"
-                  className="gap-2"
-                >
-                  {showPreview ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  {showPreview ? 'Hide Preview' : 'Show Preview'}
-                </Button>
-              </div>
-            )}
-
             {/* Settings Section */}
             <div className={isMobile && showPreview ? 'hidden' : ''}>
               <h1 className="text-2xl font-bold mb-6 text-secondary">Chatbot Settings</h1>
@@ -58,6 +44,17 @@ const DashboardContent = ({ userId, settings, isLoading }: DashboardContentProps
         {/* Preview Column - Fixed */}
         <div className={`lg:col-span-5 h-full ${isMobile && !showPreview ? 'hidden' : ''}`}>
           <div className="sticky top-8">
+            {/* Close Preview Button (Mobile Only) */}
+            {isMobile && showPreview && (
+              <Button
+                onClick={() => setShowPreview(false)}
+                variant="outline"
+                className="absolute right-0 top-0 z-10"
+                size="icon"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
             <h2 className="text-2xl font-bold mb-6 text-secondary">Preview</h2>
             <PhonePreview
               botName={settings?.bot_name || ""}
@@ -67,6 +64,20 @@ const DashboardContent = ({ userId, settings, isLoading }: DashboardContentProps
           </div>
         </div>
       </div>
+
+      {/* Preview Toggle Button (Mobile Only) - Fixed Position */}
+      {isMobile && !showPreview && (
+        <div className="fixed left-1/2 bottom-8 -translate-x-1/2 z-50">
+          <Button
+            onClick={() => setShowPreview(true)}
+            variant="outline"
+            className="gap-2 shadow-lg animate-fade-in"
+          >
+            <Eye className="h-4 w-4" />
+            Preview
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
