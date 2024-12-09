@@ -10,6 +10,7 @@ interface NavigationMenuProps {
 export function NavigationMenu({ state }: NavigationMenuProps) {
   const navigate = useNavigate();
   const location = useLocation();
+  console.log('Current location:', location.pathname);
 
   const menuItems = [
     {
@@ -24,6 +25,11 @@ export function NavigationMenu({ state }: NavigationMenuProps) {
     },
   ];
 
+  const handleNavigation = (path: string) => {
+    console.log('Navigating to:', path);
+    navigate(path);
+  };
+
   return (
     <SidebarContent className="p-2">
       <SidebarMenu>
@@ -34,7 +40,7 @@ export function NavigationMenu({ state }: NavigationMenuProps) {
             icon={item.icon}
             isActive={location.pathname === item.path}
             state={state}
-            onClick={() => navigate(item.path)}
+            onClick={() => handleNavigation(item.path)}
           />
         ))}
       </SidebarMenu>

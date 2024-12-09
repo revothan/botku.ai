@@ -24,31 +24,31 @@ export function NavigationItem({
   state, 
   onClick 
 }: NavigationItemProps) {
-  const button = (
+  const menuButton = (
     <SidebarMenuButton
       onClick={onClick}
       isActive={isActive}
-      className="w-full flex items-center gap-2 p-2"
+      className="w-full flex items-center gap-2 p-2 cursor-pointer"
     >
       <Icon className="h-5 w-5 shrink-0" />
       {state === 'expanded' && <span>{title}</span>}
     </SidebarMenuButton>
   );
 
-  if (state === 'collapsed') {
-    return (
-      <SidebarMenuItem>
-        <Tooltip>
+  return (
+    <SidebarMenuItem>
+      {state === 'collapsed' ? (
+        <Tooltip delayDuration={0}>
           <TooltipTrigger asChild>
-            {button}
+            {menuButton}
           </TooltipTrigger>
-          <TooltipContent side="right">
+          <TooltipContent side="right" className="font-normal">
             {title}
           </TooltipContent>
         </Tooltip>
-      </SidebarMenuItem>
-    );
-  }
-
-  return <SidebarMenuItem>{button}</SidebarMenuItem>;
+      ) : (
+        menuButton
+      )}
+    </SidebarMenuItem>
+  );
 }

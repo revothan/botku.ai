@@ -11,6 +11,7 @@ interface SideNavProps {
 export function SideNav({ onSignOut }: SideNavProps) {
   const session = useSession();
   const { state, toggleSidebar } = useSidebar();
+  console.log('Sidebar state:', state);
   
   const userEmail = session?.user?.email;
   const displayName = userEmail ? userEmail.split('@')[0] : 'User';
