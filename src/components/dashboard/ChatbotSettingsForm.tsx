@@ -33,9 +33,9 @@ const ChatbotSettingsForm = ({
     defaultValues: {
       ...defaultValues,
       answers: {
-        business: Array(10).fill(""),
-        creator: Array(10).fill(""),
-        other: Array(10).fill("")
+        business: Array(5).fill(""),
+        creator: Array(5).fill(""),
+        other: Array(4).fill("")
       }
     },
   });
@@ -47,13 +47,30 @@ const ChatbotSettingsForm = ({
     const typeAnswers = answers[type as keyof typeof answers] || [];
     
     const questions = type === 'business' 
-      ? BusinessQuestions
+      ? [
+          "Nama bisnis dan deskripsi produk/jasa",
+          "Target pelanggan utama",
+          "Pertanyaan umum yang sering ditanyakan pelanggan",
+          "Tujuan utama penggunaan AI atau chatbot",
+          "Bahasa yang akan digunakan oleh chatbot"
+        ]
       : type === 'creator'
-        ? CreatorQuestions
-        : OtherQuestions;
+        ? [
+            "Jenis konten utama yang dibuat",
+            "Audiens utama atau target pengikut",
+            "Pertanyaan yang sering diajukan pengikut",
+            "Cara AI membantu audiens",
+            "Kebutuhan untuk merekomendasikan konten atau produk"
+          ]
+        : [
+            "Tujuan utama pembuatan AI",
+            "Topik atau fokus utama AI",
+            "Gaya komunikasi yang diinginkan",
+            "Masalah yang ingin diselesaikan oleh AI"
+          ];
 
     typeAnswers.forEach((answer, index) => {
-      if (answer.trim()) {
+      if (answer.trim() && questions[index]) {
         trainingData += `${questions[index]}\n${answer}\n\n`;
       }
     });
@@ -116,15 +133,15 @@ const ChatbotSettingsForm = ({
                 >
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="business" id="business" />
-                    <Label htmlFor="business">Untuk Bisnis</Label>
+                    <Label htmlFor="business">Pengguna Bisnis</Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="creator" id="creator" />
-                    <Label htmlFor="creator">Untuk Kreator</Label>
+                    <Label htmlFor="creator">Pengguna Kreator</Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="other" id="other" />
-                    <Label htmlFor="other">Lainnya</Label>
+                    <Label htmlFor="other">Pengguna Lainnya</Label>
                   </div>
                 </RadioGroup>
               </FormControl>
