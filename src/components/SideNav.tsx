@@ -65,7 +65,7 @@ export function SideNav({ onSignOut }: SideNavProps) {
               <SidebarMenuButton
                 onClick={() => navigate(item.path)}
                 isActive={location.pathname === item.path}
-                className="w-full"
+                className="w-full flex items-center gap-2"
                 tooltip={state === 'collapsed' ? item.title : undefined}
               >
                 <item.icon className="h-4 w-4 shrink-0" />
@@ -80,7 +80,7 @@ export function SideNav({ onSignOut }: SideNavProps) {
         <SidebarMenuButton
           onClick={onSignOut}
           variant="outline"
-          className="w-full"
+          className="w-full flex items-center gap-2"
           tooltip={state === 'collapsed' ? 'Logout' : undefined}
         >
           <LogOut className="h-4 w-4 shrink-0" />
