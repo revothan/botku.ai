@@ -103,6 +103,62 @@ export type Database = {
           },
         ]
       }
+      products: {
+        Row: {
+          created_at: string
+          cta: string | null
+          delivery_fee: number | null
+          details: string | null
+          id: string
+          image_url: string | null
+          name: string
+          price: number
+          profile_id: string
+          purchase_link: string | null
+          sku: string | null
+          stock: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          cta?: string | null
+          delivery_fee?: number | null
+          details?: string | null
+          id?: string
+          image_url?: string | null
+          name: string
+          price: number
+          profile_id: string
+          purchase_link?: string | null
+          sku?: string | null
+          stock?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          cta?: string | null
+          delivery_fee?: number | null
+          details?: string | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          price?: number
+          profile_id?: string
+          purchase_link?: string | null
+          sku?: string | null
+          stock?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null

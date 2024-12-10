@@ -1,20 +1,12 @@
 import { useForm } from "react-hook-form";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form } from "@/components/ui/form";
 import BusinessQuestions from "./questions/BusinessQuestions";
 import CreatorQuestions from "./questions/CreatorQuestions";
 import OtherQuestions from "./questions/OtherQuestions";
+import FormHeaderFields from "./form/FormHeaderFields";
+import UserTypeSelection from "./form/UserTypeSelection";
 import type { ChatbotFormData } from "@/types/chatbot";
 
 type ChatbotSettingsFormProps = {
@@ -44,7 +36,6 @@ const ChatbotSettingsForm = ({
 
   const userType = form.watch('user_type');
 
-  // Watch for changes in user_type and clear other type answers
   useEffect(() => {
     if (userType) {
       const emptyAnswers = {
@@ -53,7 +44,6 @@ const ChatbotSettingsForm = ({
         other: Array(4).fill("")
       };
       
-      // Only keep the current user type answers, clear others
       form.setValue('answers', {
         ...emptyAnswers,
         [userType]: form.getValues(`answers.${userType}`)
@@ -99,7 +89,6 @@ const ChatbotSettingsForm = ({
 
   const handleFormSubmit = (values: ChatbotFormData) => {
     if (userType && values.answers) {
-      // Only include the current user type answers in the submission
       const currentTypeAnswers = {
         business: Array(5).fill(""),
         creator: Array(5).fill(""),
@@ -115,68 +104,9 @@ const ChatbotSettingsForm = ({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="bot_name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nama Chatbot</FormLabel>
-              <FormControl>
-                <Input placeholder="Masukkan nama chatbot Anda" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="greeting_message"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Pesan Sambutan</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Masukkan pesan sambutan untuk pengunjung Anda"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="user_type"
-          render={({ field }) => (
-            <FormItem className="space-y-3">
-              <FormLabel>Pilih Salah Satu</FormLabel>
-              <FormControl>
-                <RadioGroup
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  className="flex flex-col space-y-1"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="business" id="business" />
-                    <Label htmlFor="business">Pengguna Bisnis</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="creator" id="creator" />
-                    <Label htmlFor="creator">Pengguna Kreator</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="other" id="other" />
-                    <Label htmlFor="other">Pengguna Lainnya</Label>
-                  </div>
-                </RadioGroup>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-8 p-4">
+        <FormHeaderFields form={form} />
+        <UserTypeSelection form={form} />
 
         {userType && (
           <div className="rounded-lg border p-6 bg-card">
