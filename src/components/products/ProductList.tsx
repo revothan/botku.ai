@@ -35,7 +35,7 @@ const ProductList = ({ products, onProductUpdated }: ProductListProps) => {
   };
 
   const handleDeleteClick = (e: React.MouseEvent, product: Product) => {
-    e.stopPropagation(); // Prevent opening edit dialog
+    e.stopPropagation();
     setProductToDelete(product);
     setIsDeleteDialogOpen(true);
   };
@@ -102,9 +102,11 @@ const ProductList = ({ products, onProductUpdated }: ProductListProps) => {
               <p className="text-primary font-medium">
                 {formatCurrency(product.price)}
               </p>
-              <p className="text-sm text-gray-600">
-                Stock: {product.stock || 0}
-              </p>
+              {product.stock !== null && product.stock > 0 && (
+                <p className="text-sm text-gray-600">
+                  Stock: {product.stock}
+                </p>
+              )}
               {product.sku && (
                 <p className="text-sm text-gray-600">
                   SKU: {product.sku}

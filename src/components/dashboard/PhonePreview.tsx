@@ -67,7 +67,6 @@ const PhonePreview = ({ botName, greetingMessage, buttons = [], userId }: PhoneP
           </div>
 
           <div className="border-t pt-4">
-            {/* Products Section */}
             {products && products.length > 0 && (
               <Collapsible
                 open={isProductsOpen}
@@ -102,7 +101,7 @@ const PhonePreview = ({ botName, greetingMessage, buttons = [], userId }: PhoneP
                         <p className="text-primary font-medium text-xs mt-1">
                           {formatCurrency(product.price)}
                         </p>
-                        {product.stock !== undefined && (
+                        {product.stock !== null && product.stock > 0 && (
                           <p className="text-xs text-muted-foreground mt-1">
                             Stock: {product.stock}
                           </p>
@@ -114,7 +113,6 @@ const PhonePreview = ({ botName, greetingMessage, buttons = [], userId }: PhoneP
               </Collapsible>
             )}
 
-            {/* Chat Input */}
             <div className="flex gap-2">
               <Input
                 placeholder="Type your message..."

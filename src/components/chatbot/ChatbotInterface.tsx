@@ -128,7 +128,7 @@ export const ChatbotInterface = ({
                           <p className="text-primary font-medium text-sm mt-1">
                             {formatCurrency(product.price)}
                           </p>
-                          {product.stock !== undefined && (
+                          {product.stock !== null && product.stock > 0 && (
                             <p className="text-xs text-muted-foreground mt-1">
                               Stock: {product.stock}
                             </p>
