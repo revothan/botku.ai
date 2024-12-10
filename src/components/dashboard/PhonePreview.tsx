@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { formatCurrency } from "@/lib/utils";
+import ProductDetailsDialog from "@/components/products/ProductDetailsDialog";
 import type { ButtonConfig } from "@/types/chatbot";
 import type { Product } from "@/types/product";
 
@@ -18,6 +19,7 @@ type PhonePreviewProps = {
 
 const PhonePreview = ({ botName, greetingMessage, buttons = [], userId }: PhonePreviewProps) => {
   const [isProductsOpen, setIsProductsOpen] = useState(true);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   const { data: products } = useQuery({
     queryKey: ["preview-products", userId],
@@ -88,7 +90,8 @@ const PhonePreview = ({ botName, greetingMessage, buttons = [], userId }: PhoneP
                     {products.map((product) => (
                       <div
                         key={product.id}
-                        className="flex-none w-32 border rounded-lg p-2 bg-white shadow-sm"
+                        className="flex-none w-32 border rounded-lg p-2 bg-white shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                        onClick={() => setSelectedProduct(product)}
                       >
                         {product.image_url && (
                           <img
@@ -126,6 +129,12 @@ const PhonePreview = ({ botName, greetingMessage, buttons = [], userId }: PhoneP
           </div>
         </div>
       </div>
+
+      <ProductDetailsDialog
+        product={selectedProduct}
+        open={!!selectedProduct}
+        onOpenChange={(open) => !open && setSelectedProduct(null)}
+      />
     </div>
   );
 };

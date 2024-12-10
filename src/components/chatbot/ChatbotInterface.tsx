@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
+import ProductDetailsDialog from "@/components/products/ProductDetailsDialog";
 import type { Message, ButtonConfig, ChatbotSettings } from "@/types/chatbot";
 import type { Product } from "@/types/product";
 
@@ -32,6 +33,7 @@ export const ChatbotInterface = ({
   isLoading = false,
 }: ChatbotInterfaceProps) => {
   const [isProductsOpen, setIsProductsOpen] = useState(true);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const buttons = (settings.buttons || []) as ButtonConfig[];
 
   const { data: products, isLoading: productsLoading } = useQuery({
@@ -115,7 +117,8 @@ export const ChatbotInterface = ({
                       {products.map((product) => (
                         <div
                           key={product.id}
-                          className="flex-none w-48 border rounded-lg p-3 bg-white shadow-sm hover:shadow-md transition-shadow"
+                          className="flex-none w-48 border rounded-lg p-3 bg-white shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                          onClick={() => setSelectedProduct(product)}
                         >
                           {product.image_url && (
                             <img
@@ -151,6 +154,12 @@ export const ChatbotInterface = ({
           </CardContent>
         </Card>
       </div>
+
+      <ProductDetailsDialog
+        product={selectedProduct}
+        open={!!selectedProduct}
+        onOpenChange={(open) => !open && setSelectedProduct(null)}
+      />
     </div>
   );
 };
