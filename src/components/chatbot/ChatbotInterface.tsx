@@ -32,7 +32,7 @@ export const ChatbotInterface = ({
   messagesEndRef,
   isLoading = false,
 }: ChatbotInterfaceProps) => {
-  const [isProductsOpen, setIsProductsOpen] = useState(true);
+  const [isProductsOpen, setIsProductsOpen] = useState(false); // Changed default to false
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const buttons = (settings.buttons || []) as ButtonConfig[];
 

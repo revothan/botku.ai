@@ -18,7 +18,7 @@ type PhonePreviewProps = {
 };
 
 const PhonePreview = ({ botName, greetingMessage, buttons = [], userId }: PhonePreviewProps) => {
-  const [isProductsOpen, setIsProductsOpen] = useState(true);
+  const [isProductsOpen, setIsProductsOpen] = useState(false); // Changed default to false
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   const { data: products } = useQuery({
