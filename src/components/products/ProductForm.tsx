@@ -16,6 +16,8 @@ const formSchema = z.object({
   sku: z.string().optional(),
   delivery_fee: z.string().regex(/^\d*$/, "Biaya pengiriman harus berupa angka").optional(),
   image: z.instanceof(File).optional(),
+  cta: z.string().optional(),
+  purchase_link: z.string().url("Link pembelian harus berupa URL yang valid").optional(),
 });
 
 export type ProductFormValues = z.infer<typeof formSchema>;
@@ -38,6 +40,8 @@ const ProductForm = ({ defaultValues, onSubmit, onCancel, submitLabel, isSubmitt
       stock: defaultValues?.stock?.toString() || "0",
       sku: defaultValues?.sku || "",
       delivery_fee: defaultValues?.delivery_fee?.toString() || "0",
+      cta: defaultValues?.cta || "Beli Sekarang",
+      purchase_link: defaultValues?.purchase_link || "",
     },
   });
 
@@ -142,6 +146,43 @@ const ProductForm = ({ defaultValues, onSubmit, onCancel, submitLabel, isSubmitt
                   <Input 
                     placeholder="Masukkan biaya pengiriman"
                     type="number"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="cta"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Call To Action</FormLabel>
+                <FormControl>
+                  <Input 
+                    placeholder="Contoh: Beli Sekarang"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="purchase_link"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Link Pembelian</FormLabel>
+                <FormControl>
+                  <Input 
+                    placeholder="https://..."
+                    type="url"
                     {...field}
                   />
                 </FormControl>
