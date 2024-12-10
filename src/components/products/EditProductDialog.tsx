@@ -51,6 +51,8 @@ const EditProductDialog = ({ product, open, onOpenChange, onProductUpdated }: Ed
           sku: values.sku,
           delivery_fee: values.delivery_fee ? parseFloat(values.delivery_fee) : 0,
           image_url: imageUrl,
+          cta: values.cta,
+          purchase_link: values.purchase_link,
         })
         .eq('id', product.id);
 
