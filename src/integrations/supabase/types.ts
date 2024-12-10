@@ -106,6 +106,7 @@ export type Database = {
       products: {
         Row: {
           created_at: string
+          cta: string | null
           delivery_fee: number | null
           details: string | null
           id: string
@@ -113,12 +114,14 @@ export type Database = {
           name: string
           price: number
           profile_id: string
+          purchase_link: string | null
           sku: string | null
           stock: number | null
           updated_at: string
         }
         Insert: {
           created_at?: string
+          cta?: string | null
           delivery_fee?: number | null
           details?: string | null
           id?: string
@@ -126,12 +129,14 @@ export type Database = {
           name: string
           price: number
           profile_id: string
+          purchase_link?: string | null
           sku?: string | null
           stock?: number | null
           updated_at?: string
         }
         Update: {
           created_at?: string
+          cta?: string | null
           delivery_fee?: number | null
           details?: string | null
           id?: string
@@ -139,6 +144,7 @@ export type Database = {
           name?: string
           price?: number
           profile_id?: string
+          purchase_link?: string | null
           sku?: string | null
           stock?: number | null
           updated_at?: string
