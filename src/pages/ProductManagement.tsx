@@ -7,18 +7,28 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import AddProductDialog from "@/components/products/AddProductDialog";
 import ProductList from "@/components/products/ProductList";
+import { useSession } from "@supabase/auth-helpers-react";
 import type { Product } from "@/types/product";
 
 const ProductManagement = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
+  const session = useSession();
+  const userId = session?.user?.id;
 
   const { data: products, isLoading, refetch } = useQuery({
-    queryKey: ["products"],
+    queryKey: ["products", userId],
     queryFn: async () => {
+      if (!userId) {
+        console.log("No user ID available for fetching products");
+        return [];
+      }
+
+      console.log("Fetching products for user:", userId);
       const { data, error } = await supabase
         .from("products")
         .select("*")
+        .eq("profile_id", userId)
         .order("created_at", { ascending: false });
 
       if (error) {
@@ -33,6 +43,7 @@ const ProductManagement = () => {
 
       return data as Product[];
     },
+    enabled: !!userId,
   });
 
   const handleProductChange = () => {

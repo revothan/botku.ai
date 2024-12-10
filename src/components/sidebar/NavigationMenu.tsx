@@ -3,7 +3,11 @@ import { LayoutDashboard, Package } from "lucide-react";
 import { SidebarContent, SidebarMenu } from "@/components/ui/sidebar";
 import { NavigationItem } from "./NavigationItem";
 
-export function NavigationMenu() {
+interface NavigationMenuProps {
+  onNavigate?: () => void;
+}
+
+export function NavigationMenu({ onNavigate }: NavigationMenuProps) {
   const navigate = useNavigate();
   const location = useLocation();
   console.log('Current location:', location.pathname);
@@ -24,6 +28,7 @@ export function NavigationMenu() {
   const handleNavigation = (path: string) => {
     console.log('Navigating to:', path);
     navigate(path);
+    onNavigate?.();
   };
 
   return (

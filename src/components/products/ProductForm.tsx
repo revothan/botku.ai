@@ -62,7 +62,7 @@ const ProductForm = ({ defaultValues, onSubmit, onCancel, submitLabel, isSubmitt
         <ProductPurchaseFields form={form} />
         <ProductImageField form={form} />
 
-        <div className="flex justify-end gap-2">
+        <div className="flex justify-end gap-2 pt-4 border-t">
           <Button
             type="button"
             variant="outline"

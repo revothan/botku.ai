@@ -19,7 +19,7 @@ const ProductDetailsDialog = ({ product, open, onOpenChange }: ProductDetailsDia
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[400px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold">{product.name}</DialogTitle>
         </DialogHeader>
