@@ -54,34 +54,30 @@ const ProductForm = ({ defaultValues, onSubmit, onCancel, submitLabel, isSubmitt
   });
 
   return (
-    <div className="w-full max-w-2xl mx-auto px-4 py-6">
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 bg-white rounded-lg shadow-sm p-6">
-          <div className="space-y-6">
-            <ProductBasicFields form={form} />
-            <ProductPricingFields form={form} />
-            <ProductDetailsFields form={form} />
-            <ProductPurchaseFields form={form} />
-            <ProductImageField form={form} />
-          </div>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <ProductBasicFields form={form} />
+        <ProductPricingFields form={form} />
+        <ProductDetailsFields form={form} />
+        <ProductPurchaseFields form={form} />
+        <ProductImageField form={form} />
 
-          <div className="flex justify-end gap-3 pt-4 border-t">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onCancel}
-              disabled={isSubmitting}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {submitLabel}
-            </Button>
-          </div>
-        </form>
-      </Form>
-    </div>
+        <div className="flex justify-end gap-2 pt-4 border-t">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+            disabled={isSubmitting}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {submitLabel}
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 };
 
