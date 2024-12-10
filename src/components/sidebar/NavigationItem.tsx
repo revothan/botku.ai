@@ -1,6 +1,5 @@
 import { LucideIcon } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
-import { useSidebar } from "@/components/ui/sidebar";
 
 interface NavigationItemProps {
   title: string;
@@ -15,17 +14,10 @@ export function NavigationItem({
   isActive, 
   onClick 
 }: NavigationItemProps) {
-  const { setOpenMobile } = useSidebar();
-
-  const handleClick = () => {
-    onClick();
-    setOpenMobile(false); // Close mobile menu after navigation
-  };
-
   return (
     <SidebarMenuItem>
       <SidebarMenuButton
-        onClick={handleClick}
+        onClick={onClick}
         isActive={isActive}
         className="w-full flex items-center gap-2 p-2 cursor-pointer"
       >

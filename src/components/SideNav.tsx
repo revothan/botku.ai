@@ -7,6 +7,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 import { Button } from "./ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useState } from "react";
 
 interface SideNavProps {
   onSignOut: () => Promise<void>;
@@ -15,6 +16,7 @@ interface SideNavProps {
 export function SideNav({ onSignOut }: SideNavProps) {
   const session = useSession();
   const isMobile = useIsMobile();
+  const [isOpen, setIsOpen] = useState(false);
   
   const userEmail = session?.user?.email;
   const displayName = userEmail ? userEmail.split('@')[0] : 'User';
@@ -22,19 +24,20 @@ export function SideNav({ onSignOut }: SideNavProps) {
   const sidebarContent = (
     <>
       <SidebarHeader displayName={displayName} />
-      <NavigationMenu />
+      <NavigationMenu onNavigate={() => setIsOpen(false)} />
       <SidebarFooter onSignOut={onSignOut} />
     </>
   );
 
   if (isMobile) {
     return (
-      <Sheet>
+      <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetTrigger asChild>
           <Button 
             variant="ghost" 
             size="icon"
             className="fixed top-4 right-4 z-50"
+            onClick={() => setIsOpen(true)}
           >
             <Menu className="h-5 w-5" />
           </Button>
