@@ -56,11 +56,13 @@ const AddProductDialog = ({ open, onOpenChange, onProductAdded }: AddProductDial
           name: values.name,
           details: values.details,
           price: parseFloat(values.price),
-          stock: values.stock ? parseInt(values.stock) : 0,
+          stock: values.has_stock ? parseInt(values.stock || "0") : null,
           sku: values.sku,
           delivery_fee: values.delivery_fee ? parseFloat(values.delivery_fee) : 0,
           image_url: imageUrl,
           profile_id: session.user.id,
+          cta: values.cta,
+          purchase_link: values.purchase_link,
         });
 
       if (insertError) throw insertError;

@@ -15,7 +15,11 @@ const formSchema = z.object({
   name: z.string().min(1, "Nama produk harus diisi"),
   details: z.string().optional(),
   price: z.string().min(1, "Harga harus diisi").regex(/^\d+$/, "Harga harus berupa angka"),
-  stock: z.string().regex(/^\d*$/, "Stock harus berupa angka").optional(),
+  has_stock: z.boolean().default(false),
+  stock: z.string()
+    .regex(/^\d*$/, "Stock harus berupa angka")
+    .refine((val) => !val || parseInt(val) > 0, "Stock harus lebih dari 0")
+    .optional(),
   sku: z.string().optional(),
   delivery_fee: z.string().regex(/^\d*$/, "Biaya pengiriman harus berupa angka").optional(),
   image: z.instanceof(File).optional(),
@@ -40,7 +44,8 @@ const ProductForm = ({ defaultValues, onSubmit, onCancel, submitLabel, isSubmitt
       name: defaultValues?.name || "",
       details: defaultValues?.details || "",
       price: defaultValues?.price?.toString() || "",
-      stock: defaultValues?.stock?.toString() || "0",
+      has_stock: defaultValues?.stock !== undefined,
+      stock: defaultValues?.stock?.toString() || undefined,
       sku: defaultValues?.sku || "",
       delivery_fee: defaultValues?.delivery_fee?.toString() || "0",
       cta: defaultValues?.cta || "Beli Sekarang",

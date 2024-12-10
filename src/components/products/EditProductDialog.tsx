@@ -47,7 +47,7 @@ const EditProductDialog = ({ product, open, onOpenChange, onProductUpdated }: Ed
           name: values.name,
           details: values.details,
           price: parseFloat(values.price),
-          stock: values.stock ? parseInt(values.stock) : 0,
+          stock: values.has_stock ? parseInt(values.stock || "0") : null,
           sku: values.sku,
           delivery_fee: values.delivery_fee ? parseFloat(values.delivery_fee) : 0,
           image_url: imageUrl,

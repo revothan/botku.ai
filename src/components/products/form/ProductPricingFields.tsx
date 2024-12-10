@@ -1,6 +1,7 @@
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { UseFormReturn } from "react-hook-form";
+import { Switch } from "@/components/ui/switch";
+import { UseFormReturn, useWatch } from "react-hook-form";
 import type { ProductFormValues } from "../ProductForm";
 
 interface ProductPricingFieldsProps {
@@ -8,8 +9,14 @@ interface ProductPricingFieldsProps {
 }
 
 const ProductPricingFields = ({ form }: ProductPricingFieldsProps) => {
+  const hasStock = useWatch({
+    control: form.control,
+    name: "has_stock",
+    defaultValue: !!form.getValues("stock"),
+  });
+
   return (
-    <div className="grid grid-cols-2 gap-4">
+    <div className="space-y-4">
       <FormField
         control={form.control}
         name="price"
@@ -30,21 +37,46 @@ const ProductPricingFields = ({ form }: ProductPricingFieldsProps) => {
 
       <FormField
         control={form.control}
-        name="stock"
+        name="has_stock"
         render={({ field }) => (
-          <FormItem>
-            <FormLabel>Stock</FormLabel>
+          <FormItem className="flex items-center justify-between space-y-0">
+            <FormLabel>Track Stock</FormLabel>
             <FormControl>
-              <Input 
-                placeholder="Masukkan stock"
-                type="number"
-                {...field}
+              <Switch
+                checked={field.value}
+                onCheckedChange={(checked) => {
+                  field.onChange(checked);
+                  if (!checked) {
+                    form.setValue("stock", undefined);
+                  } else {
+                    form.setValue("stock", "1");
+                  }
+                }}
               />
             </FormControl>
-            <FormMessage />
           </FormItem>
         )}
       />
+
+      {hasStock && (
+        <FormField
+          control={form.control}
+          name="stock"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Stock</FormLabel>
+              <FormControl>
+                <Input 
+                  placeholder="Masukkan stock"
+                  type="number"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )}
     </div>
   );
 };
