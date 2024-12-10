@@ -21,8 +21,8 @@ const DashboardContent = ({ userId, settings, isLoading }: DashboardContentProps
     <div className="h-[100dvh] overflow-hidden p-4 md:p-8">
       <div className="h-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Main Content Column */}
-        <div className="lg:col-span-7 h-full overflow-y-auto pr-4">
-          <div className="space-y-8">
+        <div className="lg:col-span-7 h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 pr-4">
+          <div className="space-y-8 pb-20 lg:pb-8">
             {/* Domain Section */}
             <div>
               <h2 className="text-2xl font-bold mb-6 text-secondary">Share Your Chatbot</h2>
@@ -42,8 +42,11 @@ const DashboardContent = ({ userId, settings, isLoading }: DashboardContentProps
         </div>
 
         {/* Preview Column - Fixed */}
-        <div className={`lg:col-span-5 h-full ${isMobile && !showPreview ? 'hidden' : ''}`}>
-          <div className="sticky top-8">
+        <div 
+          className={`lg:col-span-5 h-full ${isMobile && !showPreview ? 'hidden' : ''} 
+            ${isMobile ? 'fixed inset-0 bg-white z-50 p-4' : 'relative'}`}
+        >
+          <div className={`${isMobile ? '' : 'sticky top-8'} h-full overflow-auto scrollbar-thin scrollbar-thumb-gray-200`}>
             {/* Close Preview Button (Mobile Only) */}
             {isMobile && showPreview && (
               <div className="flex justify-between items-center mb-4">
