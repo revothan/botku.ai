@@ -66,7 +66,7 @@ export const useSupabaseSubscription = (sessionId: string | null) => {
           }
         }
       )
-      .on('error', { event: 'error' }, (error) => {
+      .on('system', { event: 'error' }, (error) => {
         console.error('Subscription error:', error);
         toast.error('Connection error occurred');
       })
