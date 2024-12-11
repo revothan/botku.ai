@@ -6,6 +6,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { LoadingState, ErrorState, NotFoundState } from "@/components/chatbot/ChatbotStates";
 import { ChatbotInterface } from "@/components/chatbot/ChatbotInterface";
 import type { Message, ButtonConfig, ChatbotSettings } from "@/types/chatbot";
+import { v4 as uuidv4 } from 'uuid';
 
 type AssistantResponse = {
   response: {
@@ -24,6 +25,8 @@ const ChatbotPage = () => {
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [visitorId] = useState(() => uuidv4());
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -112,6 +115,44 @@ const ChatbotPage = () => {
     };
   };
 
+  const createChatSession = async () => {
+    if (!settings?.profile_id) {
+      console.error("No profile ID available");
+      return null;
+    }
+
+    try {
+      console.log("Creating chat session for profile:", settings.profile_id);
+      const { data: session, error } = await supabase
+        .from("chat_sessions")
+        .insert({
+          profile_id: settings.profile_id,
+          visitor_id: visitorId,
+          visitor_ip: null, // You might want to get this from a service
+          user_agent: navigator.userAgent,
+          status: 'active'
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Error creating chat session:", error);
+        throw error;
+      }
+
+      console.log("Chat session created:", session);
+      return session.id;
+    } catch (error) {
+      console.error("Failed to create chat session:", error);
+      toast({
+        title: "Error",
+        description: "Failed to start chat session",
+        variant: "destructive",
+      });
+      return null;
+    }
+  };
+
   const sendMessage = async (message: string) => {
     if (!settings?.assistant_id) {
       toast({
@@ -124,6 +165,31 @@ const ChatbotPage = () => {
 
     try {
       setIsLoading(true);
+
+      // Create a chat session if one doesn't exist
+      if (!sessionId) {
+        const newSessionId = await createChatSession();
+        if (!newSessionId) {
+          throw new Error("Failed to create chat session");
+        }
+        setSessionId(newSessionId);
+        console.log("New session created:", newSessionId);
+      }
+
+      // Insert user message into chat_messages
+      const { error: messageError } = await supabase
+        .from("chat_messages")
+        .insert({
+          session_id: sessionId,
+          role: "user",
+          content: message
+        });
+
+      if (messageError) {
+        console.error("Error inserting user message:", messageError);
+        throw messageError;
+      }
+
       setMessages(prev => [...prev, { role: "user", content: message }]);
       setInputMessage(""); // Clear input immediately after sending
 
@@ -137,9 +203,25 @@ const ChatbotPage = () => {
       if (response.error) throw response.error;
 
       if (response.data?.response?.text?.value) {
+        const assistantMessage = response.data.response.text.value;
+        
+        // Insert assistant message into chat_messages
+        const { error: assistantMessageError } = await supabase
+          .from("chat_messages")
+          .insert({
+            session_id: sessionId,
+            role: "assistant",
+            content: assistantMessage
+          });
+
+        if (assistantMessageError) {
+          console.error("Error inserting assistant message:", assistantMessageError);
+          throw assistantMessageError;
+        }
+
         setMessages(prev => [...prev, { 
           role: "assistant", 
-          content: response.data.response.text.value 
+          content: assistantMessage 
         }]);
       } else {
         console.error("Unexpected response format:", response);
@@ -150,6 +232,7 @@ const ChatbotPage = () => {
         });
       }
     } catch (error: any) {
+      console.error("Chat error:", error);
       toast({
         title: "Error",
         description: error.message || "Failed to send message",
