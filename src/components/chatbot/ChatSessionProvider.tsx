@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { useSupabaseSubscription } from '@/hooks/useSupabaseSubscription';
 import { useMessageManagement } from '@/hooks/useMessageManagement';
 import type { Message } from '@/types/chatbot';
