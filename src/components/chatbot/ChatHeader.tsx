@@ -36,14 +36,6 @@ export const ChatHeader = ({ botName, avatarUrl }: ChatHeaderProps) => {
         console.log("Successfully generated public URL:", data.publicUrl);
         setPublicAvatarUrl(data.publicUrl);
 
-        // Verify the URL is accessible
-        const img = new Image();
-        img.onerror = () => {
-          console.error("Failed to load image from URL:", data.publicUrl);
-          setPublicAvatarUrl(null);
-        };
-        img.src = data.publicUrl;
-
       } catch (err) {
         console.error("Unexpected error while generating public URL:", err);
         setPublicAvatarUrl(null);
