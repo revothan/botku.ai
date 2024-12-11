@@ -27,30 +27,7 @@ const ProductList = ({ products, onProductUpdated }: ProductListProps) => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
-  const [imageUrls, setImageUrls] = useState<Record<string, string>>({});
   const { toast } = useToast();
-
-  useEffect(() => {
-    const loadImageUrls = async () => {
-      const urls: Record<string, string> = {};
-      for (const product of products) {
-        if (product.image_url && !product.image_url.startsWith('http')) {
-          try {
-            const { data } = await supabase.storage
-              .from('product-images')
-              .getPublicUrl(product.image_url);
-            urls[product.image_url] = data.publicUrl;
-          } catch (error) {
-            console.error('Error getting public URL:', error);
-            urls[product.image_url] = '/placeholder.svg';
-          }
-        }
-      }
-      setImageUrls(urls);
-    };
-
-    loadImageUrls();
-  }, [products]);
 
   const handleProductClick = (product: Product) => {
     setSelectedProduct(product);
@@ -92,11 +69,6 @@ const ProductList = ({ products, onProductUpdated }: ProductListProps) => {
     }
   };
 
-  const getImageUrl = (path: string) => {
-    if (path.startsWith('http')) return path;
-    return imageUrls[path] || '/placeholder.svg';
-  };
-
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -118,7 +90,7 @@ const ProductList = ({ products, onProductUpdated }: ProductListProps) => {
             {product.image_url && (
               <div className="relative w-full h-48 mb-4">
                 <img
-                  src={getImageUrl(product.image_url)}
+                  src={product.image_url}
                   alt={product.name}
                   className="w-full h-full object-cover rounded-md"
                   onError={(e) => {
