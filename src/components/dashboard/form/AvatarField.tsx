@@ -81,7 +81,9 @@ const AvatarField = ({ form, defaultAvatarUrl, profileId }: AvatarFieldProps) =>
       // Update chatbot settings in the database
       const { error: updateError } = await supabase
         .from('chatbot_settings')
-        .update({ avatar_url: publicUrl })
+        .update({ 
+          avatar_url: fileName  // Store only the filename in the database
+        })
         .eq('profile_id', profileId);
 
       if (updateError) {
@@ -117,7 +119,7 @@ const AvatarField = ({ form, defaultAvatarUrl, profileId }: AvatarFieldProps) =>
             <div className="flex items-center gap-4">
               <Avatar className="h-20 w-20">
                 <AvatarImage src={avatarUrl || ''} alt="Chatbot avatar" />
-                <AvatarFallback>BOT</AvatarFallback>
+                <AvatarFallback></AvatarFallback>
               </Avatar>
               <div className="flex-1">
                 <Input
