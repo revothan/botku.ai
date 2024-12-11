@@ -1,13 +1,14 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { LoadingState, ErrorState, NotFoundState } from "@/components/chatbot/ChatbotStates";
 import { ChatInput } from "@/components/chatbot/ChatInput";
 import { ChatMessages } from "@/components/chatbot/ChatMessages";
-import { useChatSession, ChatSessionProvider } from "@/components/chatbot/ChatSessionProvider";
+import { ChatSessionProvider } from "@/components/chatbot/ChatSessionProvider";
 import { useChatLogic } from "@/hooks/useChatLogic";
 import { usePostMessage } from "@/hooks/usePostMessage";
+import { toast } from "sonner";
 import type { ChatbotSettings } from "@/types/chatbot";
 
 const transformSettings = (rawSettings: any): ChatbotSettings => ({
@@ -25,7 +26,7 @@ const ChatbotContent = () => {
   const { customDomain } = useParams<{ customDomain: string }>();
   const [inputMessage, setInputMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { messages, isLoading: messagesLoading } = useChatSession();
+  const [sessionId] = useState(() => crypto.randomUUID());
 
   const { data: settings, isLoading: settingsLoading, error } = useQuery({
     queryKey: ["chatbot-settings", customDomain],
@@ -66,19 +67,41 @@ const ChatbotContent = () => {
   });
 
   usePostMessage((message) => {
-    console.log('Received postMessage:', message);
-    // Handle any postMessage events here
+    try {
+      console.log('Received postMessage:', message);
+      // Handle the message based on its type
+      if (message.type === 'chatbot-action') {
+        // Handle chatbot specific actions
+        console.log('Handling chatbot action:', message.action);
+      }
+    } catch (error) {
+      console.error('Error processing postMessage:', error);
+    }
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputMessage.trim()) return;
 
-    console.log('Handling message submission:', inputMessage);
-    setInputMessage("");
+    try {
+      console.log('Handling message submission:', inputMessage);
+      const { error } = await supabase
+        .from('chat_messages')
+        .insert({
+          session_id: sessionId,
+          role: 'user',
+          content: inputMessage.trim()
+        });
+
+      if (error) throw error;
+      setInputMessage("");
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast.error('Failed to send message. Please try again.');
+    }
   };
 
-  if (settingsLoading || messagesLoading) return <LoadingState />;
+  if (settingsLoading) return <LoadingState />;
   if (error) return <ErrorState message={error.message} />;
   if (!settings) return <NotFoundState />;
 
@@ -92,9 +115,9 @@ const ChatbotContent = () => {
             </div>
             
             <ChatMessages
-              messages={messages}
+              messages={[]}
               buttons={settings.buttons || []}
-              isLoading={messagesLoading}
+              isLoading={false}
               messagesEndRef={messagesEndRef}
               greeting={settings.greeting_message}
             />
@@ -104,7 +127,7 @@ const ChatbotContent = () => {
                 inputMessage={inputMessage}
                 setInputMessage={setInputMessage}
                 handleSubmit={handleSubmit}
-                isLoading={messagesLoading}
+                isLoading={false}
               />
             </div>
           </div>

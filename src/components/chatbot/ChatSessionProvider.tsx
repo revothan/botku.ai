@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import type { Message } from "@/types/chatbot";
 
 interface ChatSessionContextType {
@@ -26,6 +27,58 @@ interface Props {
 export const ChatSessionProvider: React.FC<Props> = ({ sessionId, children }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [retryCount, setRetryCount] = useState(0);
+  const MAX_RETRIES = 3;
+
+  const setupSubscription = async () => {
+    if (!sessionId) {
+      console.log('No session ID available, skipping subscription setup');
+      return null;
+    }
+
+    console.log('Setting up subscription for session:', sessionId);
+    
+    return supabase
+      .channel(`chat_messages_${sessionId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'chat_messages',
+          filter: `session_id=eq.${sessionId}`
+        },
+        (payload: any) => {
+          console.log('Real-time message received:', payload);
+          
+          if (!['user', 'assistant', 'owner'].includes(payload.new.role)) {
+            console.warn(`Invalid role in payload: ${payload.new.role}`);
+            return;
+          }
+
+          const newMessage: Message = {
+            role: payload.new.role as Message['role'],
+            content: payload.new.content
+          };
+
+          setMessages(prev => [...prev, newMessage]);
+        }
+      )
+      .subscribe(status => {
+        console.log('Subscription status:', status);
+        
+        if (status === 'SUBSCRIBED') {
+          console.log('Successfully subscribed to real-time updates');
+        } else if (status === 'CLOSED' && retryCount < MAX_RETRIES) {
+          console.log('Subscription closed, attempting to reconnect...');
+          setRetryCount(prev => prev + 1);
+          setupSubscription();
+        } else if (status === 'CLOSED') {
+          console.error('Max retry attempts reached for subscription');
+          toast.error('Failed to maintain real-time connection. Please refresh the page.');
+        }
+      });
+  };
 
   useEffect(() => {
     if (!sessionId) {
@@ -68,48 +121,22 @@ export const ChatSessionProvider: React.FC<Props> = ({ sessionId, children }) =>
         setMessages(validMessages);
       } catch (error) {
         console.error('Error loading messages:', error);
+        toast.error('Failed to load messages. Please try again.');
       } finally {
         setIsLoading(false);
       }
     };
 
     loadMessages();
-
-    // Set up real-time subscription
-    const channel = supabase
-      .channel(`chat_messages_${sessionId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'chat_messages',
-          filter: `session_id=eq.${sessionId}`
-        },
-        (payload: any) => {
-          console.log('Real-time message received:', payload);
-          if (!['user', 'assistant', 'owner'].includes(payload.new.role)) {
-            console.warn(`Invalid role in payload: ${payload.new.role}`);
-            return;
-          }
-
-          const newMessage: Message = {
-            role: payload.new.role as Message['role'],
-            content: payload.new.content
-          };
-
-          setMessages(prev => [...prev, newMessage]);
-        }
-      )
-      .subscribe(status => {
-        console.log('Subscription status:', status);
-      });
+    const subscription = setupSubscription();
 
     return () => {
       console.log('Cleaning up subscription');
-      supabase.removeChannel(channel);
+      if (subscription) {
+        supabase.removeChannel(subscription);
+      }
     };
-  }, [sessionId]);
+  }, [sessionId, retryCount]);
 
   const addMessage = (message: Message) => {
     setMessages(prev => [...prev, message]);
