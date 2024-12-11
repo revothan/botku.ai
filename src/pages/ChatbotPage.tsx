@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useRef, useEffect } from "react";
@@ -85,35 +85,44 @@ const ChatbotPage = () => {
       
       console.log("Loading messages for session:", sessionId);
       
-      const { data, error } = await supabase
-        .from('chat_messages')
-        .select('*')
-        .eq('session_id', sessionId)
-        .order('created_at', { ascending: true });
-        
-      if (error) {
-        console.error('Error loading messages:', error);
-        return;
-      }
+      try {
+        const { data, error } = await supabase
+          .from('chat_messages')
+          .select('*')
+          .eq('session_id', sessionId)
+          .order('created_at', { ascending: true });
 
-      console.log("Received messages from database:", data);
-      
-      const formattedMessages = data
-        .map(msg => {
-          if (!isValidRole(msg.role)) {
-            console.warn(`Invalid role encountered: ${msg.role}`);
-            return null;
-          }
-          return {
-            role: msg.role,
-            content: msg.content
-          } as Message;
-        })
-        .filter((msg): msg is Message => msg !== null);
-      
-      console.log("Formatted messages:", formattedMessages);
-      setLocalMessages(formattedMessages);
-      setMessages(formattedMessages);
+        if (error) {
+          console.error('Error loading messages:', error);
+          return;
+        }
+
+        console.log("Received messages from database:", data);
+        
+        if (!data || data.length === 0) {
+          console.log("No messages found for session");
+          return;
+        }
+
+        const formattedMessages = data
+          .map(msg => {
+            if (!isValidRole(msg.role)) {
+              console.warn(`Invalid role encountered: ${msg.role}`);
+              return null;
+            }
+            return {
+              role: msg.role,
+              content: msg.content
+            } as Message;
+          })
+          .filter((msg): msg is Message => msg !== null);
+        
+        console.log("Formatted messages:", formattedMessages);
+        setLocalMessages(formattedMessages);
+        setMessages(formattedMessages);
+      } catch (error) {
+        console.error('Error in loadMessages:', error);
+      }
     };
     
     loadMessages();
@@ -166,7 +175,7 @@ const ChatbotPage = () => {
 
   // Scroll to bottom when messages update
   useEffect(() => {
-    console.log('Messages updated, scrolling to bottom');
+    console.log('Messages updated, scrolling to bottom. Current messages:', localMessages);
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [localMessages]);
 
