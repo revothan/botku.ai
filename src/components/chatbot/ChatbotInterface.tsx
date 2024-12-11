@@ -34,6 +34,7 @@ export const ChatbotInterface = ({
 }: ChatbotInterfaceProps) => {
   const [isProductsOpen, setIsProductsOpen] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [localMessages, setLocalMessages] = useState<Message[]>(messages);
   const buttons = (settings.buttons || []) as ButtonConfig[];
 
   const { data: products, isLoading: productsLoading } = useQuery({
@@ -56,10 +57,15 @@ export const ChatbotInterface = ({
     enabled: !!settings.profile_id,
   });
 
+  // Update local messages when prop changes
+  useEffect(() => {
+    setLocalMessages(messages);
+  }, [messages]);
+
   // Subscribe to real-time updates for messages
   useEffect(() => {
     const channel = supabase
-      .channel('public:chat_messages')
+      .channel('chat_messages')
       .on(
         'postgres_changes',
         {
@@ -67,8 +73,15 @@ export const ChatbotInterface = ({
           schema: 'public',
           table: 'chat_messages'
         },
-        (payload) => {
+        (payload: any) => {
           console.log('Real-time message update:', payload);
+          if (payload.eventType === 'INSERT') {
+            const newMessage = {
+              role: payload.new.role,
+              content: payload.new.content
+            } as Message;
+            setLocalMessages(prev => [...prev, newMessage]);
+          }
         }
       )
       .subscribe();
@@ -93,7 +106,7 @@ export const ChatbotInterface = ({
                   <p className="text-sm">{settings.greeting_message}</p>
                 </div>
 
-                {messages.map((message, index) => (
+                {localMessages.map((message, index) => (
                   <ChatMessage key={index} message={message} />
                 ))}
 
