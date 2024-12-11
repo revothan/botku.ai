@@ -54,17 +54,43 @@ const AvatarField = ({ form }: AvatarFieldProps) => {
       const fileExt = file.name.split('.').pop();
       const fileName = `${crypto.randomUUID()}.${fileExt}`;
 
-      // Upload file using Supabase Storage
-      const { error: uploadError, data } = await supabase.storage
-        .from('chatbot-avatars')
-        .upload(fileName, file, {
-          cacheControl: '3600',
-          upsert: false
-        });
+      // Upload file using Supabase Storage with retry logic
+      const maxRetries = 3;
+      let attempt = 0;
+      let uploadError = null;
+      let data = null;
+
+      while (attempt < maxRetries) {
+        try {
+          console.log(`Upload attempt ${attempt + 1} of ${maxRetries}`);
+          const result = await supabase.storage
+            .from('chatbot-avatars')
+            .upload(fileName, file, {
+              cacheControl: '3600',
+              upsert: false
+            });
+          
+          if (result.error) {
+            console.error(`Attempt ${attempt + 1} failed:`, result.error);
+            uploadError = result.error;
+            attempt++;
+            await new Promise(resolve => setTimeout(resolve, 1000 * attempt)); // Exponential backoff
+          } else {
+            data = result.data;
+            uploadError = null;
+            break;
+          }
+        } catch (err) {
+          console.error(`Network error on attempt ${attempt + 1}:`, err);
+          uploadError = err;
+          attempt++;
+          await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+        }
+      }
 
       if (uploadError) {
-        console.error('Upload error:', uploadError);
-        throw new Error('Failed to upload file');
+        console.error('All upload attempts failed:', uploadError);
+        throw new Error('Failed to upload file after multiple attempts');
       }
 
       // Get public URL
@@ -82,7 +108,7 @@ const AvatarField = ({ form }: AvatarFieldProps) => {
       console.error('Upload error:', error);
       toast({
         title: "Upload failed",
-        description: error.message || "Failed to upload avatar",
+        description: error.message || "Failed to upload avatar. Please try again.",
         variant: "destructive",
       });
     } finally {
