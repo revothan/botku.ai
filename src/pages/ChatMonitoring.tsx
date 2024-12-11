@@ -8,10 +8,14 @@ import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
 import type { ChatSession, ChatMessage } from "@/types/chat";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+
+const CHAT_LIMIT = 10;
 
 const ChatMonitoring = () => {
   const session = useSession();
+  const { toast } = useToast();
   const [realtimeSessions, setRealtimeSessions] = useState<Record<string, ChatSession>>({});
 
   const { data: initialSessions, isLoading, error } = useQuery({
@@ -23,7 +27,6 @@ const ChatMonitoring = () => {
 
       console.log("Fetching chat sessions for user:", session.user.id);
       
-      // First get the user's profile
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("id, custom_domain")
@@ -37,7 +40,7 @@ const ChatMonitoring = () => {
 
       console.log("Found profile:", profile);
 
-      // Then get all chat sessions for this profile that have at least one message
+      // Get only the 10 most recent chat sessions with messages
       const { data: sessions, error: sessionsError } = await supabase
         .from("chat_sessions")
         .select(`
@@ -49,7 +52,9 @@ const ChatMonitoring = () => {
             created_at
           )
         `)
-        .eq("profile_id", profile.id);
+        .eq("profile_id", profile.id)
+        .order('created_at', { ascending: false })
+        .limit(CHAT_LIMIT);
 
       if (sessionsError) {
         console.error("Error fetching chat sessions:", sessionsError);
@@ -62,7 +67,7 @@ const ChatMonitoring = () => {
       const sessionsMap: Record<string, ChatSession> = {};
       sessions?.forEach((session: any) => {
         const messages = session.chat_messages || [];
-        if (messages.length > 0) {  // Only include sessions with messages
+        if (messages.length > 0) {
           console.log("Processing session:", session.id, "with messages:", messages);
           sessionsMap[session.id] = {
             ...session,
@@ -97,6 +102,18 @@ const ChatMonitoring = () => {
         (payload) => {
           console.log("Chat session change:", payload);
           setRealtimeSessions((current) => {
+            const currentSessionsCount = Object.keys(current).length;
+            
+            // If we already have 10 sessions and this is a new one, show toast and don't add it
+            if (currentSessionsCount >= CHAT_LIMIT && payload.eventType === "INSERT") {
+              toast({
+                title: "Chat Limit Reached",
+                description: `You can only monitor ${CHAT_LIMIT} most recent chats. Older chats will not be displayed.`,
+                variant: "warning",
+              });
+              return current;
+            }
+
             if (payload.eventType === "DELETE") {
               const { [payload.old.id]: _, ...rest } = current;
               return rest;
@@ -129,6 +146,17 @@ const ChatMonitoring = () => {
           setRealtimeSessions((current) => {
             const session = current[message.session_id];
             if (!session) return current;
+
+            // If this session is already at the limit, don't add more messages
+            if (Object.keys(current).length >= CHAT_LIMIT) {
+              toast({
+                title: "Chat Limit Reached",
+                description: `You can only monitor ${CHAT_LIMIT} most recent chats. Older messages will not be displayed.`,
+                variant: "warning",
+              });
+              return current;
+            }
+
             return {
               ...current,
               [message.session_id]: {
@@ -146,7 +174,7 @@ const ChatMonitoring = () => {
       sessionsChannel.unsubscribe();
       messagesChannel.unsubscribe();
     };
-  }, [session?.user?.id]);
+  }, [session?.user?.id, toast]);
 
   const sessions = {
     ...(initialSessions || {}),
@@ -191,7 +219,15 @@ const ChatMonitoring = () => {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Chat Sessions</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Chat Sessions</h1>
+        <Alert variant="warning" className="w-auto">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription className="ml-2">
+            Showing {sessionsList.length} of maximum {CHAT_LIMIT} recent chats
+          </AlertDescription>
+        </Alert>
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {sessionsList
           .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
@@ -232,6 +268,8 @@ const ChatMonitoring = () => {
                           className={`rounded-lg px-3 py-2 max-w-[80%] ${
                             message.role === "user"
                               ? "bg-primary text-primary-foreground"
+                              : message.role === "owner"
+                              ? "bg-blue-500 text-white"
                               : "bg-muted"
                           }`}
                         >
