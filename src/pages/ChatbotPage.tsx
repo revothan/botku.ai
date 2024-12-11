@@ -128,7 +128,7 @@ const ChatbotPage = () => {
         .insert({
           profile_id: settings.profile_id,
           visitor_id: visitorId,
-          visitor_ip: null, // You might want to get this from a service
+          visitor_ip: null,
           user_agent: navigator.userAgent,
           status: 'active'
         })
@@ -137,16 +137,21 @@ const ChatbotPage = () => {
 
       if (error) {
         console.error("Error creating chat session:", error);
-        throw error;
+        toast({
+          title: "Error",
+          description: "Failed to create chat session. Please try again.",
+          variant: "destructive",
+        });
+        return null;
       }
 
-      console.log("Chat session created:", session);
+      console.log("Chat session created successfully:", session);
       return session.id;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to create chat session:", error);
       toast({
         title: "Error",
-        description: "Failed to start chat session",
+        description: error.message || "Failed to create chat session",
         variant: "destructive",
       });
       return null;
