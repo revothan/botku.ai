@@ -1,26 +1,9 @@
 import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { motion } from "framer-motion";
-import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { OTPVerification } from "./OTPVerification";
 
 export const AuthForm = () => {
-  const [showOTP, setShowOTP] = useState(false);
-  const [userEmail, setUserEmail] = useState("");
-
-  const handleAuthStateChange = async (event: any, session: any) => {
-    console.log('Auth state changed:', event);
-    if (event === "SIGNED_UP") {
-      setUserEmail(session?.user?.email || "");
-      setShowOTP(true);
-    }
-  };
-
-  if (showOTP) {
-    return <OTPVerification email={userEmail} />;
-  }
-
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -57,7 +40,6 @@ export const AuthForm = () => {
           }}
           theme="light"
           providers={[]}
-          onAuthStateChange={handleAuthStateChange}
         />
       </div>
     </motion.div>
