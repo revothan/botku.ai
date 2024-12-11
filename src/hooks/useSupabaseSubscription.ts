@@ -15,7 +15,7 @@ export const useSupabaseSubscription = (sessionId: string | null) => {
   const handleReconnection = useCallback(() => {
     if (!sessionId || retryCount >= MAX_RETRY_ATTEMPTS) {
       console.error('Max retry attempts reached or no session ID');
-      toast.error('Failed to maintain connection. Please refresh the page.');
+      toast.error('Unable to maintain connection. Please refresh the page.');
       return;
     }
 
@@ -68,7 +68,10 @@ export const useSupabaseSubscription = (sessionId: string | null) => {
       )
       .on('system', { event: 'error' }, (error) => {
         console.error('Subscription error:', error);
-        toast.error('Connection error occurred');
+        toast.error('Connection lost. Attempting to reconnect...', {
+          description: 'Please wait while we restore your connection.'
+        });
+        handleReconnection();
       })
       .subscribe(status => {
         console.log('Subscription status:', status);
@@ -83,7 +86,9 @@ export const useSupabaseSubscription = (sessionId: string | null) => {
           handleReconnection();
         } else if (status === 'CHANNEL_ERROR') {
           console.error('Channel error occurred');
-          toast.error('Connection error occurred');
+          toast.error('Connection error', {
+            description: 'There was a problem with the chat connection. Attempting to reconnect...'
+          });
           handleReconnection();
         }
       });
@@ -124,7 +129,9 @@ export const useSupabaseSubscription = (sessionId: string | null) => {
       channelRef.current = null;
     }
     setupSubscription(sessionId);
-    toast.success('Attempting to reconnect...');
+    toast.success('Attempting to reconnect...', {
+      description: 'Please wait while we restore your connection.'
+    });
   }, [sessionId, setupSubscription]);
 
   // Cleanup on unmount
