@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { Message } from "@/types/chatbot";
+import type { RealtimeChannel } from '@supabase/supabase-js';
 
 interface ChatSessionContextType {
   messages: Message[];
@@ -30,12 +31,7 @@ export const ChatSessionProvider: React.FC<Props> = ({ sessionId, children }) =>
   const [retryCount, setRetryCount] = useState(0);
   const MAX_RETRIES = 3;
 
-  const setupSubscription = async () => {
-    if (!sessionId) {
-      console.log('No session ID available, skipping subscription setup');
-      return null;
-    }
-
+  const setupSubscription = (sessionId: string): RealtimeChannel => {
     console.log('Setting up subscription for session:', sessionId);
     
     return supabase
@@ -72,7 +68,6 @@ export const ChatSessionProvider: React.FC<Props> = ({ sessionId, children }) =>
         } else if (status === 'CLOSED' && retryCount < MAX_RETRIES) {
           console.log('Subscription closed, attempting to reconnect...');
           setRetryCount(prev => prev + 1);
-          setupSubscription();
         } else if (status === 'CLOSED') {
           console.error('Max retry attempts reached for subscription');
           toast.error('Failed to maintain real-time connection. Please refresh the page.');
@@ -81,6 +76,8 @@ export const ChatSessionProvider: React.FC<Props> = ({ sessionId, children }) =>
   };
 
   useEffect(() => {
+    let subscription: RealtimeChannel | null = null;
+
     if (!sessionId) {
       console.log('No session ID available, skipping message load');
       setIsLoading(false);
@@ -128,7 +125,10 @@ export const ChatSessionProvider: React.FC<Props> = ({ sessionId, children }) =>
     };
 
     loadMessages();
-    const subscription = setupSubscription();
+    
+    if (sessionId) {
+      subscription = setupSubscription(sessionId);
+    }
 
     return () => {
       console.log('Cleaning up subscription');
