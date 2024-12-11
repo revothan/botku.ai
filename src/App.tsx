@@ -15,6 +15,7 @@ import ManagementDashboard from "./pages/ManagementDashboard";
 import ChatbotPage from "./pages/ChatbotPage";
 import Pricing from "./pages/Pricing";
 import ProductManagement from "./pages/ProductManagement";
+import ChatMonitoring from "./pages/ChatMonitoring";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -25,7 +26,6 @@ const queryClient = new QueryClient({
   },
 });
 
-// Protected route wrapper component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const session = useSession();
   const { toast } = useToast();
@@ -69,7 +69,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-// Home route wrapper to handle authentication redirect
 const HomeRoute = () => {
   const session = useSession();
   
@@ -97,6 +96,7 @@ const AppRoutes = () => {
         }
       >
         <Route path="products" element={<ProductManagement />} />
+        <Route path="chats" element={<ChatMonitoring />} />
       </Route>
       <Route path="/pricing" element={<Pricing />} />
       <Route path="/u/:username" element={<UserPage />} />
