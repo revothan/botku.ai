@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, Upload } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import type { UseFormReturn } from "react-hook-form";
@@ -51,12 +50,11 @@ const AvatarField = ({ form, defaultAvatarUrl }: AvatarFieldProps) => {
       const fileName = `${crypto.randomUUID()}.${fileExt}`;
 
       // Upload file to Supabase Storage
-      const { error: uploadError } = await supabase.storage
+      const { error: uploadError, data } = await supabase.storage
         .from('chatbot-avatars')
         .upload(fileName, file, {
           cacheControl: '3600',
-          upsert: false,
-          contentType: file.type // Preserve original content type
+          upsert: false
         });
 
       if (uploadError) throw uploadError;
