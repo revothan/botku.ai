@@ -7,6 +7,7 @@ import { LoadingState, ErrorState, NotFoundState } from "@/components/chatbot/Ch
 import { ChatbotInterface } from "@/components/chatbot/ChatbotInterface";
 import { useChatSession } from "@/hooks/useChatSession";
 import { useChatMessages } from "@/hooks/useChatMessages";
+import { useSession } from '@supabase/auth-helpers-react';
 import type { ChatbotSettings } from "@/types/chatbot";
 
 type AssistantResponse = {
@@ -38,6 +39,7 @@ const ChatbotPage = () => {
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const session = useSession();
 
   const { data: settings, isLoading: settingsLoading, error } = useQuery({
     queryKey: ["chatbot-settings", customDomain],

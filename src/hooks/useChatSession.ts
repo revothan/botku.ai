@@ -2,11 +2,13 @@ import { useState } from "react";
 import { v4 as uuidv4 } from 'uuid';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { useSession } from '@supabase/auth-helpers-react';
 
 export const useChatSession = (profileId: string | undefined) => {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [visitorId] = useState(() => uuidv4());
   const { toast } = useToast();
+  const session = useSession();
 
   const createChatSession = async () => {
     if (!profileId) {
@@ -16,11 +18,11 @@ export const useChatSession = (profileId: string | undefined) => {
 
     try {
       console.log("Creating chat session for profile:", profileId);
-      const { data: session, error } = await supabase
+      const { data: chatSession, error } = await supabase
         .from("chat_sessions")
         .insert({
           profile_id: profileId,
-          visitor_id: visitorId,
+          visitor_id: session?.user?.id || visitorId,
           visitor_ip: null,
           user_agent: navigator.userAgent,
           status: 'active'
@@ -38,8 +40,8 @@ export const useChatSession = (profileId: string | undefined) => {
         return null;
       }
 
-      console.log("Chat session created successfully:", session);
-      return session.id;
+      console.log("Chat session created successfully:", chatSession);
+      return chatSession.id;
     } catch (error: any) {
       console.error("Failed to create chat session:", error);
       toast({
