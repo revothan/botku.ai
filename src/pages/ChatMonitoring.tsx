@@ -2,10 +2,13 @@ import { useEffect, useState } from "react";
 import { useSession } from "@supabase/auth-helpers-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { formatDistanceToNow } from "date-fns";
+import type { ChatSession, ChatMessage } from "@/types/chat";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
-import { ChatSessionCard } from "@/components/chatbot/ChatSessionCard";
-import type { ChatSession } from "@/types/chat";
 
 const ChatMonitoring = () => {
   const session = useSession();
@@ -20,9 +23,10 @@ const ChatMonitoring = () => {
 
       console.log("Fetching chat sessions for user:", session.user.id);
       
+      // First get the user's profile
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
-        .select("id")
+        .select("id, custom_domain")
         .eq("id", session.user.id)
         .single();
 
@@ -31,6 +35,9 @@ const ChatMonitoring = () => {
         throw profileError;
       }
 
+      console.log("Found profile:", profile);
+
+      // Then get all chat sessions for this profile that have at least one message
       const { data: sessions, error: sessionsError } = await supabase
         .from("chat_sessions")
         .select(`
@@ -49,10 +56,14 @@ const ChatMonitoring = () => {
         throw sessionsError;
       }
 
+      console.log("Raw sessions data:", sessions);
+
+      // Group messages by session
       const sessionsMap: Record<string, ChatSession> = {};
       sessions?.forEach((session: any) => {
         const messages = session.chat_messages || [];
-        if (messages.length > 0) {
+        if (messages.length > 0) {  // Only include sessions with messages
+          console.log("Processing session:", session.id, "with messages:", messages);
           sessionsMap[session.id] = {
             ...session,
             messages: messages
@@ -60,15 +71,19 @@ const ChatMonitoring = () => {
         }
       });
 
+      console.log("Processed sessions map:", sessionsMap);
       return sessionsMap;
     },
     enabled: !!session?.user?.id,
-    refetchInterval: 30000,
+    refetchInterval: 30000, // Refetch every 30 seconds
   });
 
   useEffect(() => {
     if (!session?.user?.id) return;
 
+    console.log("Setting up realtime subscriptions for user:", session.user.id);
+
+    // Subscribe to new chat sessions
     const sessionsChannel = supabase
       .channel("chat-sessions")
       .on(
@@ -98,6 +113,7 @@ const ChatMonitoring = () => {
       )
       .subscribe();
 
+    // Subscribe to chat messages
     const messagesChannel = supabase
       .channel("chat-messages")
       .on(
@@ -109,7 +125,7 @@ const ChatMonitoring = () => {
         },
         (payload) => {
           console.log("New chat message:", payload);
-          const message = payload.new;
+          const message = payload.new as ChatMessage;
           setRealtimeSessions((current) => {
             const session = current[message.session_id];
             if (!session) return current;
@@ -126,6 +142,7 @@ const ChatMonitoring = () => {
       .subscribe();
 
     return () => {
+      console.log("Cleaning up realtime subscriptions");
       sessionsChannel.unsubscribe();
       messagesChannel.unsubscribe();
     };
@@ -179,7 +196,56 @@ const ChatMonitoring = () => {
         {sessionsList
           .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
           .map((session) => (
-            <ChatSessionCard key={session.id} session={session} />
+            <Card key={session.id} className="relative">
+              <CardHeader className="pb-2">
+                <div className="flex justify-between items-start">
+                  <CardTitle className="text-sm font-medium">
+                    Visitor {session.visitor_id.slice(0, 8)}
+                  </CardTitle>
+                  <Badge 
+                    variant={
+                      session.status === "active" 
+                        ? "default" 
+                        : session.status === "ended" 
+                          ? "secondary" 
+                          : "outline"
+                    }
+                  >
+                    {session.status}
+                  </Badge>
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  Started {formatDistanceToNow(new Date(session.created_at))} ago
+                </div>
+              </CardHeader>
+              <CardContent>
+                <ScrollArea className="h-[300px]">
+                  <div className="space-y-4">
+                    {session.messages?.map((message) => (
+                      <div
+                        key={message.id}
+                        className={`flex ${
+                          message.role === "user" ? "justify-end" : "justify-start"
+                        }`}
+                      >
+                        <div
+                          className={`rounded-lg px-3 py-2 max-w-[80%] ${
+                            message.role === "user"
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-muted"
+                          }`}
+                        >
+                          <p className="text-sm">{message.content}</p>
+                          <span className="text-xs opacity-70">
+                            {formatDistanceToNow(new Date(message.created_at))} ago
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </Card>
           ))}
       </div>
     </div>
