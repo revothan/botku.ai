@@ -7,7 +7,6 @@ import CreatorQuestions from "./questions/CreatorQuestions";
 import OtherQuestions from "./questions/OtherQuestions";
 import FormHeaderFields from "./form/FormHeaderFields";
 import UserTypeSelection from "./form/UserTypeSelection";
-import AvatarField from "./form/AvatarField";
 import type { ChatbotFormData } from "@/types/chatbot";
 
 type ChatbotSettingsFormProps = {
@@ -106,7 +105,6 @@ const ChatbotSettingsForm = ({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-8 p-4">
-        <AvatarField form={form} />
         <FormHeaderFields form={form} />
         <UserTypeSelection form={form} />
 

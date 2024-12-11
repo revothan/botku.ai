@@ -92,7 +92,6 @@ export type Database = {
         Row: {
           answers: Json | null
           assistant_id: string | null
-          avatar_url: string | null
           bot_name: string
           buttons: Json | null
           created_at: string
@@ -106,7 +105,6 @@ export type Database = {
         Insert: {
           answers?: Json | null
           assistant_id?: string | null
-          avatar_url?: string | null
           bot_name?: string
           buttons?: Json | null
           created_at?: string
@@ -120,7 +118,6 @@ export type Database = {
         Update: {
           answers?: Json | null
           assistant_id?: string | null
-          avatar_url?: string | null
           bot_name?: string
           buttons?: Json | null
           created_at?: string

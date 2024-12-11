@@ -9,7 +9,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import ProductDetailsDialog from "@/components/products/ProductDetailsDialog";
 import type { Message, ButtonConfig, ChatbotSettings } from "@/types/chatbot";
 import type { Product } from "@/types/product";
@@ -62,11 +61,7 @@ export const ChatbotInterface = ({
       <div className="w-full max-w-lg h-full">
         <Card className="border-none shadow-lg bg-white/80 backdrop-blur-sm h-full">
           <CardContent className="p-4 h-full flex flex-col">
-            <div className="text-center border-b pb-4 flex items-center justify-center gap-3">
-              <Avatar className="h-10 w-10">
-                <AvatarImage src={settings.avatar_url || undefined} alt={settings.bot_name} />
-                <AvatarFallback className="bg-primary/10">{settings.bot_name?.charAt(0) || 'B'}</AvatarFallback>
-              </Avatar>
+            <div className="text-center border-b pb-4">
               <h3 className="font-bold text-secondary">{settings.bot_name}</h3>
             </div>
             

@@ -22,7 +22,6 @@ export type ChatbotSettings = {
     creator: string[];
     other: string[];
   };
-  avatar_url?: string | null;
 };
 
 export type Message = {
@@ -40,5 +39,4 @@ export type ChatbotFormData = {
     creator: string[];
     other: string[];
   };
-  avatar_url?: string | null;
 };
