@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
-import type { ChatSession, ChatMessage } from "@/types/chat";
+import type { ChatSession, ChatMessage, ChatSessionStatus } from "@/types/chat";
 
 const ChatMonitoring = () => {
   const session = useSession();
@@ -124,7 +124,15 @@ const ChatMonitoring = () => {
                   <CardTitle className="text-sm font-medium">
                     Visitor {session.visitor_id.slice(0, 8)}
                   </CardTitle>
-                  <Badge variant={session.status === "active" ? "default" : "secondary"}>
+                  <Badge 
+                    variant={
+                      session.status === "active" 
+                        ? "default" 
+                        : session.status === "ended" 
+                          ? "secondary" 
+                          : "outline"
+                    }
+                  >
                     {session.status}
                   </Badge>
                 </div>
