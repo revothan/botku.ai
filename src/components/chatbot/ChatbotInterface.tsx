@@ -65,7 +65,7 @@ export const ChatbotInterface = ({
             <div className="text-center border-b pb-4 flex items-center justify-center gap-3">
               <Avatar className="h-8 w-8">
                 <AvatarImage src={settings.avatar_url} alt={settings.bot_name} />
-                <AvatarFallback>BOT</AvatarFallback>
+                <AvatarFallback></AvatarFallback>
               </Avatar>
               <h3 className="font-bold text-secondary">{settings.bot_name}</h3>
             </div>
