@@ -59,7 +59,7 @@ export const ChatbotInterface = ({
 
   // Get the public URL for the avatar
   const avatarUrl = settings.avatar_url 
-    ? supabase.storage.from('chatbot-avatars').getPublicUrl(settings.avatar_url.split('/').pop() || '').data.publicUrl
+    ? supabase.storage.from('chatbot-avatars').getPublicUrl(settings.avatar_url).data.publicUrl
     : '';
 
   return (
