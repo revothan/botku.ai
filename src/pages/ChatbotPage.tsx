@@ -8,7 +8,7 @@ import { ChatbotInterface } from "@/components/chatbot/ChatbotInterface";
 import { useChatSession } from "@/hooks/useChatSession";
 import { useChatMessages } from "@/hooks/useChatMessages";
 import { useSession } from '@supabase/auth-helpers-react';
-import type { ChatbotSettings } from "@/types/chatbot";
+import type { ChatbotSettings, Message } from "@/types/chatbot";
 
 type AssistantResponse = {
   response: {
