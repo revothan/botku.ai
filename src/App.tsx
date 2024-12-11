@@ -69,12 +69,24 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// Home route wrapper to handle authentication redirect
+const HomeRoute = () => {
+  const session = useSession();
+  
+  if (session) {
+    console.log("User is logged in, redirecting to dashboard");
+    return <Navigate to="/dashboard" replace />;
+  }
+  
+  return <Landing />;
+};
+
 const AppRoutes = () => {
   console.log("App rendering, initializing Supabase session");
   
   return (
     <Routes>
-      <Route path="/" element={<Landing />} />
+      <Route path="/" element={<HomeRoute />} />
       <Route path="/login" element={<Login />} />
       <Route 
         path="/dashboard" 
