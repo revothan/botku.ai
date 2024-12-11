@@ -1,7 +1,7 @@
 export type ChatMessage = {
   id: string;
   session_id: string;
-  role: "user" | "assistant";
+  role: "user" | "assistant" | string;
   content: string;
   created_at: string;
 };

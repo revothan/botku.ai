@@ -30,7 +30,7 @@ const ChatMonitoring = () => {
       }
 
       const sessionsMap: Record<string, ChatSession> = {};
-      sessions?.forEach((session: ChatSession) => {
+      sessions?.forEach((session: any) => {
         sessionsMap[session.id] = session;
       });
 
