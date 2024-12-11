@@ -17,27 +17,47 @@ const ChatMonitoring = () => {
   const { data: initialSessions, isLoading, error } = useQuery({
     queryKey: ["chat-sessions"],
     queryFn: async () => {
-      console.log("Fetching chat sessions for user:", session?.user?.id);
+      if (!session?.user?.id) {
+        throw new Error("No authenticated user");
+      }
+
+      console.log("Fetching chat sessions for user:", session.user.id);
       
-      const { data: sessions, error } = await supabase
+      // First get the user's profile
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("id", session.user.id)
+        .single();
+
+      if (profileError) {
+        console.error("Error fetching profile:", profileError);
+        throw profileError;
+      }
+
+      // Then get all chat sessions for this profile
+      const { data: sessions, error: sessionsError } = await supabase
         .from("chat_sessions")
         .select(`
           *,
           chat_messages (*)
         `)
-        .eq("profile_id", session?.user?.id)
+        .eq("profile_id", profile.id)
         .order("created_at", { ascending: false });
 
-      if (error) {
-        console.error("Error fetching chat sessions:", error);
-        throw error;
+      if (sessionsError) {
+        console.error("Error fetching chat sessions:", sessionsError);
+        throw sessionsError;
       }
 
       console.log("Fetched sessions:", sessions);
 
       const sessionsMap: Record<string, ChatSession> = {};
       sessions?.forEach((session: any) => {
-        sessionsMap[session.id] = session;
+        sessionsMap[session.id] = {
+          ...session,
+          messages: session.chat_messages || []
+        };
       });
 
       return sessionsMap;
