@@ -22,6 +22,11 @@ const AvatarField = ({ form }: AvatarFieldProps) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    // Debug logs
+    console.log('File:', file);
+    console.log('File type:', file.type);
+    console.log('File size:', file.size);
+
     // Validate file type
     if (!file.type.startsWith('image/')) {
       toast({
@@ -48,14 +53,23 @@ const AvatarField = ({ form }: AvatarFieldProps) => {
       // Upload to Supabase Storage
       const fileExt = file.name.split('.').pop();
       const fileName = `${crypto.randomUUID()}.${fileExt}`;
+
+      // Create a new File object with explicit type
+      const imageFile = new File([file], fileName, {
+        type: file.type
+      });
+
       const { error: uploadError, data } = await supabase.storage
         .from('chatbot-avatars')
-        .upload(fileName, file, {
+        .upload(fileName, imageFile, {
           contentType: file.type,
           upsert: false
         });
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        throw uploadError;
+      }
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
@@ -77,6 +91,8 @@ const AvatarField = ({ form }: AvatarFieldProps) => {
       });
     } finally {
       setIsUploading(false);
+      // Reset the input value to allow uploading the same file again
+      event.target.value = '';
     }
   };
 
