@@ -71,7 +71,21 @@ const AvatarField = ({ form, defaultAvatarUrl }: AvatarFieldProps) => {
         .getPublicUrl(fileName);
 
       // Update form with the public URL
-      form.setValue("avatar_url", publicUrl);
+      form.setValue("avatar_url", publicUrl, {
+        shouldDirty: true,
+        shouldTouch: true,
+        shouldValidate: true
+      });
+
+      // Update chatbot settings in the database
+      const { error: updateError } = await supabase
+        .from('chatbot_settings')
+        .update({ avatar_url: publicUrl })
+        .eq('profile_id', form.getValues('profile_id'));
+
+      if (updateError) {
+        throw updateError;
+      }
 
       toast({
         title: "Success",
