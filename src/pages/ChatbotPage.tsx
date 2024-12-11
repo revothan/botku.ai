@@ -11,6 +11,12 @@ import { useChatMessages } from "@/hooks/useChatMessages";
 import { useChatLogic } from "@/hooks/useChatLogic";
 import type { ChatbotSettings, Message } from "@/types/chatbot";
 
+// Helper function to validate message role
+const isValidRole = (role: string): role is Message['role'] => {
+  const validRoles = ['user', 'assistant', 'owner'] as const;
+  return validRoles.includes(role as Message['role']);
+};
+
 const transformSettings = (rawSettings: any): ChatbotSettings => ({
   ...rawSettings,
   buttons: Array.isArray(rawSettings.buttons) 
@@ -21,11 +27,6 @@ const transformSettings = (rawSettings: any): ChatbotSettings => ({
       }))
     : []
 });
-
-// Helper function to validate message role
-const isValidRole = (role: string): role is Message['role'] => {
-  return ['user', 'assistant', 'owner'].includes(role);
-};
 
 const ChatbotPage = () => {
   const { customDomain } = useParams<{ customDomain: string }>();
@@ -101,6 +102,8 @@ const ChatbotPage = () => {
         
         if (!data || data.length === 0) {
           console.log("No messages found for session");
+          setLocalMessages([]);
+          setMessages([]);
           return;
         }
 
