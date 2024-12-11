@@ -88,11 +88,18 @@ const ProductList = ({ products, onProductUpdated }: ProductListProps) => {
             </Button>
 
             {product.image_url && (
-              <img
-                src={product.image_url}
-                alt={product.name}
-                className="w-full h-48 object-cover rounded-md mb-4"
-              />
+              <div className="relative w-full h-48 mb-4">
+                <img
+                  src={product.image_url}
+                  alt={product.name}
+                  className="w-full h-full object-cover rounded-md"
+                  onError={(e) => {
+                    console.error('Image load error:', e);
+                    const img = e.target as HTMLImageElement;
+                    img.src = '/placeholder.svg';
+                  }}
+                />
+              </div>
             )}
             <h3 className="font-semibold text-lg">{product.name}</h3>
             {product.details && (
