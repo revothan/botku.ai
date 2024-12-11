@@ -26,7 +26,7 @@ const ChatMonitoring = () => {
       // First get the user's profile
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
-        .select("id")
+        .select("id, custom_domain")
         .eq("id", session.user.id)
         .single();
 
@@ -35,40 +35,49 @@ const ChatMonitoring = () => {
         throw profileError;
       }
 
+      console.log("Found profile:", profile);
+
       // Then get all chat sessions for this profile
       const { data: sessions, error: sessionsError } = await supabase
         .from("chat_sessions")
         .select(`
           *,
-          chat_messages (*)
+          chat_messages (
+            id,
+            role,
+            content,
+            created_at
+          )
         `)
-        .eq("profile_id", profile.id)
-        .order("created_at", { ascending: false });
+        .eq("profile_id", profile.id);
 
       if (sessionsError) {
         console.error("Error fetching chat sessions:", sessionsError);
         throw sessionsError;
       }
 
-      console.log("Fetched sessions:", sessions);
+      console.log("Raw sessions data:", sessions);
 
       const sessionsMap: Record<string, ChatSession> = {};
       sessions?.forEach((session: any) => {
+        console.log("Processing session:", session.id, "with messages:", session.chat_messages);
         sessionsMap[session.id] = {
           ...session,
           messages: session.chat_messages || []
         };
       });
 
+      console.log("Processed sessions map:", sessionsMap);
       return sessionsMap;
     },
     enabled: !!session?.user?.id,
+    refetchInterval: 30000, // Refetch every 30 seconds
   });
 
   useEffect(() => {
     if (!session?.user?.id) return;
 
-    console.log("Setting up realtime subscriptions");
+    console.log("Setting up realtime subscriptions for user:", session.user.id);
 
     // Subscribe to new chat sessions
     const sessionsChannel = supabase
