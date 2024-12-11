@@ -50,6 +50,18 @@ const Index = () => {
       } else if (_event === 'TOKEN_REFRESHED') {
         console.log("Token refreshed successfully");
         setSession(session);
+      } else if (_event === 'PASSWORD_RECOVERY') {
+        console.log("Password recovery email sent");
+        toast({
+          title: "Password Reset Email Sent",
+          description: "Please check your email for the password reset link",
+        });
+      } else if (_event === 'USER_UPDATED') {
+        console.log("User updated successfully");
+        toast({
+          title: "Success",
+          description: "Your password has been updated successfully",
+        });
       }
     });
 
@@ -59,6 +71,36 @@ const Index = () => {
       subscription.unsubscribe();
     };
   }, [navigate, toast]);
+
+  const handlePasswordReset = async (email: string) => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      
+      if (error) {
+        console.error("Password reset error:", error);
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      toast({
+        title: "Password Reset Email Sent",
+        description: "Please check your email for the password reset link",
+      });
+    } catch (error: any) {
+      console.error("Error sending reset email:", error);
+      toast({
+        title: "Error",
+        description: "Failed to send password reset email",
+        variant: "destructive",
+      });
+    }
+  };
 
   if (session) {
     return (
@@ -128,6 +170,7 @@ const Index = () => {
               }}
               theme="light"
               providers={[]}
+              onPasswordReset={handlePasswordReset}
             />
           </div>
         </div>
