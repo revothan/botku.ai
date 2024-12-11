@@ -37,12 +37,12 @@ const ChatMonitoring = () => {
 
       console.log("Found profile:", profile);
 
-      // Then get all chat sessions for this profile
+      // Then get all chat sessions for this profile that have at least one message
       const { data: sessions, error: sessionsError } = await supabase
         .from("chat_sessions")
         .select(`
           *,
-          chat_messages (
+          chat_messages!inner (
             id,
             role,
             content,
@@ -58,13 +58,17 @@ const ChatMonitoring = () => {
 
       console.log("Raw sessions data:", sessions);
 
+      // Group messages by session
       const sessionsMap: Record<string, ChatSession> = {};
       sessions?.forEach((session: any) => {
-        console.log("Processing session:", session.id, "with messages:", session.chat_messages);
-        sessionsMap[session.id] = {
-          ...session,
-          messages: session.chat_messages || []
-        };
+        const messages = session.chat_messages || [];
+        if (messages.length > 0) {  // Only include sessions with messages
+          console.log("Processing session:", session.id, "with messages:", messages);
+          sessionsMap[session.id] = {
+            ...session,
+            messages: messages
+          };
+        }
       });
 
       console.log("Processed sessions map:", sessionsMap);
@@ -169,14 +173,16 @@ const ChatMonitoring = () => {
     );
   }
 
-  const sessionsList = Object.values(sessions);
+  const sessionsList = Object.values(sessions).filter(session => 
+    session.messages && session.messages.length > 0
+  );
   
   if (sessionsList.length === 0) {
     return (
       <div className="p-6">
         <Alert>
           <AlertDescription>
-            No chat sessions found. Start a chat session to see it here.
+            No active chat sessions found. Chat sessions will appear here once visitors start chatting with your chatbot.
           </AlertDescription>
         </Alert>
       </div>
