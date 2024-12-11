@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { formatCurrency } from "@/lib/utils";
-import { Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";  // Keeping the existing Trash2 icon
 import {
   AlertDialog,
   AlertDialogAction,
@@ -75,16 +75,16 @@ const ProductList = ({ products, onProductUpdated }: ProductListProps) => {
         {products.map((product) => (
           <div
             key={product.id}
-            className="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer relative"
+            className="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer relative group"
             onClick={() => handleProductClick(product)}
           >
             <Button
-              variant="ghost"
+              variant="destructive"
               size="icon"
-              className="absolute top-2 right-2 text-destructive hover:text-destructive/90"
+              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"
               onClick={(e) => handleDeleteClick(e, product)}
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="h-5 w-5" />
             </Button>
 
             {product.image_url && (
