@@ -49,15 +49,26 @@ const AvatarField = ({ form, defaultAvatarUrl }: AvatarFieldProps) => {
       const fileExt = file.name.split('.').pop()?.toLowerCase();
       const fileName = `${crypto.randomUUID()}.${fileExt}`;
 
-      // Upload file to Supabase Storage
-      const { error: uploadError, data } = await supabase.storage
-        .from('chatbot-avatars')
-        .upload(fileName, file, {
-          cacheControl: '3600',
-          upsert: false
-        });
+      // Create a FormData instance
+      const formData = new FormData();
+      formData.append('file', file);
 
-      if (uploadError) throw uploadError;
+      // Upload file to Supabase Storage using fetch
+      const uploadResponse = await fetch(
+        `${supabase.storageClient.url}/object/chatbot-avatars/${fileName}`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${supabase.auth.session()?.access_token}`,
+            'apikey': supabase.supabaseKey,
+          },
+          body: formData,
+        }
+      );
+
+      if (!uploadResponse.ok) {
+        throw new Error('Upload failed');
+      }
 
       // Get the public URL
       const { data: { publicUrl } } = supabase.storage
