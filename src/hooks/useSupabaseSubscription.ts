@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState, useEffect } from 'react';
 import { RealtimeChannel } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -66,7 +66,7 @@ export const useSupabaseSubscription = (sessionId: string | null) => {
           }
         }
       )
-      .on('error', (error) => {
+      .on('error', { event: 'error' }, (error) => {
         console.error('Subscription error:', error);
         toast.error('Connection error occurred');
       })
