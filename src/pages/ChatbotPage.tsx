@@ -1,21 +1,14 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useState, useRef, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { useState, useRef } from "react";
 import { LoadingState, ErrorState, NotFoundState } from "@/components/chatbot/ChatbotStates";
 import { ChatInput } from "@/components/chatbot/ChatInput";
 import { ChatMessages } from "@/components/chatbot/ChatMessages";
-import { useChatSession } from "@/hooks/useChatSession";
-import { useChatMessages } from "@/hooks/useChatMessages";
+import { useChatSession, ChatSessionProvider } from "@/components/chatbot/ChatSessionProvider";
 import { useChatLogic } from "@/hooks/useChatLogic";
-import type { ChatbotSettings, Message } from "@/types/chatbot";
-
-// Helper function to validate message role
-const isValidRole = (role: string): role is Message['role'] => {
-  const validRoles = ['user', 'assistant', 'owner'] as const;
-  return validRoles.includes(role as Message['role']);
-};
+import { usePostMessage } from "@/hooks/usePostMessage";
+import type { ChatbotSettings } from "@/types/chatbot";
 
 const transformSettings = (rawSettings: any): ChatbotSettings => ({
   ...rawSettings,
@@ -28,11 +21,11 @@ const transformSettings = (rawSettings: any): ChatbotSettings => ({
     : []
 });
 
-const ChatbotPage = () => {
+const ChatbotContent = () => {
   const { customDomain } = useParams<{ customDomain: string }>();
   const [inputMessage, setInputMessage] = useState("");
-  const [localMessages, setLocalMessages] = useState<Message[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { messages, isLoading: messagesLoading } = useChatSession();
 
   const { data: settings, isLoading: settingsLoading, error } = useQuery({
     queryKey: ["chatbot-settings", customDomain],
@@ -72,156 +65,36 @@ const ChatbotPage = () => {
     },
   });
 
-  const { sessionId, setSessionId, createChatSession } = useChatSession(settings?.profile_id);
-  const { messages, setMessages } = useChatMessages(sessionId);
-  const { isLoading, sendMessage } = useChatLogic(settings!, sessionId, setSessionId);
-
-  // Load initial messages for the session
-  useEffect(() => {
-    const loadMessages = async () => {
-      if (!sessionId) {
-        console.log("No session ID available, skipping message load");
-        return;
-      }
-      
-      console.log("Loading messages for session:", sessionId);
-      
-      try {
-        const { data, error } = await supabase
-          .from('chat_messages')
-          .select('*')
-          .eq('session_id', sessionId)
-          .order('created_at', { ascending: true });
-
-        if (error) {
-          console.error('Error loading messages:', error);
-          return;
-        }
-
-        console.log("Received messages from database:", data);
-        
-        if (!data || data.length === 0) {
-          console.log("No messages found for session");
-          setLocalMessages([]);
-          setMessages([]);
-          return;
-        }
-
-        const formattedMessages = data
-          .map(msg => {
-            if (!isValidRole(msg.role)) {
-              console.warn(`Invalid role encountered: ${msg.role}`);
-              return null;
-            }
-            return {
-              role: msg.role,
-              content: msg.content
-            } as Message;
-          })
-          .filter((msg): msg is Message => msg !== null);
-        
-        console.log("Formatted messages:", formattedMessages);
-        setLocalMessages(formattedMessages);
-        setMessages(formattedMessages);
-      } catch (error) {
-        console.error('Error in loadMessages:', error);
-      }
-    };
-    
-    loadMessages();
-  }, [sessionId, setMessages]);
-
-  // Subscribe to real-time updates for messages
-  useEffect(() => {
-    if (!sessionId) {
-      console.log('No session ID available for subscription');
-      return;
-    }
-
-    console.log('Setting up real-time subscription for session:', sessionId);
-    const channel = supabase
-      .channel(`chat_messages_${sessionId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'chat_messages',
-          filter: `session_id=eq.${sessionId}`
-        },
-        (payload: any) => {
-          console.log('Real-time message update received:', payload);
-          
-          if (!isValidRole(payload.new.role)) {
-            console.warn(`Invalid role received in real-time update: ${payload.new.role}`);
-            return;
-          }
-          
-          const newMessage: Message = {
-            role: payload.new.role,
-            content: payload.new.content
-          };
-          
-          console.log('Adding new message to local state:', newMessage);
-          setLocalMessages(prev => [...prev, newMessage]);
-        }
-      )
-      .subscribe((status) => {
-        console.log('Subscription status:', status);
-      });
-
-    return () => {
-      console.log('Cleaning up subscription');
-      supabase.removeChannel(channel);
-    };
-  }, [sessionId]);
-
-  // Scroll to bottom when messages update
-  useEffect(() => {
-    console.log('Messages updated, scrolling to bottom. Current messages:', localMessages);
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [localMessages]);
+  usePostMessage((message) => {
+    console.log('Received postMessage:', message);
+    // Handle any postMessage events here
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputMessage.trim()) return;
 
     console.log('Handling message submission:', inputMessage);
-
-    if (!sessionId) {
-      console.log('Creating new chat session');
-      const newSessionId = await createChatSession();
-      if (!newSessionId) {
-        console.error('Failed to create chat session');
-        return;
-      }
-      setSessionId(newSessionId);
-    }
-
-    const success = await sendMessage(inputMessage, "user");
-    if (success) {
-      console.log('Message sent successfully');
-      setInputMessage("");
-    }
+    setInputMessage("");
   };
 
-  if (settingsLoading) return <LoadingState />;
+  if (settingsLoading || messagesLoading) return <LoadingState />;
   if (error) return <ErrorState message={error.message} />;
   if (!settings) return <NotFoundState />;
 
   return (
     <div className="h-[100dvh] bg-gradient-to-b from-[#fcf5eb] to-white p-4 flex items-center justify-center overflow-hidden">
       <div className="w-full max-w-lg h-full">
-        <Card className="border-none shadow-lg bg-white/80 backdrop-blur-sm h-full">
-          <CardContent className="p-4 h-full flex flex-col">
+        <div className="border-none shadow-lg bg-white/80 backdrop-blur-sm h-full rounded-lg">
+          <div className="p-4 h-full flex flex-col">
             <div className="text-center border-b pb-4">
               <h3 className="font-bold text-secondary">{settings.bot_name}</h3>
             </div>
             
             <ChatMessages
-              messages={localMessages}
+              messages={messages}
               buttons={settings.buttons || []}
-              isLoading={isLoading}
+              isLoading={messagesLoading}
               messagesEndRef={messagesEndRef}
               greeting={settings.greeting_message}
             />
@@ -231,13 +104,23 @@ const ChatbotPage = () => {
                 inputMessage={inputMessage}
                 setInputMessage={setInputMessage}
                 handleSubmit={handleSubmit}
-                isLoading={isLoading}
+                isLoading={messagesLoading}
               />
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
+  );
+};
+
+const ChatbotPage = () => {
+  const [sessionId] = useState(() => crypto.randomUUID());
+
+  return (
+    <ChatSessionProvider sessionId={sessionId}>
+      <ChatbotContent />
+    </ChatSessionProvider>
   );
 };
 
