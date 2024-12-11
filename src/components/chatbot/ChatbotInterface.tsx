@@ -1,14 +1,11 @@
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent } from "@/components/ui/card";
-import { ChatMessage } from "@/components/chatbot/ChatMessage";
 import { ChatInput } from "@/components/chatbot/ChatInput";
-import { ChatButtons } from "@/components/chatbot/ChatButtons";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { formatCurrency } from "@/lib/utils";
+import { ChatHeader } from "@/components/chatbot/ChatHeader";
+import { ChatMessages } from "@/components/chatbot/ChatMessages";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, ChevronUp, User } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 import ProductDetailsDialog from "@/components/products/ProductDetailsDialog";
 import type { Message, ButtonConfig, ChatbotSettings } from "@/types/chatbot";
@@ -37,11 +34,6 @@ export const ChatbotInterface = ({
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const buttons = (settings.buttons || []) as ButtonConfig[];
 
-  // Get the public URL for the avatar
-  const avatarUrl = settings.avatar_url 
-    ? supabase.storage.from('chatbot-avatars').getPublicUrl(settings.avatar_url).data.publicUrl
-    : '';
-
   const { data: products, isLoading: productsLoading } = useQuery({
     queryKey: ["chatbot-products", settings.profile_id],
     queryFn: async () => {
@@ -67,40 +59,18 @@ export const ChatbotInterface = ({
       <div className="w-full max-w-lg h-full">
         <Card className="border-none shadow-lg bg-white/80 backdrop-blur-sm h-full">
           <CardContent className="p-4 h-full flex flex-col">
-            <div className="text-center border-b pb-4 flex items-center justify-center gap-3">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={avatarUrl} alt={settings.bot_name} />
-                <AvatarFallback>
-                  <User className="h-4 w-4 text-muted-foreground" />
-                </AvatarFallback>
-              </Avatar>
-              <h3 className="font-bold text-secondary">{settings.bot_name}</h3>
-            </div>
+            <ChatHeader 
+              botName={settings.bot_name} 
+              avatarUrl={settings.avatar_url}
+            />
             
-            <ScrollArea className="flex-1 py-4">
-              <div className="space-y-4">
-                <div className="bg-primary/10 rounded-lg p-3 max-w-[80%]">
-                  <p className="text-sm">{settings.greeting_message}</p>
-                </div>
-
-                {messages.map((message, index) => (
-                  <ChatMessage key={index} message={message} />
-                ))}
-
-                {isLoading && (
-                  <div className="bg-primary/10 rounded-lg p-3 max-w-[80%] animate-pulse">
-                    <div className="flex space-x-2">
-                      <div className="w-2 h-2 bg-primary/30 rounded-full animate-bounce"></div>
-                      <div className="w-2 h-2 bg-primary/30 rounded-full animate-bounce [animation-delay:0.2s]"></div>
-                      <div className="w-2 h-2 bg-primary/30 rounded-full animate-bounce [animation-delay:0.4s]"></div>
-                    </div>
-                  </div>
-                )}
-
-                <ChatButtons buttons={buttons} />
-                <div ref={messagesEndRef} />
-              </div>
-            </ScrollArea>
+            <ChatMessages 
+              messages={messages}
+              buttons={buttons}
+              isLoading={isLoading}
+              greetingMessage={settings.greeting_message}
+              messagesEndRef={messagesEndRef}
+            />
 
             <div className="border-t pt-4">
               {/* Products Collapsible Section */}
