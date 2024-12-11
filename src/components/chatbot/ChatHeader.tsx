@@ -22,17 +22,10 @@ export const ChatHeader = ({ botName, avatarUrl }: ChatHeaderProps) => {
       try {
         console.log("Fetching public URL for avatar:", avatarUrl);
         
-        // Get the bucket reference
-        const bucket = supabase.storage.from("chatbot-avatars");
-        
-        // Generate public URL
-        const { data, error } = bucket.getPublicUrl(avatarUrl);
-
-        if (error) {
-          console.error("Error generating public URL:", error);
-          setPublicAvatarUrl(null);
-          return;
-        }
+        // Get the bucket reference and generate public URL
+        const { data } = supabase.storage
+          .from("chatbot-avatars")
+          .getPublicUrl(avatarUrl);
 
         if (!data?.publicUrl) {
           console.error("No public URL generated");
