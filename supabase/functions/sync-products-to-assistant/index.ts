@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
 import OpenAI from "https://deno.land/x/openai@v4.24.0/mod.ts"
 
 const corsHeaders = {
@@ -15,8 +14,12 @@ serve(async (req) => {
   try {
     const { file, assistant_id } = await req.json()
 
+    if (!file) {
+      throw new Error("'file' is a required property")
+    }
+
     if (!assistant_id) {
-      throw new Error('No assistant ID provided')
+      throw new Error("No assistant ID provided")
     }
 
     const openai = new OpenAI({
@@ -25,18 +28,22 @@ serve(async (req) => {
 
     // Create a file with the products data
     const fileUpload = await openai.files.create({
-      file: new Blob([file], { type: 'application/json' }),
+      file: new Blob([JSON.stringify(file)], { type: 'application/json' }),
       purpose: 'assistants'
     })
+
+    console.log("File uploaded successfully:", fileUpload.id)
 
     // Get existing files for this assistant
     const assistant = await openai.beta.assistants.retrieve(assistant_id)
     
     // Remove old files if they exist
     if (assistant.file_ids?.length) {
+      console.log("Removing old files:", assistant.file_ids)
       for (const fileId of assistant.file_ids) {
         try {
           await openai.files.del(fileId)
+          console.log("Successfully deleted file:", fileId)
         } catch (error) {
           console.error(`Error deleting file ${fileId}:`, error)
         }
@@ -48,6 +55,8 @@ serve(async (req) => {
       file_ids: [fileUpload.id],
       tools: [{ type: "retrieval" }]
     })
+
+    console.log("Assistant updated successfully with new file")
 
     return new Response(
       JSON.stringify({ message: 'Products synced successfully' }),

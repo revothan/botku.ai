@@ -78,16 +78,12 @@ const ProductManagement = () => {
       }));
 
       // Create a JSON file with products data
-      const jsonContent = JSON.stringify({
+      const jsonContent = {
         products: productsData,
         formatted_text: productsData.map(p => 
           `This business has these products:\nNama Produk: ${p.name}\nDetails: ${p.details || 'N/A'}\nHarga: ${p.price}\nStok: ${p.stock || 'N/A'}\nCall To Action untuk membeli: ${p.cta || 'Beli Sekarang'}`
         ).join('\n\n')
-      }, null, 2);
-
-      const file = new File([jsonContent], "products.json", {
-        type: "application/json"
-      });
+      };
 
       // Get the current settings to retrieve assistant_id
       const { data: settings, error: settingsError } = await supabase

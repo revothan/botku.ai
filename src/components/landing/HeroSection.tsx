@@ -6,8 +6,13 @@ import { useEffect, useState } from "react";
 import { Bot, Sparkles, Zap } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 
+type DemoMessage = {
+  content: string;
+  role: 'assistant' | 'user';
+  showProducts?: boolean;
+};
+
 export const HeroSection = () => {
-  // Chat animation state
   const [messages, setMessages] = useState<Array<{ content: string; role: 'assistant' | 'user' }>>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -28,16 +33,16 @@ export const HeroSection = () => {
     }
   ];
 
-  const demoMessages = [
-    { content: "Halo! Saya YourAI, asisten virtual Anda. Ada yang bisa saya bantu?", role: 'assistant' as const },
-    { content: "Saya ingin beli kopi", role: 'user' as const },
+  const demoMessages: DemoMessage[] = [
+    { content: "Halo! Saya YourAI, asisten virtual Anda. Ada yang bisa saya bantu?", role: 'assistant' },
+    { content: "Saya ingin beli kopi", role: 'user' },
     { 
       content: "Berikut beberapa produk kopi yang kami miliki:", 
-      role: 'assistant' as const,
+      role: 'assistant',
       showProducts: true 
     },
-    { content: "Berapa harga Coffee Drip Kit?", role: 'user' as const },
-    { content: "Coffee Drip Kit dijual dengan harga Rp 299.000. Stok tersedia 25 unit. Apakah Anda ingin melakukan pemesanan?", role: 'assistant' as const },
+    { content: "Berapa harga Coffee Drip Kit?", role: 'user' },
+    { content: "Coffee Drip Kit dijual dengan harga Rp 299.000. Stok tersedia 25 unit. Apakah Anda ingin melakukan pemesanan?", role: 'assistant' },
   ];
 
   useEffect(() => {
