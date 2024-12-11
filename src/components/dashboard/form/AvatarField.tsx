@@ -61,12 +61,12 @@ const AvatarField = ({ form, defaultAvatarUrl }: AvatarFieldProps) => {
 
       // Upload file to Supabase Storage using fetch
       const uploadResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/chatbot-avatars/${fileName}`,
+        `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/chatbot-avatars/${fileName}`,
         {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${session.access_token}`,
-            'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
+            'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY || '',
           },
           body: formData,
         }
