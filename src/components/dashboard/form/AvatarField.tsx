@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -54,7 +54,7 @@ const AvatarField = ({ form, defaultAvatarUrl }: AvatarFieldProps) => {
       const fileData = new Uint8Array(arrayBuffer);
 
       // Upload file to Supabase Storage
-      const { data, error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('chatbot-avatars')
         .upload(fileName, fileData, {
           contentType: file.type,
