@@ -13,17 +13,14 @@ export const ChatHeader = ({ botName, avatarUrl }: ChatHeaderProps) => {
 
   useEffect(() => {
     if (avatarUrl) {
-      try {
-        const { data } = supabase.storage
-          .from('chatbot-avatars')
-          .getPublicUrl(avatarUrl);
-        
-        if (data?.publicUrl) {
-          console.log('Avatar URL resolved:', data.publicUrl);
-          setPublicAvatarUrl(data.publicUrl);
-        }
-      } catch (error) {
-        console.error('Error getting avatar URL:', error);
+      // Get the public URL directly without try/catch since getPublicUrl is synchronous
+      const { data } = supabase.storage
+        .from('chatbot-avatars')
+        .getPublicUrl(avatarUrl);
+      
+      if (data?.publicUrl) {
+        console.log('Setting avatar URL:', data.publicUrl);
+        setPublicAvatarUrl(data.publicUrl);
       }
     }
   }, [avatarUrl]);
@@ -31,20 +28,19 @@ export const ChatHeader = ({ botName, avatarUrl }: ChatHeaderProps) => {
   return (
     <div className="text-center border-b pb-4 flex items-center justify-center gap-3">
       <Avatar className="h-8 w-8">
-        {publicAvatarUrl ? (
+        {publicAvatarUrl && (
           <AvatarImage 
             src={publicAvatarUrl} 
             alt={botName}
-            onError={() => {
-              console.error('Failed to load avatar image');
+            onError={(e) => {
+              console.error('Failed to load avatar image:', e);
               setPublicAvatarUrl('');
             }}
           />
-        ) : (
-          <AvatarFallback>
-            <User className="h-4 w-4 text-muted-foreground" />
-          </AvatarFallback>
         )}
+        <AvatarFallback>
+          <User className="h-4 w-4 text-muted-foreground" />
+        </AvatarFallback>
       </Avatar>
       <h3 className="font-bold text-secondary">{botName}</h3>
     </div>
