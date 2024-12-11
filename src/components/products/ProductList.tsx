@@ -69,6 +69,18 @@ const ProductList = ({ products, onProductUpdated }: ProductListProps) => {
     }
   };
 
+  const getImageUrl = async (path: string) => {
+    try {
+      const { data } = await supabase.storage
+        .from('product-images')
+        .getPublicUrl(path);
+      return data.publicUrl;
+    } catch (error) {
+      console.error('Error getting public URL:', error);
+      return '/placeholder.svg';
+    }
+  };
+
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -90,7 +102,7 @@ const ProductList = ({ products, onProductUpdated }: ProductListProps) => {
             {product.image_url && (
               <div className="relative w-full h-48 mb-4">
                 <img
-                  src={product.image_url}
+                  src={product.image_url.startsWith('http') ? product.image_url : getImageUrl(product.image_url)}
                   alt={product.name}
                   className="w-full h-full object-cover rounded-md"
                   onError={(e) => {
