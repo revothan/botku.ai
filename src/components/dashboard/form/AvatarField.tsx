@@ -49,10 +49,14 @@ const AvatarField = ({ form, defaultAvatarUrl }: AvatarFieldProps) => {
       const fileExt = file.name.split('.').pop()?.toLowerCase();
       const fileName = `${crypto.randomUUID()}.${fileExt}`;
 
+      // Convert File object to ArrayBuffer
+      const arrayBuffer = await file.arrayBuffer();
+      const fileData = new Uint8Array(arrayBuffer);
+
       // Upload file to Supabase Storage
       const { error: uploadError } = await supabase.storage
         .from('chatbot-avatars')
-        .upload(fileName, file, {
+        .upload(fileName, fileData, {
           contentType: file.type,
           upsert: false
         });
