@@ -8,6 +8,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 import ProductDetailsDialog from "@/components/products/ProductDetailsDialog";
+import { formatCurrency } from "@/lib/utils";  // Added this import
 import type { Message, ButtonConfig, ChatbotSettings } from "@/types/chatbot";
 import type { Product } from "@/types/product";
 
