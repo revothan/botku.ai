@@ -38,6 +38,8 @@ const ChatbotPage = () => {
     queryFn: async () => {
       if (!customDomain) throw new Error("No domain provided");
       
+      console.log("Fetching settings for domain:", customDomain);
+      
       const { data: profileByDomain, error: domainError } = await supabase
         .from("profiles")
         .select(`
@@ -48,6 +50,7 @@ const ChatbotPage = () => {
         .single();
 
       if (!domainError && profileByDomain?.chatbot_settings) {
+        console.log("Found settings by domain:", profileByDomain.chatbot_settings);
         return transformSettings(profileByDomain.chatbot_settings);
       }
 
@@ -63,6 +66,7 @@ const ChatbotPage = () => {
       if (usernameError) throw usernameError;
       if (!profileByUsername?.chatbot_settings) return null;
 
+      console.log("Found settings by username:", profileByUsername.chatbot_settings);
       return transformSettings(profileByUsername.chatbot_settings);
     },
   });
@@ -74,7 +78,12 @@ const ChatbotPage = () => {
   // Load initial messages for the session
   useEffect(() => {
     const loadMessages = async () => {
-      if (!sessionId) return;
+      if (!sessionId) {
+        console.log("No session ID available, skipping message load");
+        return;
+      }
+      
+      console.log("Loading messages for session:", sessionId);
       
       const { data, error } = await supabase
         .from('chat_messages')
@@ -86,6 +95,8 @@ const ChatbotPage = () => {
         console.error('Error loading messages:', error);
         return;
       }
+
+      console.log("Received messages from database:", data);
       
       const formattedMessages = data
         .map(msg => {
@@ -100,6 +111,7 @@ const ChatbotPage = () => {
         })
         .filter((msg): msg is Message => msg !== null);
       
+      console.log("Formatted messages:", formattedMessages);
       setLocalMessages(formattedMessages);
       setMessages(formattedMessages);
     };
@@ -109,9 +121,12 @@ const ChatbotPage = () => {
 
   // Subscribe to real-time updates for messages
   useEffect(() => {
-    if (!sessionId) return;
+    if (!sessionId) {
+      console.log('No session ID available for subscription');
+      return;
+    }
 
-    console.log('Subscribing to chat messages for session:', sessionId);
+    console.log('Setting up real-time subscription for session:', sessionId);
     const channel = supabase
       .channel(`chat_messages_${sessionId}`)
       .on(
@@ -123,15 +138,19 @@ const ChatbotPage = () => {
           filter: `session_id=eq.${sessionId}`
         },
         (payload: any) => {
-          console.log('Real-time message update:', payload);
+          console.log('Real-time message update received:', payload);
+          
           if (!isValidRole(payload.new.role)) {
             console.warn(`Invalid role received in real-time update: ${payload.new.role}`);
             return;
           }
+          
           const newMessage: Message = {
             role: payload.new.role,
             content: payload.new.content
           };
+          
+          console.log('Adding new message to local state:', newMessage);
           setLocalMessages(prev => [...prev, newMessage]);
         }
       )
@@ -145,23 +164,34 @@ const ChatbotPage = () => {
     };
   }, [sessionId]);
 
+  // Scroll to bottom when messages update
+  useEffect(() => {
+    console.log('Messages updated, scrolling to bottom');
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [localMessages]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputMessage.trim()) return;
 
+    console.log('Handling message submission:', inputMessage);
+
     if (!sessionId) {
+      console.log('Creating new chat session');
       const newSessionId = await createChatSession();
-      if (!newSessionId) return;
+      if (!newSessionId) {
+        console.error('Failed to create chat session');
+        return;
+      }
       setSessionId(newSessionId);
     }
 
     const success = await sendMessage(inputMessage, "user");
-    if (success) setInputMessage("");
+    if (success) {
+      console.log('Message sent successfully');
+      setInputMessage("");
+    }
   };
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [localMessages]);
 
   if (settingsLoading) return <LoadingState />;
   if (error) return <ErrorState message={error.message} />;
