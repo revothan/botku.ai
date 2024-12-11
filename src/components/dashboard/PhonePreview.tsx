@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { formatCurrency } from "@/lib/utils";
 import ProductDetailsDialog from "@/components/products/ProductDetailsDialog";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import type { ButtonConfig } from "@/types/chatbot";
 import type { Product } from "@/types/product";
 
@@ -20,6 +21,21 @@ type PhonePreviewProps = {
 const PhonePreview = ({ botName, greetingMessage, buttons = [], userId }: PhonePreviewProps) => {
   const [isProductsOpen, setIsProductsOpen] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
+  const { data: settings } = useQuery({
+    queryKey: ["chatbot-settings", userId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("chatbot_settings")
+        .select("*")
+        .eq("profile_id", userId)
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!userId
+  });
 
   const { data: products } = useQuery({
     queryKey: ["preview-products", userId],
@@ -45,7 +61,11 @@ const PhonePreview = ({ botName, greetingMessage, buttons = [], userId }: PhoneP
       <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-1/3 h-6 bg-gray-900 rounded-b-2xl"></div>
       <div className="h-full bg-gray-100 p-4">
         <div className="bg-white h-full rounded-2xl shadow-sm p-4 flex flex-col">
-          <div className="text-center border-b pb-4">
+          <div className="text-center border-b pb-4 flex items-center justify-center gap-3">
+            <Avatar className="h-8 w-8">
+              <AvatarImage src={settings?.avatar_url || ''} alt={botName} />
+              <AvatarFallback>BOT</AvatarFallback>
+            </Avatar>
             <h3 className="font-bold">{botName || "My ChatBot"}</h3>
           </div>
           <div className="flex-1 overflow-y-auto py-4">

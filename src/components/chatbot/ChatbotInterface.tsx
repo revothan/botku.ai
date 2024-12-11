@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ChatMessage } from "@/components/chatbot/ChatMessage";
 import { ChatInput } from "@/components/chatbot/ChatInput";
 import { ChatButtons } from "@/components/chatbot/ChatButtons";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { formatCurrency } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -61,7 +62,11 @@ export const ChatbotInterface = ({
       <div className="w-full max-w-lg h-full">
         <Card className="border-none shadow-lg bg-white/80 backdrop-blur-sm h-full">
           <CardContent className="p-4 h-full flex flex-col">
-            <div className="text-center border-b pb-4">
+            <div className="text-center border-b pb-4 flex items-center justify-center gap-3">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={settings.avatar_url || ''} alt={settings.bot_name} />
+                <AvatarFallback>BOT</AvatarFallback>
+              </Avatar>
               <h3 className="font-bold text-secondary">{settings.bot_name}</h3>
             </div>
             
