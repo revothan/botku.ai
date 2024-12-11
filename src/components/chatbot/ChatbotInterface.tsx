@@ -8,7 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import ProductDetailsDialog from "@/components/products/ProductDetailsDialog";
 import type { Message, ButtonConfig, ChatbotSettings } from "@/types/chatbot";
 import type { Product } from "@/types/product";
@@ -34,7 +34,6 @@ export const ChatbotInterface = ({
 }: ChatbotInterfaceProps) => {
   const [isProductsOpen, setIsProductsOpen] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [localMessages, setLocalMessages] = useState<Message[]>(messages);
   const buttons = (settings.buttons || []) as ButtonConfig[];
 
   const { data: products, isLoading: productsLoading } = useQuery({
@@ -57,40 +56,6 @@ export const ChatbotInterface = ({
     enabled: !!settings.profile_id,
   });
 
-  // Update local messages when prop changes
-  useEffect(() => {
-    setLocalMessages(messages);
-  }, [messages]);
-
-  // Subscribe to real-time updates for messages
-  useEffect(() => {
-    const channel = supabase
-      .channel('chat_messages')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'chat_messages'
-        },
-        (payload: any) => {
-          console.log('Real-time message update:', payload);
-          if (payload.eventType === 'INSERT') {
-            const newMessage = {
-              role: payload.new.role,
-              content: payload.new.content
-            } as Message;
-            setLocalMessages(prev => [...prev, newMessage]);
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
-
   return (
     <div className="h-[100dvh] bg-gradient-to-b from-[#fcf5eb] to-white p-4 flex items-center justify-center overflow-hidden">
       <div className="w-full max-w-lg h-full">
@@ -106,7 +71,7 @@ export const ChatbotInterface = ({
                   <p className="text-sm">{settings.greeting_message}</p>
                 </div>
 
-                {localMessages.map((message, index) => (
+                {messages.map((message, index) => (
                   <ChatMessage key={index} message={message} />
                 ))}
 

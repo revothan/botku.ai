@@ -25,7 +25,7 @@ export type ChatbotSettings = {
 };
 
 export type Message = {
-  role: "user" | "assistant" | "owner";
+  role: "user" | "assistant";
   content: string;
 };
 
