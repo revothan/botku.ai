@@ -12,9 +12,6 @@ type AvatarFieldProps = {
   form: UseFormReturn<ChatbotFormData>;
 };
 
-const SUPABASE_URL = "https://wssgzuhdbtcrxrxojsfq.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indzc2d6dWhkYnRjcnhyeG9qc2ZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM2MDI3NjMsImV4cCI6MjA0OTE3ODc2M30.LboN0ORnD6kNhI7KcBXy9jtv7jmHONyJv18HtUj1A7c";
-
 const AvatarField = ({ form }: AvatarFieldProps) => {
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
@@ -57,23 +54,16 @@ const AvatarField = ({ form }: AvatarFieldProps) => {
       const fileExt = file.name.split('.').pop();
       const fileName = `${crypto.randomUUID()}.${fileExt}`;
 
-      // Create FormData
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('fileName', fileName);
+      // Upload file using Supabase Storage
+      const { error: uploadError, data } = await supabase.storage
+        .from('chatbot-avatars')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
 
-      // Upload using fetch and FormData
-      const response = await fetch(`${SUPABASE_URL}/storage/v1/object/chatbot-avatars/${fileName}`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-        },
-        body: formData
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        console.error('Upload error:', error);
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
         throw new Error('Failed to upload file');
       }
 
