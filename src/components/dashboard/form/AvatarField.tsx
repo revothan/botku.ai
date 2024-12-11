@@ -18,11 +18,6 @@ const AvatarField = ({ form, defaultAvatarUrl }: AvatarFieldProps) => {
   const { toast } = useToast();
   const avatarUrl = form.watch("avatar_url") || defaultAvatarUrl;
 
-  // Get the public URL for display
-  const publicAvatarUrl = avatarUrl 
-    ? supabase.storage.from('chatbot-avatars').getPublicUrl(avatarUrl.split('/').pop() || '').data.publicUrl
-    : '';
-
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -53,16 +48,15 @@ const AvatarField = ({ form, defaultAvatarUrl }: AvatarFieldProps) => {
       // Generate a unique file name
       const fileExt = file.name.split('.').pop()?.toLowerCase();
       const fileName = `${crypto.randomUUID()}.${fileExt}`;
-      const filePath = `${fileName}`; // Store only the filename
 
       // Convert File object to ArrayBuffer
       const arrayBuffer = await file.arrayBuffer();
       const fileData = new Uint8Array(arrayBuffer);
 
       // Upload file to Supabase Storage
-      const { error: uploadError } = await supabase.storage
+      const { data, error: uploadError } = await supabase.storage
         .from('chatbot-avatars')
-        .upload(filePath, fileData, {
+        .upload(fileName, fileData, {
           contentType: file.type,
           upsert: false
         });
@@ -71,8 +65,13 @@ const AvatarField = ({ form, defaultAvatarUrl }: AvatarFieldProps) => {
         throw uploadError;
       }
 
-      // Update form with the file path
-      form.setValue("avatar_url", filePath);
+      // Get the public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('chatbot-avatars')
+        .getPublicUrl(fileName);
+
+      // Update form with the public URL
+      form.setValue("avatar_url", publicUrl);
 
       toast({
         title: "Success",
@@ -102,7 +101,7 @@ const AvatarField = ({ form, defaultAvatarUrl }: AvatarFieldProps) => {
           <FormControl>
             <div className="flex items-center gap-4">
               <Avatar className="h-20 w-20">
-                <AvatarImage src={publicAvatarUrl} alt="Chatbot avatar" />
+                <AvatarImage src={avatarUrl} alt="Chatbot avatar" />
                 <AvatarFallback>BOT</AvatarFallback>
               </Avatar>
               <div className="flex-1">
