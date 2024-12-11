@@ -3,7 +3,7 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/comp
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Loader2 } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import type { UseFormReturn } from "react-hook-form";
 import type { ChatbotFormData } from "@/types/chatbot";
@@ -17,7 +17,14 @@ interface AvatarFieldProps {
 const AvatarField = ({ form, defaultAvatarUrl, profileId }: AvatarFieldProps) => {
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
-  const avatarUrl = form.watch("avatar_url") || defaultAvatarUrl;
+  
+  // Get the current avatar URL from the form or use the default
+  const avatarUrl = form.watch("avatar_url");
+  
+  // Get the public URL for the avatar if it exists
+  const publicAvatarUrl = defaultAvatarUrl 
+    ? supabase.storage.from('chatbot-avatars').getPublicUrl(defaultAvatarUrl).data.publicUrl
+    : null;
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -71,8 +78,8 @@ const AvatarField = ({ form, defaultAvatarUrl, profileId }: AvatarFieldProps) =>
         .from('chatbot-avatars')
         .getPublicUrl(fileName);
 
-      // Update form with the public URL
-      form.setValue("avatar_url", publicUrl, {
+      // Update form with the file name (not the public URL)
+      form.setValue("avatar_url", fileName, {
         shouldDirty: true,
         shouldTouch: true,
         shouldValidate: true
@@ -118,7 +125,7 @@ const AvatarField = ({ form, defaultAvatarUrl, profileId }: AvatarFieldProps) =>
           <FormControl>
             <div className="flex items-center gap-4">
               <Avatar className="h-20 w-20">
-                <AvatarImage src={avatarUrl || ''} alt="Chatbot avatar" />
+                <AvatarImage src={avatarUrl ? publicAvatarUrl : ''} alt="Chatbot avatar" />
                 <AvatarFallback></AvatarFallback>
               </Avatar>
               <div className="flex-1">
