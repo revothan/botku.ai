@@ -22,6 +22,11 @@ const transformSettings = (rawSettings: any): ChatbotSettings => ({
     : []
 });
 
+// Helper function to validate message role
+const isValidRole = (role: string): role is Message['role'] => {
+  return ['user', 'assistant', 'owner'].includes(role);
+};
+
 const ChatbotPage = () => {
   const { customDomain } = useParams<{ customDomain: string }>();
   const [inputMessage, setInputMessage] = useState("");
@@ -82,10 +87,18 @@ const ChatbotPage = () => {
         return;
       }
       
-      const formattedMessages = data.map(msg => ({
-        role: msg.role,
-        content: msg.content
-      }));
+      const formattedMessages = data
+        .map(msg => {
+          if (!isValidRole(msg.role)) {
+            console.warn(`Invalid role encountered: ${msg.role}`);
+            return null;
+          }
+          return {
+            role: msg.role,
+            content: msg.content
+          } as Message;
+        })
+        .filter((msg): msg is Message => msg !== null);
       
       setLocalMessages(formattedMessages);
       setMessages(formattedMessages);
@@ -111,10 +124,14 @@ const ChatbotPage = () => {
         },
         (payload: any) => {
           console.log('Real-time message update:', payload);
-          const newMessage = {
+          if (!isValidRole(payload.new.role)) {
+            console.warn(`Invalid role received in real-time update: ${payload.new.role}`);
+            return;
+          }
+          const newMessage: Message = {
             role: payload.new.role,
             content: payload.new.content
-          } as Message;
+          };
           setLocalMessages(prev => [...prev, newMessage]);
         }
       )
