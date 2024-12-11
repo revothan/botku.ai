@@ -66,13 +66,41 @@ const ChatbotPage = () => {
   const { messages, setMessages } = useChatMessages(sessionId);
   const { isLoading, sendMessage } = useChatLogic(settings!, sessionId, setSessionId);
 
+  // Load initial messages for the session
+  useEffect(() => {
+    const loadMessages = async () => {
+      if (!sessionId) return;
+      
+      const { data, error } = await supabase
+        .from('chat_messages')
+        .select('*')
+        .eq('session_id', sessionId)
+        .order('created_at', { ascending: true });
+        
+      if (error) {
+        console.error('Error loading messages:', error);
+        return;
+      }
+      
+      const formattedMessages = data.map(msg => ({
+        role: msg.role,
+        content: msg.content
+      }));
+      
+      setLocalMessages(formattedMessages);
+      setMessages(formattedMessages);
+    };
+    
+    loadMessages();
+  }, [sessionId, setMessages]);
+
   // Subscribe to real-time updates for messages
   useEffect(() => {
     if (!sessionId) return;
 
     console.log('Subscribing to chat messages for session:', sessionId);
     const channel = supabase
-      .channel('chat_messages')
+      .channel(`chat_messages_${sessionId}`)
       .on(
         'postgres_changes',
         {
@@ -90,17 +118,15 @@ const ChatbotPage = () => {
           setLocalMessages(prev => [...prev, newMessage]);
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Subscription status:', status);
+      });
 
     return () => {
+      console.log('Cleaning up subscription');
       supabase.removeChannel(channel);
     };
   }, [sessionId]);
-
-  // Update local messages when messages prop changes
-  useEffect(() => {
-    setLocalMessages(messages);
-  }, [messages]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
