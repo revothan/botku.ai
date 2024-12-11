@@ -9,7 +9,7 @@ import { ChatMessages } from "@/components/chatbot/ChatMessages";
 import { useChatSession } from "@/hooks/useChatSession";
 import { useChatMessages } from "@/hooks/useChatMessages";
 import { useChatLogic } from "@/hooks/useChatLogic";
-import type { ChatbotSettings } from "@/types/chatbot";
+import type { ChatbotSettings, Message } from "@/types/chatbot";
 
 const transformSettings = (rawSettings: any): ChatbotSettings => ({
   ...rawSettings,
@@ -25,6 +25,7 @@ const transformSettings = (rawSettings: any): ChatbotSettings => ({
 const ChatbotPage = () => {
   const { customDomain } = useParams<{ customDomain: string }>();
   const [inputMessage, setInputMessage] = useState("");
+  const [localMessages, setLocalMessages] = useState<Message[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const { data: settings, isLoading: settingsLoading, error } = useQuery({
@@ -65,6 +66,42 @@ const ChatbotPage = () => {
   const { messages, setMessages } = useChatMessages(sessionId);
   const { isLoading, sendMessage } = useChatLogic(settings!, sessionId, setSessionId);
 
+  // Subscribe to real-time updates for messages
+  useEffect(() => {
+    if (!sessionId) return;
+
+    console.log('Subscribing to chat messages for session:', sessionId);
+    const channel = supabase
+      .channel('chat_messages')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'chat_messages',
+          filter: `session_id=eq.${sessionId}`
+        },
+        (payload: any) => {
+          console.log('Real-time message update:', payload);
+          const newMessage = {
+            role: payload.new.role,
+            content: payload.new.content
+          } as Message;
+          setLocalMessages(prev => [...prev, newMessage]);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [sessionId]);
+
+  // Update local messages when messages prop changes
+  useEffect(() => {
+    setLocalMessages(messages);
+  }, [messages]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputMessage.trim()) return;
@@ -81,7 +118,7 @@ const ChatbotPage = () => {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [localMessages]);
 
   if (settingsLoading) return <LoadingState />;
   if (error) return <ErrorState message={error.message} />;
@@ -97,7 +134,7 @@ const ChatbotPage = () => {
             </div>
             
             <ChatMessages
-              messages={messages}
+              messages={localMessages}
               buttons={settings.buttons || []}
               isLoading={isLoading}
               messagesEndRef={messagesEndRef}
