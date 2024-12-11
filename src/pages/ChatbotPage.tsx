@@ -114,10 +114,6 @@ const ChatbotPage = () => {
   const { sessionId, setSessionId, createChatSession } = useChatSession(settings?.profile_id);
   const { messages, setMessages, insertMessage } = useChatMessages(sessionId);
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
   const sendMessage = async (message: string) => {
     if (!settings?.assistant_id) {
       toast({
@@ -138,7 +134,6 @@ const ChatbotPage = () => {
           throw new Error("Failed to create chat session");
         }
         setSessionId(newSessionId);
-        console.log("New session created:", newSessionId);
       }
 
       // Insert user message
@@ -147,32 +142,38 @@ const ChatbotPage = () => {
         throw new Error("Failed to send message");
       }
 
-      setInputMessage(""); // Clear input immediately after sending
+      setInputMessage("");
 
-      const response = await supabase.functions.invoke<AssistantResponse>('chat-with-assistant', {
-        body: JSON.stringify({
-          message,
-          assistantId: settings.assistant_id
-        })
-      });
+      // Check if the last message was from the owner
+      const lastMessage = messages[messages.length - 1];
+      const isAiDisabled = lastMessage?.role === "owner";
 
-      if (response.error) throw response.error;
-
-      if (response.data?.response?.text?.value) {
-        const assistantMessage = response.data.response.text.value;
-        
-        // Insert assistant message
-        const assistantMessageSuccess = await insertMessage(assistantMessage, "assistant");
-        if (!assistantMessageSuccess) {
-          throw new Error("Failed to save assistant response");
-        }
-      } else {
-        console.error("Unexpected response format:", response);
-        toast({
-          title: "Error",
-          description: "Received an invalid response from the chatbot",
-          variant: "destructive",
+      // Only send to AI if it's not disabled
+      if (!isAiDisabled) {
+        const response = await supabase.functions.invoke<AssistantResponse>('chat-with-assistant', {
+          body: JSON.stringify({
+            message,
+            assistantId: settings.assistant_id
+          })
         });
+
+        if (response.error) throw response.error;
+
+        if (response.data?.response?.text?.value) {
+          const assistantMessage = response.data.response.text.value;
+          
+          const assistantMessageSuccess = await insertMessage(assistantMessage, "assistant");
+          if (!assistantMessageSuccess) {
+            throw new Error("Failed to save assistant response");
+          }
+        } else {
+          console.error("Unexpected response format:", response);
+          toast({
+            title: "Error",
+            description: "Received an invalid response from the chatbot",
+            variant: "destructive",
+          });
+        }
       }
     } catch (error: any) {
       console.error("Chat error:", error);
