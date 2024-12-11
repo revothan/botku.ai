@@ -16,6 +16,7 @@ const AvatarField = ({ form }: AvatarFieldProps) => {
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
   const avatarUrl = form.watch("avatar_url");
+  const botName = form.watch("bot_name");
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -86,8 +87,10 @@ const AvatarField = ({ form }: AvatarFieldProps) => {
           <FormControl>
             <div className="flex items-center gap-4">
               <Avatar className="h-20 w-20">
-                <AvatarImage src={avatarUrl} />
-                <AvatarFallback className="bg-primary/10">BOT</AvatarFallback>
+                <AvatarImage src={avatarUrl || undefined} alt={botName} />
+                <AvatarFallback className="bg-primary/10 text-lg">
+                  {botName?.charAt(0) || 'B'}
+                </AvatarFallback>
               </Avatar>
               <div className="flex flex-col gap-2">
                 <Button
