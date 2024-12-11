@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,10 +10,25 @@ import { Session } from '@supabase/supabase-js';
 
 const Index = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [session, setSession] = useState<Session | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
+    // Check for email confirmation success
+    const params = new URLSearchParams(window.location.search);
+    const confirmationSuccess = location.hash.includes('#access_token') || params.get('confirmed') === 'true';
+    
+    if (confirmationSuccess) {
+      console.log("Email confirmation successful");
+      toast({
+        title: "Email Confirmed",
+        description: "Your email has been confirmed successfully. Redirecting to dashboard...",
+      });
+      // Short delay to ensure the toast is shown before redirect
+      setTimeout(() => navigate('/dashboard'), 1500);
+    }
+
     // Initial session check
     supabase.auth.getSession().then(({ data: { session }, error }) => {
       console.log("Initial session check:", { session, error });
@@ -70,7 +85,7 @@ const Index = () => {
       console.log("Cleaning up auth subscription");
       subscription.unsubscribe();
     };
-  }, [navigate, toast]);
+  }, [navigate, toast, location]);
 
   const handlePasswordReset = async (email: string) => {
     try {
