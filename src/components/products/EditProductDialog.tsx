@@ -53,7 +53,7 @@ Call To Action untuk membeli: ${values.cta || 'Beli Sekarang'}`;
       // Get current chatbot settings to update training data
       const { data: settings, error: settingsError } = await supabase
         .from('chatbot_settings')
-        .select('training_data')
+        .select('training_data, assistant_id')
         .eq('profile_id', product.profile_id)
         .single();
 
