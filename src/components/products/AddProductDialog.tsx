@@ -16,15 +16,6 @@ const AddProductDialog = ({ open, onOpenChange, onProductAdded }: AddProductDial
   const { toast } = useToast();
   const session = useSession();
 
-  const formatProductForAssistant = (values: ProductFormValues) => {
-    return `This business has this product:
-Nama Produk: ${values.name}
-Details: ${values.details || 'Tidak ada detail'}
-Harga: ${values.price}
-Stok: ${values.has_stock ? values.stock : 'Tidak tersedia'}
-Call To Action untuk membeli: ${values.cta || 'Beli Sekarang'}`;
-  };
-
   const handleSubmit = async (values: ProductFormValues) => {
     if (!session?.user?.id) {
       toast({
@@ -59,32 +50,6 @@ Call To Action untuk membeli: ${values.cta || 'Beli Sekarang'}`;
         imageUrl = publicUrl;
       }
 
-      // Get current chatbot settings
-      const { data: settings, error: settingsError } = await supabase
-        .from('chatbot_settings')
-        .select('training_data, assistant_id')
-        .eq('profile_id', session.user.id)
-        .single();
-
-      if (settingsError) throw settingsError;
-
-      // Format the product information
-      const productInfo = formatProductForAssistant(values);
-
-      // Append new product information to existing training data
-      const trainingData = settings?.training_data 
-        ? `${settings.training_data}\n\n${productInfo}`
-        : productInfo;
-
-      // Update chatbot settings with new training data
-      const { error: updateSettingsError } = await supabase
-        .from('chatbot_settings')
-        .update({ training_data: trainingData })
-        .eq('profile_id', session.user.id);
-
-      if (updateSettingsError) throw updateSettingsError;
-
-      // Add the new product
       const { error: insertError } = await supabase
         .from('products')
         .insert({
@@ -102,23 +67,11 @@ Call To Action untuk membeli: ${values.cta || 'Beli Sekarang'}`;
 
       if (insertError) throw insertError;
 
-      // Update OpenAI Assistant
-      const assistantResponse = await supabase.functions.invoke('create-openai-assistant', {
-        body: JSON.stringify({
-          training_data: trainingData,
-          assistant_id: settings?.assistant_id
-        })
-      });
-
-      if (assistantResponse.error) {
-        throw new Error(assistantResponse.error.message);
-      }
-
       onProductAdded();
       onOpenChange(false);
       toast({
         title: "Success",
-        description: "Product added and chatbot updated successfully",
+        description: "Product added successfully",
       });
     } catch (error: any) {
       console.error('Error adding product:', error);
