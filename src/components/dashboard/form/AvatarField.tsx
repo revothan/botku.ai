@@ -53,14 +53,20 @@ const AvatarField = ({ form, defaultAvatarUrl }: AvatarFieldProps) => {
       const formData = new FormData();
       formData.append('file', file);
 
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error('No active session');
+      }
+
       // Upload file to Supabase Storage using fetch
       const uploadResponse = await fetch(
-        `${supabase.storageClient.url}/object/chatbot-avatars/${fileName}`,
+        `${supabase.supabaseUrl}/storage/v1/object/chatbot-avatars/${fileName}`,
         {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${supabase.auth.session()?.access_token}`,
-            'apikey': supabase.supabaseKey,
+            'Authorization': `Bearer ${session.access_token}`,
+            'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
           },
           body: formData,
         }
