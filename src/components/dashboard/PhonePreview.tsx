@@ -56,6 +56,11 @@ const PhonePreview = ({ botName, greetingMessage, buttons = [], userId }: PhoneP
     enabled: !!userId,
   });
 
+  // Get the public URL for the avatar
+  const avatarUrl = settings?.avatar_url 
+    ? supabase.storage.from('chatbot-avatars').getPublicUrl(settings.avatar_url.split('/').pop() || '').data.publicUrl
+    : '';
+
   return (
     <div className="relative mx-auto w-[300px] h-[600px] rounded-[3rem] border-8 border-gray-900 overflow-hidden">
       <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-1/3 h-6 bg-gray-900 rounded-b-2xl"></div>
@@ -63,7 +68,7 @@ const PhonePreview = ({ botName, greetingMessage, buttons = [], userId }: PhoneP
         <div className="bg-white h-full rounded-2xl shadow-sm p-4 flex flex-col">
           <div className="text-center border-b pb-4 flex items-center justify-center gap-3">
             <Avatar className="h-8 w-8">
-              <AvatarImage src={settings?.avatar_url || ''} alt={botName} />
+              <AvatarImage src={avatarUrl} alt={botName} />
               <AvatarFallback>BOT</AvatarFallback>
             </Avatar>
             <h3 className="font-bold">{botName || "My ChatBot"}</h3>

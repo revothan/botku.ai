@@ -57,6 +57,11 @@ export const ChatbotInterface = ({
     enabled: !!settings.profile_id,
   });
 
+  // Get the public URL for the avatar
+  const avatarUrl = settings.avatar_url 
+    ? supabase.storage.from('chatbot-avatars').getPublicUrl(settings.avatar_url.split('/').pop() || '').data.publicUrl
+    : '';
+
   return (
     <div className="h-[100dvh] bg-gradient-to-b from-[#fcf5eb] to-white p-4 flex items-center justify-center overflow-hidden">
       <div className="w-full max-w-lg h-full">
@@ -64,7 +69,7 @@ export const ChatbotInterface = ({
           <CardContent className="p-4 h-full flex flex-col">
             <div className="text-center border-b pb-4 flex items-center justify-center gap-3">
               <Avatar className="h-8 w-8">
-                <AvatarImage src={settings.avatar_url || ''} alt={settings.bot_name} />
+                <AvatarImage src={avatarUrl} alt={settings.bot_name} />
                 <AvatarFallback>BOT</AvatarFallback>
               </Avatar>
               <h3 className="font-bold text-secondary">{settings.bot_name}</h3>
