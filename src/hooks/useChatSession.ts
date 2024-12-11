@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { v4 as uuidv4 } from 'uuid';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -52,6 +52,17 @@ export const useChatSession = (profileId: string | undefined) => {
       return null;
     }
   };
+
+  // Automatically create a session when the component mounts
+  useEffect(() => {
+    if (!sessionId && profileId) {
+      createChatSession().then((newSessionId) => {
+        if (newSessionId) {
+          setSessionId(newSessionId);
+        }
+      });
+    }
+  }, [profileId]);
 
   return {
     sessionId,
