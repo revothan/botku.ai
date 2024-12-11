@@ -9,8 +9,17 @@ const MAX_RETRY_ATTEMPTS = 5;
 
 export const useSupabaseSubscription = (sessionId: string | null) => {
   const [retryCount, setRetryCount] = useState(0);
+  const [isConnected, setIsConnected] = useState(false);
   const channelRef = useRef<RealtimeChannel | null>(null);
   const timeoutRef = useRef<number>();
+  const heartbeatIntervalRef = useRef<number>();
+
+  const clearHeartbeat = () => {
+    if (heartbeatIntervalRef.current) {
+      clearInterval(heartbeatIntervalRef.current);
+      heartbeatIntervalRef.current = undefined;
+    }
+  };
 
   const handleReconnection = useCallback(() => {
     if (!sessionId || retryCount >= MAX_RETRY_ATTEMPTS) {
@@ -38,11 +47,34 @@ export const useSupabaseSubscription = (sessionId: string | null) => {
     }, delay);
   }, [sessionId, retryCount]);
 
+  const startHeartbeat = (channel: RealtimeChannel) => {
+    clearHeartbeat();
+    
+    heartbeatIntervalRef.current = window.setInterval(() => {
+      if (channel.state === 'closed') {
+        clearHeartbeat();
+        return;
+      }
+
+      channel.send({
+        type: 'broadcast',
+        event: 'heartbeat',
+        payload: { timestamp: Date.now() }
+      }).catch(error => {
+        console.error('Heartbeat failed:', error);
+        clearHeartbeat();
+        setIsConnected(false);
+        handleReconnection();
+      });
+    }, 30000); // Send heartbeat every 30 seconds
+  };
+
   const setupSubscription = useCallback((sid: string) => {
     if (channelRef.current) {
       console.warn('Subscription already exists, cleaning up first');
       supabase.removeChannel(channelRef.current);
       channelRef.current = null;
+      clearHeartbeat();
     }
 
     console.log('Setting up subscription for session:', sid);
@@ -68,6 +100,7 @@ export const useSupabaseSubscription = (sessionId: string | null) => {
       )
       .on('system', { event: 'error' }, (error) => {
         console.error('Subscription error:', error);
+        setIsConnected(false);
         toast.error('Connection lost. Attempting to reconnect...', {
           description: 'Please wait while we restore your connection.'
         });
@@ -78,14 +111,16 @@ export const useSupabaseSubscription = (sessionId: string | null) => {
         
         if (status === 'SUBSCRIBED') {
           console.log('Successfully subscribed to real-time updates');
+          setIsConnected(true);
           setRetryCount(0);
-          // Start heartbeat
           startHeartbeat(channel);
         } else if (status === 'CLOSED') {
           console.log('Subscription closed, attempting to reconnect...');
+          setIsConnected(false);
           handleReconnection();
         } else if (status === 'CHANNEL_ERROR') {
           console.error('Channel error occurred');
+          setIsConnected(false);
           toast.error('Connection error', {
             description: 'There was a problem with the chat connection. Attempting to reconnect...'
           });
@@ -97,37 +132,17 @@ export const useSupabaseSubscription = (sessionId: string | null) => {
     return channel;
   }, [handleReconnection]);
 
-  const startHeartbeat = (channel: RealtimeChannel) => {
-    const heartbeatInterval = setInterval(() => {
-      if (channel.state === 'closed') {
-        clearInterval(heartbeatInterval);
-        return;
-      }
-
-      channel.send({
-        type: 'broadcast',
-        event: 'heartbeat',
-        payload: { timestamp: Date.now() }
-      }).catch(error => {
-        console.error('Heartbeat failed:', error);
-        clearInterval(heartbeatInterval);
-        handleReconnection();
-      });
-    }, 30000); // Send heartbeat every 30 seconds
-
-    // Store interval ID for cleanup
-    return heartbeatInterval;
-  };
-
   const reconnect = useCallback(() => {
     if (!sessionId) return;
     
     console.log('Manual reconnection requested');
     setRetryCount(0);
+    setIsConnected(false);
     if (channelRef.current) {
       supabase.removeChannel(channelRef.current);
       channelRef.current = null;
     }
+    clearHeartbeat();
     setupSubscription(sessionId);
     toast.success('Attempting to reconnect...', {
       description: 'Please wait while we restore your connection.'
@@ -141,6 +156,7 @@ export const useSupabaseSubscription = (sessionId: string | null) => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
+      clearHeartbeat();
       if (channelRef.current) {
         supabase.removeChannel(channelRef.current);
         channelRef.current = null;
@@ -151,6 +167,7 @@ export const useSupabaseSubscription = (sessionId: string | null) => {
   return {
     channelRef,
     setupSubscription,
-    reconnect
+    reconnect,
+    isConnected
   };
 };
