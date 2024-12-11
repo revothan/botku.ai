@@ -6,20 +6,24 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
-import type { ChatSession, ChatMessage, ChatSessionStatus } from "@/types/chat";
+import type { ChatSession, ChatMessage } from "@/types/chat";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2 } from "lucide-react";
 
 const ChatMonitoring = () => {
   const session = useSession();
   const [realtimeSessions, setRealtimeSessions] = useState<Record<string, ChatSession>>({});
 
-  const { data: initialSessions, isLoading } = useQuery({
+  const { data: initialSessions, isLoading, error } = useQuery({
     queryKey: ["chat-sessions"],
     queryFn: async () => {
+      console.log("Fetching chat sessions for user:", session?.user?.id);
+      
       const { data: sessions, error } = await supabase
         .from("chat_sessions")
         .select(`
           *,
-          messages:chat_messages(*)
+          chat_messages (*)
         `)
         .eq("profile_id", session?.user?.id)
         .order("created_at", { ascending: false });
@@ -28,6 +32,8 @@ const ChatMonitoring = () => {
         console.error("Error fetching chat sessions:", error);
         throw error;
       }
+
+      console.log("Fetched sessions:", sessions);
 
       const sessionsMap: Record<string, ChatSession> = {};
       sessions?.forEach((session: any) => {
@@ -41,6 +47,8 @@ const ChatMonitoring = () => {
 
   useEffect(() => {
     if (!session?.user?.id) return;
+
+    console.log("Setting up realtime subscriptions");
 
     // Subscribe to new chat sessions
     const sessionsChannel = supabase
@@ -101,6 +109,7 @@ const ChatMonitoring = () => {
       .subscribe();
 
     return () => {
+      console.log("Cleaning up realtime subscriptions");
       sessionsChannel.unsubscribe();
       messagesChannel.unsubscribe();
     };
@@ -111,11 +120,45 @@ const ChatMonitoring = () => {
     ...realtimeSessions,
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-[50vh]">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <Alert variant="destructive">
+          <AlertDescription>
+            Error loading chat sessions: {error.message}
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
+  const sessionsList = Object.values(sessions);
+  
+  if (sessionsList.length === 0) {
+    return (
+      <div className="p-6">
+        <Alert>
+          <AlertDescription>
+            No chat sessions found. Start a chat session to see it here.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">Chat Sessions</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {Object.values(sessions)
+        {sessionsList
           .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
           .map((session) => (
             <Card key={session.id} className="relative">
