@@ -77,8 +77,8 @@ const ProductManagement = () => {
         cta: product.cta
       }));
 
-      // Create a JSON file with products data
-      const jsonContent = {
+      // Create formatted content for the file
+      const fileContent = {
         products: productsData,
         formatted_text: productsData.map(p => 
           `This business has these products:\nNama Produk: ${p.name}\nDetails: ${p.details || 'N/A'}\nHarga: ${p.price}\nStok: ${p.stock || 'N/A'}\nCall To Action untuk membeli: ${p.cta || 'Beli Sekarang'}`
@@ -97,7 +97,7 @@ const ProductManagement = () => {
       // Upload file to OpenAI Assistant
       const response = await supabase.functions.invoke('sync-products-to-assistant', {
         body: {
-          file: jsonContent,
+          file: fileContent,
           assistant_id: settings?.assistant_id
         }
       });
