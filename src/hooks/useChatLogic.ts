@@ -18,11 +18,7 @@ export const useChatLogic = (settings: ChatbotSettings, sessionId: string | null
 
   const sendMessage = async (message: string, role: "user" | "assistant" | "owner") => {
     if (!settings?.assistant_id && role !== "owner") {
-      toast({
-        title: "Error",
-        description: "Chatbot not configured properly",
-        variant: "destructive",
-      });
+      toast("Error: Chatbot not configured properly");
       return;
     }
 
@@ -69,11 +65,7 @@ export const useChatLogic = (settings: ChatbotSettings, sessionId: string | null
       return true;
     } catch (error: any) {
       console.error("Chat error:", error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to send message",
-        variant: "destructive",
-      });
+      toast("Error: " + (error.message || "Failed to send message"));
       return false;
     } finally {
       setIsLoading(false);
