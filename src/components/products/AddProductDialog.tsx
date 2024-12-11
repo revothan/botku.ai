@@ -35,9 +35,13 @@ const AddProductDialog = ({ open, onOpenChange, onProductAdded }: AddProductDial
         const fileExt = values.image.name.split('.').pop();
         const filePath = `${crypto.randomUUID()}.${fileExt}`;
         
+        // Convert File object to ArrayBuffer
+        const arrayBuffer = await values.image.arrayBuffer();
+        const fileData = new Uint8Array(arrayBuffer);
+        
         const { error: uploadError } = await supabase.storage
           .from('product-images')
-          .upload(filePath, values.image, {
+          .upload(filePath, fileData, {
             contentType: values.image.type,
             upsert: false
           });
