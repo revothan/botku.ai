@@ -61,7 +61,7 @@ const AvatarField = ({ form, defaultAvatarUrl }: AvatarFieldProps) => {
 
       // Upload file to Supabase Storage using fetch
       const uploadResponse = await fetch(
-        `${supabase.supabaseUrl}/storage/v1/object/chatbot-avatars/${fileName}`,
+        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/chatbot-avatars/${fileName}`,
         {
           method: 'POST',
           headers: {
