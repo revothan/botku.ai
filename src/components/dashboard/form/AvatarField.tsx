@@ -2,7 +2,7 @@ import { useState } from "react";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Loader2 } from "lucide-react";
+import { Loader2, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import type { UseFormReturn } from "react-hook-form";
@@ -22,8 +22,8 @@ const AvatarField = ({ form, defaultAvatarUrl, profileId }: AvatarFieldProps) =>
   const avatarUrl = form.watch("avatar_url");
   
   // Get the public URL for the avatar if it exists
-  const publicAvatarUrl = defaultAvatarUrl 
-    ? supabase.storage.from('chatbot-avatars').getPublicUrl(defaultAvatarUrl).data.publicUrl
+  const publicAvatarUrl = avatarUrl || defaultAvatarUrl 
+    ? supabase.storage.from('chatbot-avatars').getPublicUrl(avatarUrl || defaultAvatarUrl || '').data.publicUrl
     : null;
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -73,11 +73,6 @@ const AvatarField = ({ form, defaultAvatarUrl, profileId }: AvatarFieldProps) =>
         throw uploadError;
       }
 
-      // Get the public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('chatbot-avatars')
-        .getPublicUrl(fileName);
-
       // Update form with the file name (not the public URL)
       form.setValue("avatar_url", fileName, {
         shouldDirty: true,
@@ -89,7 +84,7 @@ const AvatarField = ({ form, defaultAvatarUrl, profileId }: AvatarFieldProps) =>
       const { error: updateError } = await supabase
         .from('chatbot_settings')
         .update({ 
-          avatar_url: fileName  // Store only the filename in the database
+          avatar_url: fileName
         })
         .eq('profile_id', profileId);
 
@@ -125,8 +120,10 @@ const AvatarField = ({ form, defaultAvatarUrl, profileId }: AvatarFieldProps) =>
           <FormControl>
             <div className="flex items-center gap-4">
               <Avatar className="h-20 w-20">
-                <AvatarImage src={avatarUrl ? publicAvatarUrl : ''} alt="Chatbot avatar" />
-                <AvatarFallback></AvatarFallback>
+                <AvatarImage src={publicAvatarUrl || ''} alt="Chatbot avatar" />
+                <AvatarFallback>
+                  <User className="h-10 w-10 text-muted-foreground" />
+                </AvatarFallback>
               </Avatar>
               <div className="flex-1">
                 <Input

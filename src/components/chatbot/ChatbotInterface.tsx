@@ -8,7 +8,7 @@ import { formatCurrency } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, User } from "lucide-react";
 import { useState } from "react";
 import ProductDetailsDialog from "@/components/products/ProductDetailsDialog";
 import type { Message, ButtonConfig, ChatbotSettings } from "@/types/chatbot";
@@ -37,6 +37,11 @@ export const ChatbotInterface = ({
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const buttons = (settings.buttons || []) as ButtonConfig[];
 
+  // Get the public URL for the avatar
+  const avatarUrl = settings.avatar_url 
+    ? supabase.storage.from('chatbot-avatars').getPublicUrl(settings.avatar_url).data.publicUrl
+    : '';
+
   const { data: products, isLoading: productsLoading } = useQuery({
     queryKey: ["chatbot-products", settings.profile_id],
     queryFn: async () => {
@@ -64,8 +69,10 @@ export const ChatbotInterface = ({
           <CardContent className="p-4 h-full flex flex-col">
             <div className="text-center border-b pb-4 flex items-center justify-center gap-3">
               <Avatar className="h-8 w-8">
-                <AvatarImage src={settings.avatar_url} alt={settings.bot_name} />
-                <AvatarFallback></AvatarFallback>
+                <AvatarImage src={avatarUrl} alt={settings.bot_name} />
+                <AvatarFallback>
+                  <User className="h-4 w-4 text-muted-foreground" />
+                </AvatarFallback>
               </Avatar>
               <h3 className="font-bold text-secondary">{settings.bot_name}</h3>
             </div>
