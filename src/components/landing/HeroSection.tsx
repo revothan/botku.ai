@@ -4,18 +4,40 @@ import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { useEffect, useState } from "react";
 import { Bot, Sparkles, Zap } from "lucide-react";
+import { formatCurrency } from "@/lib/utils";
 
 export const HeroSection = () => {
   // Chat animation state
   const [messages, setMessages] = useState<Array<{ content: string; role: 'assistant' | 'user' }>>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  const demoProducts = [
+    {
+      id: 1,
+      name: "Premium Coffee Beans",
+      price: 150000,
+      image_url: "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=800&h=600&fit=crop",
+      stock: 50
+    },
+    {
+      id: 2,
+      name: "Coffee Drip Kit",
+      price: 299000,
+      image_url: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=800&h=600&fit=crop",
+      stock: 25
+    }
+  ];
+
   const demoMessages = [
     { content: "Halo! Saya YourAI, asisten virtual Anda. Ada yang bisa saya bantu?", role: 'assistant' as const },
-    { content: "Jam berapa toko buka?", role: 'user' as const },
-    { content: "Toko kami buka setiap hari dari jam 09.00 - 21.00 WIB. Ada yang bisa saya bantu lagi?", role: 'assistant' as const },
-    { content: "Apakah tersedia layanan delivery?", role: 'user' as const },
-    { content: "Ya, kami menyediakan layanan delivery melalui GoJek dan Grab. Silakan hubungi kami di WhatsApp 081234567890 untuk informasi lebih lanjut.", role: 'assistant' as const },
+    { content: "Saya ingin beli kopi", role: 'user' as const },
+    { 
+      content: "Berikut beberapa produk kopi yang kami miliki:", 
+      role: 'assistant' as const,
+      showProducts: true 
+    },
+    { content: "Berapa harga Coffee Drip Kit?", role: 'user' as const },
+    { content: "Coffee Drip Kit dijual dengan harga Rp 299.000. Stok tersedia 25 unit. Apakah Anda ingin melakukan pemesanan?", role: 'assistant' as const },
   ];
 
   useEffect(() => {
@@ -138,6 +160,31 @@ export const HeroSection = () => {
                     }`}
                   >
                     <p className="text-sm">{message.content}</p>
+                    {message.showProducts && (
+                      <div className="mt-4 overflow-x-auto flex space-x-4 pb-2">
+                        {demoProducts.map((product) => (
+                          <div
+                            key={product.id}
+                            className="flex-none w-48 border rounded-lg p-3 bg-white shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                          >
+                            <img
+                              src={product.image_url}
+                              alt={product.name}
+                              className="w-full h-32 object-cover rounded-md mb-2"
+                            />
+                            <h4 className="font-medium text-sm">{product.name}</h4>
+                            <p className="text-primary font-medium text-sm mt-1">
+                              {formatCurrency(product.price)}
+                            </p>
+                            {product.stock !== null && product.stock > 0 && (
+                              <p className="text-xs text-muted-foreground mt-1">
+                                Stock: {product.stock}
+                              </p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </motion.div>
                 ))}
                 {currentIndex < demoMessages.length && (
