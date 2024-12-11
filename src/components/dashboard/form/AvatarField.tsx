@@ -11,9 +11,10 @@ import type { ChatbotFormData } from "@/types/chatbot";
 interface AvatarFieldProps {
   form: UseFormReturn<ChatbotFormData>;
   defaultAvatarUrl?: string | null;
+  profileId: string;
 }
 
-const AvatarField = ({ form, defaultAvatarUrl }: AvatarFieldProps) => {
+const AvatarField = ({ form, defaultAvatarUrl, profileId }: AvatarFieldProps) => {
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
   const avatarUrl = form.watch("avatar_url") || defaultAvatarUrl;
@@ -81,7 +82,7 @@ const AvatarField = ({ form, defaultAvatarUrl }: AvatarFieldProps) => {
       const { error: updateError } = await supabase
         .from('chatbot_settings')
         .update({ avatar_url: publicUrl })
-        .eq('profile_id', form.getValues('profile_id'));
+        .eq('profile_id', profileId);
 
       if (updateError) {
         throw updateError;
@@ -115,7 +116,7 @@ const AvatarField = ({ form, defaultAvatarUrl }: AvatarFieldProps) => {
           <FormControl>
             <div className="flex items-center gap-4">
               <Avatar className="h-20 w-20">
-                <AvatarImage src={avatarUrl} alt="Chatbot avatar" />
+                <AvatarImage src={avatarUrl || ''} alt="Chatbot avatar" />
                 <AvatarFallback>BOT</AvatarFallback>
               </Avatar>
               <div className="flex-1">

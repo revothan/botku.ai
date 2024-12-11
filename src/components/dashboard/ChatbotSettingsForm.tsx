@@ -29,9 +29,10 @@ interface ChatbotSettingsFormProps {
   onSubmit: (values: ChatbotFormData) => void;
   isSubmitting: boolean;
   hasExistingBot: boolean;
+  profileId: string;
 }
 
-const ChatbotSettingsForm = ({ defaultValues, onSubmit, isSubmitting, hasExistingBot }: ChatbotSettingsFormProps) => {
+const ChatbotSettingsForm = ({ defaultValues, onSubmit, isSubmitting, hasExistingBot, profileId }: ChatbotSettingsFormProps) => {
   const form = useForm<ChatbotFormData>({
     resolver: zodResolver(formSchema),
     defaultValues
@@ -42,7 +43,11 @@ const ChatbotSettingsForm = ({ defaultValues, onSubmit, isSubmitting, hasExistin
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <AvatarField form={form} defaultAvatarUrl={defaultValues.avatar_url} />
+        <AvatarField 
+          form={form} 
+          defaultAvatarUrl={defaultValues.avatar_url} 
+          profileId={profileId}
+        />
         <FormHeaderFields form={form} />
         <UserTypeSelection form={form} />
 
