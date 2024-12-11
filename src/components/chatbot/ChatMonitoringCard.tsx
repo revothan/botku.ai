@@ -7,6 +7,7 @@ import { ChatInput } from "./ChatInput";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { ChatSession } from "@/types/chat";
+import { toast } from "sonner";
 
 interface ChatMonitoringCardProps {
   session: ChatSession;
@@ -32,9 +33,12 @@ export const ChatMonitoringCard = ({ session }: ChatMonitoringCardProps) => {
         });
 
       if (error) throw error;
+      
       setInputMessage("");
+      toast.success("Message sent successfully");
     } catch (error: any) {
       console.error("Error sending message:", error);
+      toast.error("Failed to send message");
     } finally {
       setIsLoading(false);
     }
@@ -101,14 +105,16 @@ export const ChatMonitoringCard = ({ session }: ChatMonitoringCardProps) => {
             ))}
           </div>
         </ScrollArea>
-        <div className="mt-4">
-          <ChatInput
-            inputMessage={inputMessage}
-            setInputMessage={setInputMessage}
-            handleSubmit={handleSubmit}
-            isLoading={isLoading}
-          />
-        </div>
+        {!isAiEnabled && (
+          <div className="mt-4">
+            <ChatInput
+              inputMessage={inputMessage}
+              setInputMessage={setInputMessage}
+              handleSubmit={handleSubmit}
+              isLoading={isLoading}
+            />
+          </div>
+        )}
       </CardContent>
     </Card>
   );
