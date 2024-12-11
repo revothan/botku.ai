@@ -28,7 +28,10 @@ const EditProductDialog = ({ product, open, onOpenChange, onProductUpdated }: Ed
         
         const { error: uploadError } = await supabase.storage
           .from('product-images')
-          .upload(filePath, values.image);
+          .upload(filePath, values.image, {
+            contentType: values.image.type,
+            upsert: false
+          });
 
         if (uploadError) {
           throw uploadError;
