@@ -45,15 +45,12 @@ const AvatarField = ({ form }: AvatarFieldProps) => {
     try {
       setIsUploading(true);
 
-      // Create a Blob from the file with the correct content type
-      const blob = new Blob([await file.arrayBuffer()], { type: file.type });
-
       // Upload to Supabase Storage
       const fileExt = file.name.split('.').pop();
       const fileName = `${crypto.randomUUID()}.${fileExt}`;
       const { error: uploadError, data } = await supabase.storage
         .from('chatbot-avatars')
-        .upload(fileName, blob, {
+        .upload(fileName, file, {
           contentType: file.type,
           upsert: false
         });
