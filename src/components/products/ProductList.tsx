@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { formatCurrency } from "@/lib/utils";
-import { Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";  // Keeping the existing Trash2 icon
 import {
   AlertDialog,
   AlertDialogAction,
@@ -75,24 +75,31 @@ const ProductList = ({ products, onProductUpdated }: ProductListProps) => {
         {products.map((product) => (
           <div
             key={product.id}
-            className="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer relative"
+            className="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer relative group"
             onClick={() => handleProductClick(product)}
           >
             <Button
-              variant="ghost"
+              variant="destructive"
               size="icon"
-              className="absolute top-2 right-2 text-destructive hover:text-destructive/90"
+              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"
               onClick={(e) => handleDeleteClick(e, product)}
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="h-5 w-5" />
             </Button>
 
             {product.image_url && (
-              <img
-                src={product.image_url}
-                alt={product.name}
-                className="w-full h-48 object-cover rounded-md mb-4"
-              />
+              <div className="relative w-full h-48 mb-4">
+                <img
+                  src={product.image_url}
+                  alt={product.name}
+                  className="w-full h-full object-cover rounded-md"
+                  onError={(e) => {
+                    console.error('Image load error:', e);
+                    const img = e.target as HTMLImageElement;
+                    img.src = '/placeholder.svg';
+                  }}
+                />
+              </div>
             )}
             <h3 className="font-semibold text-lg">{product.name}</h3>
             {product.details && (

@@ -9,10 +9,90 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      chat_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          role: string
+          session_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          role: string
+          session_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          role?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "chat_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_sessions: {
+        Row: {
+          created_at: string
+          ended_at: string | null
+          id: string
+          profile_id: string
+          started_at: string
+          status: string
+          updated_at: string
+          user_agent: string | null
+          visitor_id: string
+          visitor_ip: string | null
+        }
+        Insert: {
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          profile_id: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_agent?: string | null
+          visitor_id: string
+          visitor_ip?: string | null
+        }
+        Update: {
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          profile_id?: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_agent?: string | null
+          visitor_id?: string
+          visitor_ip?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_sessions_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chatbot_settings: {
         Row: {
           answers: Json | null
           assistant_id: string | null
+          avatar_url: string | null
           bot_name: string
           buttons: Json | null
           created_at: string
@@ -26,6 +106,7 @@ export type Database = {
         Insert: {
           answers?: Json | null
           assistant_id?: string | null
+          avatar_url?: string | null
           bot_name?: string
           buttons?: Json | null
           created_at?: string
@@ -39,6 +120,7 @@ export type Database = {
         Update: {
           answers?: Json | null
           assistant_id?: string | null
+          avatar_url?: string | null
           bot_name?: string
           buttons?: Json | null
           created_at?: string

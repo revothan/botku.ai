@@ -7,6 +7,9 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const MAX_POLLING_TIME = 20; // Further reduced from 25 to 20 seconds
+const POLLING_INTERVAL = 500; // Reduced from 800ms to 500ms
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -19,12 +22,30 @@ serve(async (req) => {
 
     if (!assistantId) {
       console.error('Assistant ID is required');
-      throw new Error('Assistant ID is required');
+      return new Response(
+        JSON.stringify({ 
+          error: 'Assistant ID is required',
+          status: 400
+        }), 
+        { 
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
 
     if (!message) {
       console.error('Message is required');
-      throw new Error('Message is required');
+      return new Response(
+        JSON.stringify({ 
+          error: 'Message is required',
+          status: 400
+        }), 
+        { 
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
 
     const openai = new OpenAI({
@@ -48,40 +69,63 @@ serve(async (req) => {
       assistant_id: assistantId,
     });
 
-    // Poll for completion
+    // Poll for completion with more aggressive timeouts
     let response;
-    while (true) {
+    let attempts = 0;
+    
+    while (attempts < MAX_POLLING_TIME) {
       const runStatus = await openai.beta.threads.runs.retrieve(thread.id, run.id);
-      console.log('Run status:', runStatus.status);
+      console.log(`Run status (attempt ${attempts + 1}/${MAX_POLLING_TIME}):`, runStatus.status);
       
       if (runStatus.status === 'completed') {
         const messages = await openai.beta.threads.messages.list(thread.id);
-        response = messages.data[0].content[0];
-        break;
-      } else if (runStatus.status === 'failed') {
-        console.error('Run failed:', runStatus);
-        throw new Error('Failed to get response from assistant');
+        if (messages.data.length > 0 && messages.data[0].content.length > 0) {
+          response = messages.data[0].content[0];
+          console.log('Response received successfully');
+          break;
+        } else {
+          console.error('No response content found');
+          throw new Error('No response content found');
+        }
+      } else if (runStatus.status === 'failed' || runStatus.status === 'cancelled') {
+        console.error('Run failed or cancelled:', runStatus);
+        throw new Error(`Assistant run ${runStatus.status}: ${runStatus.last_error?.message || 'Unknown error'}`);
       } else if (runStatus.status === 'expired') {
         console.error('Run expired:', runStatus);
         throw new Error('Assistant response timed out');
       }
-      // Wait before polling again
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Shorter polling interval with progress logging
+      console.log(`Waiting ${POLLING_INTERVAL}ms before next attempt...`);
+      await new Promise(resolve => setTimeout(resolve, POLLING_INTERVAL));
+      attempts++;
+    }
+
+    if (!response) {
+      console.error('Maximum polling attempts reached without response');
+      throw new Error('Response timeout - please try again');
     }
 
     console.log('Sending response:', response);
-    return new Response(JSON.stringify({ response }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({ response }), 
+      {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      }
+    );
   } catch (error) {
     console.error('Error in chat-with-assistant function:', error);
     return new Response(
       JSON.stringify({ 
         error: error.message || 'An unexpected error occurred',
-        details: error.toString()
-      }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+        details: error.toString(),
+        status: 500
+      }), 
+      {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      }
+    );
   }
 });

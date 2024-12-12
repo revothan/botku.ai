@@ -17,9 +17,21 @@ serve(async (req) => {
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 
     if (!openAIApiKey) {
-      throw new Error('OpenAI API key not found');
+      console.error('OpenAI API key not found');
+      return new Response(
+        JSON.stringify({ 
+          error: 'OpenAI API key not found',
+          status: 500
+        }), 
+        {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
 
+    console.log(`Processing request for bot: ${bot_name}, assistant_id: ${assistant_id || 'new'}`);
+    
     let response;
     
     if (assistant_id) {
@@ -61,26 +73,41 @@ serve(async (req) => {
     if (!response.ok) {
       const error = await response.json();
       console.error('OpenAI API Error:', error);
-      throw new Error(`OpenAI API error: ${error.error?.message || 'Unknown error'}`);
+      return new Response(
+        JSON.stringify({ 
+          error: `OpenAI API error: ${error.error?.message || 'Unknown error'}`,
+          status: response.status
+        }), 
+        {
+          status: response.status,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
 
     const data = await response.json();
     console.log('OpenAI Assistant operation successful:', data);
 
-    return new Response(JSON.stringify({ 
-      status: 'success',
-      assistant: data
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({ 
+        status: 'success',
+        assistant: data
+      }), 
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
+    );
   } catch (error) {
     console.error('Error in create-openai-assistant function:', error);
-    return new Response(JSON.stringify({ 
-      status: 'error',
-      error: error.message 
-    }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({ 
+        error: error.message || 'An unexpected error occurred',
+        status: 500
+      }), 
+      {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
+    );
   }
 });

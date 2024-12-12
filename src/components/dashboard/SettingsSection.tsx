@@ -115,6 +115,7 @@ const SettingsSection = ({ userId, settings, isLoading }: SettingsSectionProps) 
         onSubmit={updateSettings.mutate}
         isSubmitting={updateSettings.isPending}
         hasExistingBot={!!settings?.assistant_id}
+        profileId={userId}
       />
       <ButtonsSection 
         profileId={userId}

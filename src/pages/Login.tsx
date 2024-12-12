@@ -1,19 +1,32 @@
-import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
-import { Auth } from "@supabase/auth-ui-react";
-import { ThemeSupa } from "@supabase/auth-ui-shared";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { Session } from '@supabase/supabase-js';
+import { Button } from "@/components/ui/button";
+import { FeaturesSection } from "@/components/auth/FeaturesSection";
+import { AuthForm } from "@/components/auth/AuthForm";
 
-const Index = () => {
+const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [session, setSession] = useState<Session | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
+    // Check for email confirmation success
+    const params = new URLSearchParams(window.location.search);
+    const confirmationSuccess = location.hash.includes('#access_token') || params.get('confirmed') === 'true';
+    
+    if (confirmationSuccess) {
+      console.log("Email confirmation successful");
+      toast({
+        title: "Email Confirmed",
+        description: "Your email has been confirmed successfully. Redirecting to dashboard...",
+      });
+      setTimeout(() => navigate('/dashboard'), 1500);
+    }
+
     // Initial session check
     supabase.auth.getSession().then(({ data: { session }, error }) => {
       console.log("Initial session check:", { session, error });
@@ -50,15 +63,26 @@ const Index = () => {
       } else if (_event === 'TOKEN_REFRESHED') {
         console.log("Token refreshed successfully");
         setSession(session);
+      } else if (_event === 'PASSWORD_RECOVERY') {
+        console.log("Password recovery email sent");
+        toast({
+          title: "Password Reset Email Sent",
+          description: "Please check your email for the password reset link",
+        });
+      } else if (_event === 'USER_UPDATED') {
+        console.log("User updated successfully");
+        toast({
+          title: "Success",
+          description: "Your password has been updated successfully",
+        });
       }
     });
 
-    // Cleanup subscription
     return () => {
       console.log("Cleaning up auth subscription");
       subscription.unsubscribe();
     };
-  }, [navigate, toast]);
+  }, [navigate, toast, location]);
 
   if (session) {
     return (
@@ -91,16 +115,11 @@ const Index = () => {
           </nav>
 
           <main className="max-w-4xl mx-auto text-center">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="space-y-6"
-            >
+            <div className="space-y-6">
               <span className="px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium">
                 Redirecting to dashboard...
               </span>
-            </motion.div>
+            </div>
           </main>
         </div>
       </div>
@@ -108,27 +127,23 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#fcf5eb] to-white">
+    <div className="min-h-screen bg-gradient-to-b from-[#fcf5eb] to-white relative overflow-hidden">
+      {/* Decorative elements */}
+      <div className="absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute -top-40 -right-32 w-[500px] h-[500px] bg-primary/10 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-32 w-[500px] h-[500px] bg-secondary/10 rounded-full blur-3xl" />
+      </div>
+      
       <div className="container mx-auto px-4 py-16">
-        <div className="max-w-md mx-auto">
-          <h1 className="text-2xl font-bold tracking-tight text-center mb-8 text-secondary">MENYAPA</h1>
-          <div className="bg-white/80 backdrop-blur-sm p-8 rounded-lg shadow-sm border border-primary/10">
-            <Auth
-              supabaseClient={supabase}
-              appearance={{
-                theme: ThemeSupa,
-                variables: {
-                  default: {
-                    colors: {
-                      brand: '#25d366',
-                      brandAccent: '#128c7e',
-                    },
-                  },
-                },
-              }}
-              theme="light"
-              providers={[]}
-            />
+        <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+          {/* On mobile, auth form appears first */}
+          <div className="md:order-2 md:col-span-1">
+            <AuthForm />
+          </div>
+          
+          {/* Features section appears second on mobile */}
+          <div className="md:order-1 md:col-span-1">
+            <FeaturesSection />
           </div>
         </div>
       </div>
@@ -136,4 +151,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default Login;

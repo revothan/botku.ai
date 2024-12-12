@@ -5,7 +5,10 @@ import { useState, useRef, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { LoadingState, ErrorState, NotFoundState } from "@/components/chatbot/ChatbotStates";
 import { ChatbotInterface } from "@/components/chatbot/ChatbotInterface";
-import type { Message, ButtonConfig, ChatbotSettings } from "@/types/chatbot";
+import { useChatSession } from "@/hooks/useChatSession";
+import { useChatMessages } from "@/hooks/useChatMessages";
+import { useSession } from '@supabase/auth-helpers-react';
+import type { ChatbotSettings } from "@/types/chatbot";
 
 type AssistantResponse = {
   response: {
@@ -17,17 +20,26 @@ type AssistantResponse = {
   };
 };
 
+const transformSettings = (rawSettings: any): ChatbotSettings => {
+  return {
+    ...rawSettings,
+    buttons: Array.isArray(rawSettings.buttons) 
+      ? rawSettings.buttons.map((button: any) => ({
+          id: button.id || crypto.randomUUID(),
+          label: button.label || '',
+          url: button.url || ''
+        }))
+      : []
+  };
+};
+
 const ChatbotPage = () => {
   const { customDomain } = useParams<{ customDomain: string }>();
   const { toast } = useToast();
-  const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  const session = useSession();
 
   const { data: settings, isLoading: settingsLoading, error } = useQuery({
     queryKey: ["chatbot-settings", customDomain],
@@ -99,18 +111,12 @@ const ChatbotPage = () => {
     },
   });
 
-  const transformSettings = (rawSettings: any): ChatbotSettings => {
-    return {
-      ...rawSettings,
-      buttons: Array.isArray(rawSettings.buttons) 
-        ? rawSettings.buttons.map((button: any) => ({
-            id: button.id || crypto.randomUUID(),
-            label: button.label || '',
-            url: button.url || ''
-          }))
-        : []
-    };
-  };
+  const { sessionId, setSessionId, createChatSession } = useChatSession(settings?.profile_id);
+  const { messages, setMessages, insertMessage } = useChatMessages(sessionId);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   const sendMessage = async (message: string) => {
     if (!settings?.assistant_id) {
@@ -124,7 +130,23 @@ const ChatbotPage = () => {
 
     try {
       setIsLoading(true);
-      setMessages(prev => [...prev, { role: "user", content: message }]);
+
+      // Create a chat session if one doesn't exist
+      if (!sessionId) {
+        const newSessionId = await createChatSession();
+        if (!newSessionId) {
+          throw new Error("Failed to create chat session");
+        }
+        setSessionId(newSessionId);
+        console.log("New session created:", newSessionId);
+      }
+
+      // Insert user message
+      const userMessageSuccess = await insertMessage(message, "user");
+      if (!userMessageSuccess) {
+        throw new Error("Failed to send message");
+      }
+
       setInputMessage(""); // Clear input immediately after sending
 
       const response = await supabase.functions.invoke<AssistantResponse>('chat-with-assistant', {
@@ -137,10 +159,13 @@ const ChatbotPage = () => {
       if (response.error) throw response.error;
 
       if (response.data?.response?.text?.value) {
-        setMessages(prev => [...prev, { 
-          role: "assistant", 
-          content: response.data.response.text.value 
-        }]);
+        const assistantMessage = response.data.response.text.value;
+        
+        // Insert assistant message
+        const assistantMessageSuccess = await insertMessage(assistantMessage, "assistant");
+        if (!assistantMessageSuccess) {
+          throw new Error("Failed to save assistant response");
+        }
       } else {
         console.error("Unexpected response format:", response);
         toast({
@@ -150,6 +175,7 @@ const ChatbotPage = () => {
         });
       }
     } catch (error: any) {
+      console.error("Chat error:", error);
       toast({
         title: "Error",
         description: error.message || "Failed to send message",
