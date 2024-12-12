@@ -26,81 +26,80 @@ const queryClient = new QueryClient({
   },
 });
 
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const session = useSession();
-  const { toast } = useToast();
-  const navigate = useNavigate();
-  
-  useEffect(() => {
-    const checkSession = async () => {
-      try {
-        const { data: { session: currentSession }, error } = await supabase.auth.getSession();
-        console.log("Session check:", { currentSession, error });
-        
-        if (error) {
-          console.error("Session error:", error);
-          throw error;
-        }
-        
-        if (!currentSession) {
-          console.log("No active session found");
+// Move ProtectedRoute inside RouterProvider to have access to navigation context
+const AppRoutes = () => {
+  const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+    const session = useSession();
+    const { toast } = useToast();
+    const navigate = useNavigate();
+    
+    useEffect(() => {
+      const checkSession = async () => {
+        try {
+          const { data: { session: currentSession }, error } = await supabase.auth.getSession();
+          console.log("Session check:", { currentSession, error });
+          
+          if (error) {
+            console.error("Session error:", error);
+            throw error;
+          }
+          
+          if (!currentSession) {
+            console.log("No active session found");
+            toast({
+              title: "Session expired",
+              description: "Please log in again to continue",
+              variant: "destructive",
+            });
+            navigate('/login');
+          }
+        } catch (error: any) {
+          console.error("Auth check error:", error);
           toast({
-            title: "Session expired",
-            description: "Please log in again to continue",
+            title: "Authentication Error",
+            description: error.message || "Please try logging in again",
             variant: "destructive",
           });
           navigate('/login');
         }
-      } catch (error: any) {
-        console.error("Auth check error:", error);
-        toast({
-          title: "Authentication Error",
-          description: error.message || "Please try logging in again",
-          variant: "destructive",
-        });
-        navigate('/login');
-      }
-    };
+      };
 
-    // Check session immediately
-    checkSession();
+      // Check session immediately
+      checkSession();
 
-    // Set up auth state change listener
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      console.log("Auth state changed:", { event: _event, session });
-      if (!session) {
-        navigate('/login');
-      }
-    });
+      // Set up auth state change listener
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange((_event, session) => {
+        console.log("Auth state changed:", { event: _event, session });
+        if (!session) {
+          navigate('/login');
+        }
+      });
 
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [toast, navigate]);
+      return () => {
+        subscription.unsubscribe();
+      };
+    }, [toast, navigate]);
 
-  if (!session) {
-    return <Navigate to="/login" replace />;
-  }
-  
-  return <>{children}</>;
-};
+    if (!session) {
+      return <Navigate to="/login" replace />;
+    }
+    
+    return <>{children}</>;
+  };
 
-const HomeRoute = () => {
-  const session = useSession();
-  
-  if (session) {
-    console.log("User is logged in, redirecting to dashboard");
-    return <Navigate to="/dashboard" replace />;
-  }
-  
-  return <Landing />;
-};
+  const HomeRoute = () => {
+    const session = useSession();
+    
+    if (session) {
+      console.log("User is logged in, redirecting to dashboard");
+      return <Navigate to="/dashboard" replace />;
+    }
+    
+    return <Landing />;
+  };
 
-const AppRoutes = () => {
-  console.log("App rendering, initializing Supabase session");
-  
   return (
     <Routes>
       <Route path="/" element={<HomeRoute />} />
