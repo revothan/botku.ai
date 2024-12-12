@@ -26,7 +26,6 @@ const queryClient = new QueryClient({
   },
 });
 
-// Move ProtectedRoute inside RouterProvider to have access to navigation context
 const AppRoutes = () => {
   const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     const session = useSession();
