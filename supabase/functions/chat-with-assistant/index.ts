@@ -7,6 +7,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const MAX_POLLING_TIME = 25; // Reduced from 30 to ensure we stay within Edge Function limits
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -60,12 +62,11 @@ serve(async (req) => {
       assistant_id: assistantId,
     });
 
-    // Poll for completion
+    // Poll for completion with a shorter timeout
     let response;
     let attempts = 0;
-    const maxAttempts = 30; // 30 seconds timeout
     
-    while (attempts < maxAttempts) {
+    while (attempts < MAX_POLLING_TIME) {
       const runStatus = await openai.beta.threads.runs.retrieve(thread.id, run.id);
       console.log('Run status:', runStatus.status);
       
@@ -85,13 +86,13 @@ serve(async (req) => {
         throw new Error('Assistant response timed out');
       }
       
-      // Wait before polling again
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Shorter polling interval
+      await new Promise(resolve => setTimeout(resolve, 800));
       attempts++;
     }
 
     if (!response) {
-      throw new Error('Timeout waiting for assistant response');
+      throw new Error('Response timeout - please try again');
     }
 
     console.log('Sending response:', response);
