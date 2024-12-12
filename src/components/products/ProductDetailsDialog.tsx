@@ -39,9 +39,16 @@ const ProductDetailsDialog = ({ product, open, onOpenChange }: ProductDetailsDia
           )}
           
           <div className="space-y-2">
-            <p className="text-lg font-semibold text-primary">
-              {formatCurrency(product.price)}
-            </p>
+            <div className="flex items-center justify-between">
+              <p className="text-lg font-semibold text-primary">
+                {formatCurrency(product.price)}
+              </p>
+              {product.delivery_fee > 0 && (
+                <p className="text-sm text-muted-foreground">
+                  + {formatCurrency(product.delivery_fee)} delivery
+                </p>
+              )}
+            </div>
             
             {product.stock !== null && product.stock > 0 && (
               <p className="text-sm text-muted-foreground">
