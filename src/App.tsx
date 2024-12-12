@@ -33,14 +33,18 @@ const AppRoutes = () => {
     const navigate = useNavigate();
     
     useEffect(() => {
+      let mounted = true;
+
       const checkSession = async () => {
+        if (!mounted) return;
+
         try {
           const { data: { session: currentSession }, error } = await supabase.auth.getSession();
           
           if (error) {
             console.error("Session error:", error);
-            // Clear any invalid session data
             await supabase.auth.signOut();
+            queryClient.clear();
             toast({
               title: "Session Error",
               description: "Please log in again to continue",
@@ -52,6 +56,7 @@ const AppRoutes = () => {
           
           if (!currentSession) {
             console.log("No active session found");
+            queryClient.clear();
             toast({
               title: "Session expired",
               description: "Please log in again to continue",
@@ -69,11 +74,12 @@ const AppRoutes = () => {
           if (expiresAt && (expiresAt - now) < fiveMinutes) {
             console.log("Session about to expire, attempting refresh");
             const { data: { session: refreshedSession }, error: refreshError } = 
-              await supabase.auth.refreshSession();
+              await supabase.auth.refreshSession(currentSession);
             
             if (refreshError || !refreshedSession) {
               console.error("Failed to refresh session:", refreshError);
               await supabase.auth.signOut();
+              queryClient.clear();
               toast({
                 title: "Session Expired",
                 description: "Please log in again to continue",
@@ -84,8 +90,8 @@ const AppRoutes = () => {
           }
         } catch (error: any) {
           console.error("Auth check error:", error);
-          // Clear any invalid session data
           await supabase.auth.signOut();
+          queryClient.clear();
           toast({
             title: "Authentication Error",
             description: error.message || "Please try logging in again",
@@ -103,6 +109,8 @@ const AppRoutes = () => {
       const {
         data: { subscription },
       } = supabase.auth.onAuthStateChange(async (event, session) => {
+        if (!mounted) return;
+        
         console.log("Auth state changed:", { event, session });
         
         if (event === 'TOKEN_REFRESHED') {
@@ -114,6 +122,7 @@ const AppRoutes = () => {
       });
 
       return () => {
+        mounted = false;
         clearInterval(intervalId);
         subscription.unsubscribe();
       };
