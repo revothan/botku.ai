@@ -23,7 +23,10 @@ serve(async (req) => {
     if (!assistantId) {
       console.error('Assistant ID is required');
       return new Response(
-        JSON.stringify({ error: 'Assistant ID is required' }), 
+        JSON.stringify({ 
+          error: 'Assistant ID is required',
+          status: 400
+        }), 
         { 
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -34,7 +37,10 @@ serve(async (req) => {
     if (!message) {
       console.error('Message is required');
       return new Response(
-        JSON.stringify({ error: 'Message is required' }), 
+        JSON.stringify({ 
+          error: 'Message is required',
+          status: 400
+        }), 
         { 
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -113,7 +119,8 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         error: error.message || 'An unexpected error occurred',
-        details: error.toString()
+        details: error.toString(),
+        status: 500
       }), 
       {
         status: 500,
