@@ -2,7 +2,7 @@ import { useState } from "react";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Loader2, User } from "lucide-react";
+import { Loader2, User, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import type { UseFormReturn } from "react-hook-form";
@@ -18,96 +18,17 @@ const AvatarField = ({ form, defaultAvatarUrl, profileId }: AvatarFieldProps) =>
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
   
-  // Get the current avatar URL from the form or use the default
   const avatarUrl = form.watch("avatar_url");
-  
-  // Get the public URL for the avatar if it exists
   const publicAvatarUrl = avatarUrl || defaultAvatarUrl 
     ? supabase.storage.from('chatbot-avatars').getPublicUrl(avatarUrl || defaultAvatarUrl || '').data.publicUrl
     : null;
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      toast({
-        title: "Invalid file type",
-        description: "Please upload an image file",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      toast({
-        title: "File too large",
-        description: "Please upload an image smaller than 5MB",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      setIsUploading(true);
-
-      // Generate a unique file name
-      const fileExt = file.name.split('.').pop()?.toLowerCase();
-      const fileName = `${crypto.randomUUID()}.${fileExt}`;
-
-      // Convert File object to ArrayBuffer
-      const arrayBuffer = await file.arrayBuffer();
-      const fileData = new Uint8Array(arrayBuffer);
-
-      // Upload file to Supabase Storage
-      const { error: uploadError } = await supabase.storage
-        .from('chatbot-avatars')
-        .upload(fileName, fileData, {
-          contentType: file.type,
-          upsert: false
-        });
-
-      if (uploadError) {
-        throw uploadError;
-      }
-
-      // Update form with the file name (not the public URL)
-      form.setValue("avatar_url", fileName, {
-        shouldDirty: true,
-        shouldTouch: true,
-        shouldValidate: true
-      });
-
-      // Update chatbot settings in the database
-      const { error: updateError } = await supabase
-        .from('chatbot_settings')
-        .update({ 
-          avatar_url: fileName
-        })
-        .eq('profile_id', profileId);
-
-      if (updateError) {
-        throw updateError;
-      }
-
-      toast({
-        title: "Success",
-        description: "Avatar uploaded successfully",
-      });
-    } catch (error: any) {
-      console.error('Upload error:', error);
-      toast({
-        title: "Upload failed",
-        description: error.message || "Failed to upload avatar",
-        variant: "destructive",
-      });
-    } finally {
-      setIsUploading(false);
-      // Reset input value to allow uploading the same file again
-      e.target.value = '';
-    }
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    toast({
+      title: "Coming Soon",
+      description: "Avatar customization will be available soon!",
+    });
   };
 
   return (
@@ -118,27 +39,30 @@ const AvatarField = ({ form, defaultAvatarUrl, profileId }: AvatarFieldProps) =>
         <FormItem>
           <FormLabel>Chatbot Avatar</FormLabel>
           <FormControl>
-            <div className="flex items-center gap-4">
-              <Avatar className="h-20 w-20">
-                <AvatarImage src={publicAvatarUrl || ''} alt="Chatbot avatar" />
-                <AvatarFallback>
-                  <User className="h-10 w-10 text-muted-foreground" />
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1">
-                <Input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  disabled={isUploading}
-                  className="cursor-pointer"
-                />
-                {isUploading && (
-                  <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Uploading...
-                  </div>
-                )}
+            <div className="relative">
+              <div className="flex items-center gap-4 opacity-60">
+                <Avatar className="h-20 w-20">
+                  <AvatarImage src={publicAvatarUrl || ''} alt="Chatbot avatar" />
+                  <AvatarFallback>
+                    <User className="h-10 w-10 text-muted-foreground" />
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="cursor-not-allowed"
+                    disabled
+                  />
+                </div>
+              </div>
+              {/* Coming Soon Overlay */}
+              <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-[1px]">
+                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-secondary text-secondary-foreground">
+                  <Lock className="h-4 w-4" />
+                  <span className="text-sm font-medium">Coming Soon</span>
+                </div>
               </div>
             </div>
           </FormControl>
