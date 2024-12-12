@@ -7,7 +7,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const MAX_POLLING_TIME = 25; // Reduced from 30 to ensure we stay within Edge Function limits
+const MAX_POLLING_TIME = 20; // Further reduced from 25 to 20 seconds
+const POLLING_INTERVAL = 500; // Reduced from 800ms to 500ms
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -62,20 +63,22 @@ serve(async (req) => {
       assistant_id: assistantId,
     });
 
-    // Poll for completion with a shorter timeout
+    // Poll for completion with more aggressive timeouts
     let response;
     let attempts = 0;
     
     while (attempts < MAX_POLLING_TIME) {
       const runStatus = await openai.beta.threads.runs.retrieve(thread.id, run.id);
-      console.log('Run status:', runStatus.status);
+      console.log(`Run status (attempt ${attempts + 1}/${MAX_POLLING_TIME}):`, runStatus.status);
       
       if (runStatus.status === 'completed') {
         const messages = await openai.beta.threads.messages.list(thread.id);
         if (messages.data.length > 0 && messages.data[0].content.length > 0) {
           response = messages.data[0].content[0];
+          console.log('Response received successfully');
           break;
         } else {
+          console.error('No response content found');
           throw new Error('No response content found');
         }
       } else if (runStatus.status === 'failed' || runStatus.status === 'cancelled') {
@@ -86,12 +89,14 @@ serve(async (req) => {
         throw new Error('Assistant response timed out');
       }
       
-      // Shorter polling interval
-      await new Promise(resolve => setTimeout(resolve, 800));
+      // Shorter polling interval with progress logging
+      console.log(`Waiting ${POLLING_INTERVAL}ms before next attempt...`);
+      await new Promise(resolve => setTimeout(resolve, POLLING_INTERVAL));
       attempts++;
     }
 
     if (!response) {
+      console.error('Maximum polling attempts reached without response');
       throw new Error('Response timeout - please try again');
     }
 
