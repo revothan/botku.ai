@@ -15,6 +15,7 @@ import ChatbotPage from "./pages/ChatbotPage";
 import Pricing from "./pages/Pricing";
 import ProductManagement from "./pages/ProductManagement";
 import ChatMonitoring from "./pages/ChatMonitoring";
+import CustomerDashboard from "./pages/CustomerDashboard";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -156,6 +157,7 @@ const AppRoutes = () => {
       >
         <Route path="products" element={<ProductManagement />} />
         <Route path="chats" element={<ChatMonitoring />} />
+        <Route path="customers" element={<CustomerDashboard />} />
       </Route>
       <Route path="/pricing" element={<Pricing />} />
       <Route path="/u/:username" element={<UserPage />} />

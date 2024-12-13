@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -6,6 +7,7 @@ import {
 } from "@/components/ui/dialog";
 import { formatCurrency } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import CustomerForm from "./CustomerForm";
 import type { Product } from "@/types/product";
 
 interface ProductDetailsDialogProps {
@@ -15,52 +17,60 @@ interface ProductDetailsDialogProps {
 }
 
 const ProductDetailsDialog = ({ product, open, onOpenChange }: ProductDetailsDialogProps) => {
+  const [showCustomerForm, setShowCustomerForm] = useState(false);
+  
   if (!product) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[400px] max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-lg font-semibold">{product.name}</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          {product.image_url && (
-            <div className="relative w-full aspect-video">
-              <img
-                src={product.image_url}
-                alt={product.name}
-                className="w-full h-full object-cover rounded-lg"
-              />
-            </div>
-          )}
-          
-          {product.details && (
-            <p className="text-sm text-muted-foreground">{product.details}</p>
-          )}
-          
-          <div className="space-y-2">
-            <p className="text-lg font-semibold text-primary">
-              {formatCurrency(product.price)}
-            </p>
-            
-            {product.stock !== null && product.stock > 0 && (
-              <p className="text-sm text-muted-foreground">
-                Stock: {product.stock}
-              </p>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-[400px] max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-semibold">{product.name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {product.image_url && (
+              <div className="relative w-full aspect-video">
+                <img
+                  src={product.image_url}
+                  alt={product.name}
+                  className="w-full h-full object-cover rounded-lg"
+                />
+              </div>
             )}
-          </div>
+            
+            {product.details && (
+              <p className="text-sm text-muted-foreground">{product.details}</p>
+            )}
+            
+            <div className="space-y-2">
+              <p className="text-lg font-semibold text-primary">
+                {formatCurrency(product.price)}
+              </p>
+              
+              {product.stock !== null && product.stock > 0 && (
+                <p className="text-sm text-muted-foreground">
+                  Stock: {product.stock}
+                </p>
+              )}
+            </div>
 
-          {product.purchase_link && (
             <Button 
               className="w-full"
-              onClick={() => window.open(product.purchase_link, '_blank')}
+              onClick={() => setShowCustomerForm(true)}
             >
               {product.cta || "Buy Now"}
             </Button>
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <CustomerForm 
+        product={product}
+        open={showCustomerForm}
+        onOpenChange={setShowCustomerForm}
+      />
+    </>
   );
 };
 
