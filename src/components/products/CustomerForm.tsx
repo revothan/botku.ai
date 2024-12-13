@@ -9,7 +9,7 @@ import { Loader2 } from "lucide-react";
 import type { Product } from "@/types/product";
 
 interface CustomerFormProps {
-  product: Product;
+  product: Product | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -27,6 +27,15 @@ const CustomerForm = ({ product, open, onOpenChange }: CustomerFormProps) => {
       toast({
         title: "Error",
         description: "Please fill in all fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!product) {
+      toast({
+        title: "Error",
+        description: "No product selected",
         variant: "destructive",
       });
       return;
@@ -73,7 +82,9 @@ const CustomerForm = ({ product, open, onOpenChange }: CustomerFormProps) => {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Interested in {product.name}?</DialogTitle>
+          <DialogTitle>
+            {product ? `Interested in ${product.name}?` : 'Product Details'}
+          </DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -109,7 +120,7 @@ const CustomerForm = ({ product, open, onOpenChange }: CustomerFormProps) => {
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="submit" disabled={isSubmitting || !product}>
               {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Submit
             </Button>
