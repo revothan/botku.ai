@@ -31,7 +31,9 @@ export const ChatbotInterface = ({
   messagesEndRef,
   isLoading = false,
 }: ChatbotInterfaceProps) => {
-  console.log("ChatbotInterface settings:", settings); // Debug log
+  console.log("ChatbotInterface settings:", settings); // Debug log for all settings
+  console.log("Avatar URL from settings:", settings.avatar_url); // Specific debug log for avatar_url
+  
   const [isProductsOpen, setIsProductsOpen] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const buttons = (settings.buttons || []) as ButtonConfig[];
@@ -50,14 +52,14 @@ export const ChatbotInterface = ({
         console.error("Error fetching products:", error);
         throw error;
       }
-      console.log("Products fetched:", data);
       return data as Product[];
     },
     enabled: !!settings.profile_id,
   });
 
-  // Debug log for avatar URL
-  console.log("Avatar URL from settings:", settings.avatar_url);
+  // Ensure we have a valid avatar URL before passing it to ChatHeader
+  const avatarUrl = settings.avatar_url || undefined;
+  console.log("Final avatar URL being passed to ChatHeader:", avatarUrl); // Debug log
 
   return (
     <div className="h-[100dvh] bg-gradient-to-b from-[#fcf5eb] to-white p-4 flex items-center justify-center overflow-hidden">
@@ -66,7 +68,7 @@ export const ChatbotInterface = ({
           <CardContent className="p-4 h-full flex flex-col">
             <ChatHeader 
               botName={settings.bot_name}
-              avatarUrl={settings.avatar_url || undefined}
+              avatarUrl={avatarUrl}
             />
             
             <ChatMessages 
@@ -78,7 +80,6 @@ export const ChatbotInterface = ({
             />
 
             <div className="border-t pt-4">
-              {/* Products Collapsible Section */}
               {productsLoading ? (
                 <div className="mb-4">
                   <div className="h-48 bg-gray-100 animate-pulse rounded-lg"></div>
@@ -130,7 +131,6 @@ export const ChatbotInterface = ({
                 </Collapsible>
               ) : null}
 
-              {/* Chat Input */}
               <ChatInput
                 inputMessage={inputMessage}
                 setInputMessage={setInputMessage}
