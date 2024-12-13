@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { formatCurrency } from "@/lib/utils";
 import ProductDetailsDialog from "@/components/products/ProductDetailsDialog";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import type { ButtonConfig } from "@/types/chatbot";
 import type { Product } from "@/types/product";
 
@@ -61,8 +62,15 @@ const PhonePreview = ({ botName, greetingMessage, buttons = [], userId }: PhoneP
       <div className="h-full bg-gray-100 p-4">
         <div className="bg-white h-full rounded-2xl shadow-sm p-4 flex flex-col">
           <div className="text-center border-b pb-4 flex items-center justify-center gap-3">
+            {settings?.avatar_url && (
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={settings.avatar_url} alt={botName} />
+                <AvatarFallback>{botName[0]?.toUpperCase()}</AvatarFallback>
+              </Avatar>
+            )}
             <h3 className="font-bold">{botName || "My ChatBot"}</h3>
           </div>
+          
           <div className="flex-1 overflow-y-auto py-4">
             <div className="bg-primary/10 rounded-lg p-3 max-w-[80%] mb-4">
               <p className="text-sm">
