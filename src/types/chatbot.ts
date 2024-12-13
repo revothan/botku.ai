@@ -3,6 +3,7 @@ export type Message = {
   content: string;
   sender: 'user' | 'assistant';
   timestamp: string;
+  role?: 'user' | 'assistant';
 };
 
 export type ButtonConfig = {
@@ -37,5 +38,17 @@ export type AssistantResponse = {
       value: string;
       annotations: any[];
     };
+  };
+};
+
+export type ChatbotFormData = {
+  bot_name: string;
+  greeting_message: string;
+  training_data: string | null;
+  user_type?: 'business' | 'creator' | 'other';
+  answers?: {
+    business: string[];
+    creator: string[];
+    other: string[];
   };
 };

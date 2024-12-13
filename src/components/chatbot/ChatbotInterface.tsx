@@ -31,8 +31,6 @@ export const ChatbotInterface = ({
   messagesEndRef,
   isLoading = false,
 }: ChatbotInterfaceProps) => {
-  console.log("Full settings object:", settings); // Debug log for all settings
-  
   const [isProductsOpen, setIsProductsOpen] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const buttons = (settings.buttons || []) as ButtonConfig[];
@@ -40,7 +38,6 @@ export const ChatbotInterface = ({
   const { data: products, isLoading: productsLoading } = useQuery({
     queryKey: ["chatbot-products", settings.profile_id],
     queryFn: async () => {
-      console.log("Fetching products for profile:", settings.profile_id);
       const { data, error } = await supabase
         .from("products")
         .select("*")
@@ -48,7 +45,6 @@ export const ChatbotInterface = ({
         .order("created_at", { ascending: false });
 
       if (error) {
-        console.error("Error fetching products:", error);
         throw error;
       }
       return data as Product[];
@@ -56,10 +52,7 @@ export const ChatbotInterface = ({
     enabled: !!settings.profile_id,
   });
 
-  // Ensure we have a valid avatar URL and log its value
   const avatarUrl = settings.avatar_url || undefined;
-  console.log("Avatar URL from settings object:", settings.avatar_url);
-  console.log("Processed avatar URL:", avatarUrl);
 
   return (
     <div className="h-[100dvh] bg-gradient-to-b from-[#fcf5eb] to-white p-4 flex items-center justify-center overflow-hidden">
@@ -74,7 +67,6 @@ export const ChatbotInterface = ({
                     src={avatarUrl} 
                     alt={settings.bot_name} 
                     onError={(e) => {
-                      console.error("Avatar image failed to load:", e);
                       e.currentTarget.style.display = 'none';
                     }}
                   />
