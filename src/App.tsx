@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,7 +6,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { SessionContextProvider, useSession } from '@supabase/auth-helpers-react';
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
@@ -97,7 +96,7 @@ const AppRoutes = () => {
       // Initial session check
       checkSession();
 
-      // Set up periodic session checks
+      // Set up periodic session checks every minute
       const intervalId = setInterval(checkSession, 60000);
 
       // Set up auth state change listener
