@@ -2,7 +2,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 type ChatHeaderProps = {
   botName: string;
-  avatarUrl?: string | null;
+  avatarUrl?: string;
 };
 
 export const ChatHeader = ({ botName, avatarUrl }: ChatHeaderProps) => {

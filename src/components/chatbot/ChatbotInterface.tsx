@@ -62,7 +62,7 @@ export const ChatbotInterface = ({
           <CardContent className="p-4 h-full flex flex-col">
             <ChatHeader 
               botName={settings.bot_name}
-              avatarUrl={settings.avatar_url}
+              avatarUrl={settings.avatar_url || undefined}
             />
             
             <ChatMessages 
