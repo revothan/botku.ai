@@ -3,9 +3,6 @@ import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/utils";
 import { useState } from "react";
 import { useCart } from "@/contexts/CartContext";
-import { useToast } from "@/components/ui/use-toast";
-import { useSession } from "@supabase/auth-helpers-react";
-import { AuthForm } from "@/components/auth/AuthForm";
 import CustomerForm from "./CustomerForm";
 import OrderSummary from "./OrderSummary";
 import type { Product } from "@/types/product";
@@ -19,45 +16,18 @@ interface ProductDetailsDialogProps {
 const ProductDetailsDialog = ({ product, open, onOpenChange }: ProductDetailsDialogProps) => {
   const [showCustomerForm, setShowCustomerForm] = useState(false);
   const [showOrderSummary, setShowOrderSummary] = useState(false);
-  const [showAuthForm, setShowAuthForm] = useState(false);
   const { addToCart } = useCart();
-  const { toast } = useToast();
-  const session = useSession();
 
   if (!product) return null;
 
-  const handleCartAction = (action: 'cart' | 'buy') => {
-    if (!session) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to continue with your purchase",
-        variant: "default",
-      });
-      setShowAuthForm(true);
-      return;
-    }
-
-    if (action === 'cart') {
-      addToCart(product);
-      onOpenChange(false);
-      toast({
-        title: "Added to Cart",
-        description: `${product.name} has been added to your cart`,
-      });
-    } else {
-      setShowOrderSummary(true);
-    }
+  const handleAddToCart = () => {
+    addToCart(product);
+    onOpenChange(false);
   };
 
-  if (showAuthForm) {
-    return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[425px]">
-          <AuthForm />
-        </DialogContent>
-      </Dialog>
-    );
-  }
+  const handleBuyNow = () => {
+    setShowOrderSummary(true);
+  };
 
   return (
     <>
@@ -86,13 +56,13 @@ const ProductDetailsDialog = ({ product, open, onOpenChange }: ProductDetailsDia
             <Button 
               className="flex-1" 
               variant="outline"
-              onClick={() => handleCartAction('cart')}
+              onClick={handleAddToCart}
             >
               Add to Cart
             </Button>
             <Button 
               className="flex-1"
-              onClick={() => handleCartAction('buy')}
+              onClick={handleBuyNow}
             >
               Buy Now
             </Button>
