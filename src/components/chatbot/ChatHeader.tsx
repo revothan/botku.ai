@@ -1,13 +1,17 @@
-import { Bot } from "lucide-react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 type ChatHeaderProps = {
   botName: string;
+  avatarUrl?: string | null;
 };
 
-export const ChatHeader = ({ botName }: ChatHeaderProps) => {
+export const ChatHeader = ({ botName, avatarUrl }: ChatHeaderProps) => {
   return (
     <div className="text-center border-b pb-4 flex items-center justify-center gap-3">
-      <Bot className="h-5 w-5 text-primary" />
+      <Avatar className="h-8 w-8">
+        <AvatarImage src={avatarUrl || ''} alt={botName} />
+        <AvatarFallback>{botName[0]?.toUpperCase()}</AvatarFallback>
+      </Avatar>
       <h3 className="font-bold text-secondary">{botName}</h3>
     </div>
   );
