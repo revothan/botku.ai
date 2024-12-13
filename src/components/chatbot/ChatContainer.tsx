@@ -16,6 +16,32 @@ export const ChatContainer = ({ settings }: ChatContainerProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
+  // Initialize visitor session
+  useEffect(() => {
+    const initializeVisitorSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          // Create anonymous session for tracking
+          const { data: { user }, error } = await supabase.auth.signUp({
+            email: `visitor_${Date.now()}@temp.com`,
+            password: crypto.randomUUID(),
+          });
+          
+          if (error) {
+            console.error("Error creating visitor session:", error);
+          } else {
+            console.log("Anonymous visitor session created:", user);
+          }
+        }
+      } catch (error) {
+        console.error("Error initializing visitor session:", error);
+      }
+    };
+
+    initializeVisitorSession();
+  }, []);
+
   const { sessionId, setSessionId, createChatSession } = useChatSession(settings?.profile_id);
   const { messages, setMessages, insertMessage } = useChatMessages(sessionId);
 
