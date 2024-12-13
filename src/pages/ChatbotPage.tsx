@@ -21,6 +21,7 @@ type AssistantResponse = {
 };
 
 const transformSettings = (rawSettings: any): ChatbotSettings => {
+  console.log("Raw settings before transform:", rawSettings); // Debug log
   return {
     ...rawSettings,
     buttons: Array.isArray(rawSettings.buttons) 
@@ -29,7 +30,8 @@ const transformSettings = (rawSettings: any): ChatbotSettings => {
           label: button.label || '',
           url: button.url || ''
         }))
-      : []
+      : [],
+    avatar_url: rawSettings.avatar_url || null // Explicitly handle avatar_url
   };
 };
 
@@ -65,7 +67,8 @@ const ChatbotPage = () => {
             created_at,
             updated_at,
             assistant_id,
-            buttons
+            buttons,
+            avatar_url
           )
         `)
         .eq('custom_domain', customDomain)
@@ -73,6 +76,7 @@ const ChatbotPage = () => {
 
       if (!domainError && profileByDomain?.chatbot_settings) {
         console.log("Found profile by custom domain:", profileByDomain);
+        console.log("Settings before transform:", profileByDomain.chatbot_settings);
         return transformSettings(profileByDomain.chatbot_settings);
       }
 
@@ -90,7 +94,8 @@ const ChatbotPage = () => {
             created_at,
             updated_at,
             assistant_id,
-            buttons
+            buttons,
+            avatar_url
           )
         `)
         .eq('username', customDomain)
@@ -107,6 +112,7 @@ const ChatbotPage = () => {
       }
 
       console.log("Found profile by username:", profileByUsername);
+      console.log("Settings before transform:", profileByUsername.chatbot_settings);
       return transformSettings(profileByUsername.chatbot_settings);
     },
   });
