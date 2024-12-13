@@ -3,6 +3,7 @@ import { Eye, EyeOff, X } from "lucide-react";
 import DomainSection from "@/components/dashboard/DomainSection";
 import SettingsSection from "@/components/dashboard/SettingsSection";
 import PhonePreview from "@/components/dashboard/PhonePreview";
+import ChatbotAvatarUpload from "@/components/dashboard/ChatbotAvatarUpload";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import type { ChatbotSettings } from "@/types/chatbot";
@@ -27,6 +28,15 @@ const DashboardContent = ({ userId, settings, isLoading }: DashboardContentProps
             <div>
               <h2 className="text-2xl font-bold mb-6 text-secondary">Share Your Chatbot</h2>
               <DomainSection userId={userId} />
+            </div>
+
+            {/* Avatar Upload Section */}
+            <div className={isMobile && showPreview ? 'hidden' : ''}>
+              <ChatbotAvatarUpload 
+                userId={userId}
+                currentAvatarUrl={settings?.avatar_url}
+                botName={settings?.bot_name || "My ChatBot"}
+              />
             </div>
 
             {/* Settings Section */}
@@ -72,7 +82,7 @@ const DashboardContent = ({ userId, settings, isLoading }: DashboardContentProps
         </div>
       </div>
 
-      {/* Preview Toggle Button (Mobile Only) - Fixed Position */}
+      {/* Preview Toggle Button (Mobile Only) */}
       {isMobile && !showPreview && (
         <div className="fixed left-1/2 bottom-8 -translate-x-1/2 z-50">
           <Button
