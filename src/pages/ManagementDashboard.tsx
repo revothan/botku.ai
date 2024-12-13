@@ -42,11 +42,16 @@ const ManagementDashboard = () => {
           console.log("Existing settings found:", existingSettings);
           return {
             ...existingSettings,
-            answers: existingSettings.answers || {
-              business: [],
-              creator: [],
-              other: []
-            },
+            answers: existingSettings.answers ? 
+              (typeof existingSettings.answers === 'object' ? 
+                {
+                  business: Array.isArray(existingSettings.answers.business) ? existingSettings.answers.business : [],
+                  creator: Array.isArray(existingSettings.answers.creator) ? existingSettings.answers.creator : [],
+                  other: Array.isArray(existingSettings.answers.other) ? existingSettings.answers.other : []
+                } : 
+                { business: [], creator: [], other: [] }
+              ) : 
+              { business: [], creator: [], other: [] },
             buttons: Array.isArray(existingSettings.buttons) 
               ? existingSettings.buttons.map((button: any) => ({
                   id: button.id || crypto.randomUUID(),

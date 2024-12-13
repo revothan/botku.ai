@@ -8,7 +8,6 @@ import CreatorQuestions from "./questions/CreatorQuestions";
 import OtherQuestions from "./questions/OtherQuestions";
 import FormHeaderFields from "./form/FormHeaderFields";
 import UserTypeSelection from "./form/UserTypeSelection";
-import AvatarField from "./form/AvatarField";
 import type { ChatbotFormData } from "@/types/chatbot";
 
 const formSchema = z.object({
@@ -20,8 +19,7 @@ const formSchema = z.object({
     business: z.array(z.string()),
     creator: z.array(z.string()),
     other: z.array(z.string())
-  }).optional(),
-  avatar_url: z.string().nullable().optional()
+  }).optional()
 });
 
 interface ChatbotSettingsFormProps {
@@ -32,7 +30,7 @@ interface ChatbotSettingsFormProps {
   profileId: string;
 }
 
-const ChatbotSettingsForm = ({ defaultValues, onSubmit, isSubmitting, hasExistingBot, profileId }: ChatbotSettingsFormProps) => {
+const ChatbotSettingsForm = ({ defaultValues, onSubmit, isSubmitting, hasExistingBot }: ChatbotSettingsFormProps) => {
   const form = useForm<ChatbotFormData>({
     resolver: zodResolver(formSchema),
     defaultValues
@@ -43,11 +41,6 @@ const ChatbotSettingsForm = ({ defaultValues, onSubmit, isSubmitting, hasExistin
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <AvatarField 
-          form={form} 
-          defaultAvatarUrl={defaultValues.avatar_url} 
-          profileId={profileId}
-        />
         <FormHeaderFields form={form} />
         <UserTypeSelection form={form} />
 
