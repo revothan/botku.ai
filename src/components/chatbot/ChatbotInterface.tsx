@@ -31,6 +31,7 @@ export const ChatbotInterface = ({
   messagesEndRef,
   isLoading = false,
 }: ChatbotInterfaceProps) => {
+  console.log("ChatbotInterface settings:", settings); // Debug log
   const [isProductsOpen, setIsProductsOpen] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const buttons = (settings.buttons || []) as ButtonConfig[];
@@ -54,6 +55,9 @@ export const ChatbotInterface = ({
     },
     enabled: !!settings.profile_id,
   });
+
+  // Debug log for avatar URL
+  console.log("Avatar URL from settings:", settings.avatar_url);
 
   return (
     <div className="h-[100dvh] bg-gradient-to-b from-[#fcf5eb] to-white p-4 flex items-center justify-center overflow-hidden">

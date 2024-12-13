@@ -6,14 +6,22 @@ type ChatHeaderProps = {
 };
 
 export const ChatHeader = ({ botName, avatarUrl }: ChatHeaderProps) => {
+  console.log("ChatHeader props:", { botName, avatarUrl }); // Debug log
+
   return (
     <div className="text-center border-b pb-4 flex items-center justify-center gap-3">
       <Avatar className="h-8 w-8">
         {avatarUrl ? (
-          <AvatarImage src={avatarUrl} alt={botName} />
-        ) : (
-          <AvatarFallback>{botName[0]?.toUpperCase()}</AvatarFallback>
-        )}
+          <AvatarImage 
+            src={avatarUrl} 
+            alt={botName} 
+            onError={(e) => {
+              console.error("Avatar image failed to load:", e);
+              e.currentTarget.style.display = 'none';
+            }}
+          />
+        ) : null}
+        <AvatarFallback>{botName[0]?.toUpperCase()}</AvatarFallback>
       </Avatar>
       <h3 className="font-bold text-secondary">{botName}</h3>
     </div>
