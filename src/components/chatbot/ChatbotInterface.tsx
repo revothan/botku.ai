@@ -1,6 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { ChatInput } from "@/components/chatbot/ChatInput";
-import { ChatHeader } from "@/components/chatbot/ChatHeader";
 import { ChatMessages } from "@/components/chatbot/ChatMessages";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,6 +8,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 import ProductDetailsDialog from "@/components/products/ProductDetailsDialog";
 import { formatCurrency } from "@/lib/utils";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import type { Message, ButtonConfig, ChatbotSettings } from "@/types/chatbot";
 import type { Product } from "@/types/product";
 
@@ -31,8 +31,8 @@ export const ChatbotInterface = ({
   messagesEndRef,
   isLoading = false,
 }: ChatbotInterfaceProps) => {
-  console.log("ChatbotInterface settings:", settings); // Debug log for all settings
-  console.log("Avatar URL from settings:", settings.avatar_url); // Specific debug log for avatar_url
+  console.log("ChatbotInterface settings:", settings);
+  console.log("Avatar URL from settings:", settings.avatar_url);
   
   const [isProductsOpen, setIsProductsOpen] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -57,19 +57,32 @@ export const ChatbotInterface = ({
     enabled: !!settings.profile_id,
   });
 
-  // Ensure we have a valid avatar URL before passing it to ChatHeader
+  // Ensure we have a valid avatar URL
   const avatarUrl = settings.avatar_url || undefined;
-  console.log("Final avatar URL being passed to ChatHeader:", avatarUrl); // Debug log
+  console.log("Avatar URL being used:", avatarUrl);
 
   return (
     <div className="h-[100dvh] bg-gradient-to-b from-[#fcf5eb] to-white p-4 flex items-center justify-center overflow-hidden">
       <div className="w-full max-w-lg h-full">
         <Card className="border-none shadow-lg bg-white/80 backdrop-blur-sm h-full">
           <CardContent className="p-4 h-full flex flex-col">
-            <ChatHeader 
-              botName={settings.bot_name}
-              avatarUrl={avatarUrl}
-            />
+            {/* Integrated ChatHeader */}
+            <div className="text-center border-b pb-4 flex items-center justify-center gap-3">
+              <Avatar className="h-8 w-8">
+                {avatarUrl ? (
+                  <AvatarImage 
+                    src={avatarUrl} 
+                    alt={settings.bot_name} 
+                    onError={(e) => {
+                      console.error("Avatar image failed to load:", e);
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                ) : null}
+                <AvatarFallback>{settings.bot_name[0]?.toUpperCase()}</AvatarFallback>
+              </Avatar>
+              <h3 className="font-bold text-secondary">{settings.bot_name}</h3>
+            </div>
             
             <ChatMessages 
               messages={messages}
