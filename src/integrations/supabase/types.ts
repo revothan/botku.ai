@@ -147,7 +147,7 @@ export type Database = {
           email: string
           id: string
           name: string
-          product_id: string
+          product_name: string
           profile_id: string
           updated_at: string
         }
@@ -156,7 +156,7 @@ export type Database = {
           email: string
           id?: string
           name: string
-          product_id: string
+          product_name?: string
           profile_id: string
           updated_at?: string
         }
@@ -165,18 +165,11 @@ export type Database = {
           email?: string
           id?: string
           name?: string
-          product_id?: string
+          product_name?: string
           profile_id?: string
           updated_at?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "customers_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "customers_profile_id_fkey"
             columns: ["profile_id"]

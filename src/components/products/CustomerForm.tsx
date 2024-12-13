@@ -39,7 +39,7 @@ const CustomerForm = ({ product, open, onOpenChange }: CustomerFormProps) => {
         .from("customers")
         .insert({
           profile_id: product.profile_id,
-          product_id: product.id,
+          product_name: product.name,
           name,
           email,
         });

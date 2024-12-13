@@ -10,9 +10,7 @@ interface Customer {
   name: string;
   email: string;
   created_at: string;
-  product: {
-    name: string;
-  };
+  product_name: string;
 }
 
 const CustomerDashboard = () => {
@@ -31,9 +29,7 @@ const CustomerDashboard = () => {
           name,
           email,
           created_at,
-          product:products (
-            name
-          )
+          product_name
         `)
         .eq("profile_id", userId)
         .order("created_at", { ascending: false });
@@ -77,7 +73,7 @@ const CustomerDashboard = () => {
               <h3 className="font-medium">{customer.name}</h3>
               <p className="text-sm text-muted-foreground">{customer.email}</p>
               <p className="text-sm text-muted-foreground">
-                Product: {customer.product.name}
+                Product: {customer.product_name}
               </p>
               <p className="text-xs text-muted-foreground">
                 Signed up: {new Date(customer.created_at).toLocaleDateString()}
