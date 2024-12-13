@@ -8,7 +8,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 import ProductDetailsDialog from "@/components/products/ProductDetailsDialog";
-import { formatCurrency } from "@/lib/utils";  // Added this import
+import { formatCurrency } from "@/lib/utils";
 import type { Message, ButtonConfig, ChatbotSettings } from "@/types/chatbot";
 import type { Product } from "@/types/product";
 
@@ -62,7 +62,6 @@ export const ChatbotInterface = ({
           <CardContent className="p-4 h-full flex flex-col">
             <ChatHeader 
               botName={settings.bot_name} 
-              avatarUrl={settings.avatar_url}
             />
             
             <ChatMessages 
