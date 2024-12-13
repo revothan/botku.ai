@@ -25,7 +25,7 @@ export const useChatbotSettings = (identifier: string | undefined) => {
         return null;
       }
 
-      const { data: profile, error } = await supabase
+      const { data: profiles, error } = await supabase
         .from("profiles")
         .select(`
           id,
@@ -45,13 +45,20 @@ export const useChatbotSettings = (identifier: string | undefined) => {
           )
         `)
         .or(`username.eq.${identifier},custom_domain.eq.${identifier}`)
-        .single();
+        .limit(1);
 
       if (error) {
         console.error("Error fetching profile:", error);
         return null;
       }
 
+      if (!profiles || profiles.length === 0) {
+        console.log("No profile found for identifier:", identifier);
+        return null;
+      }
+
+      const profile = profiles[0];
+      
       if (!profile?.chatbot_settings) {
         console.log("No chatbot settings found for profile:", profile);
         return null;
