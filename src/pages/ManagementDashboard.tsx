@@ -40,13 +40,28 @@ const ManagementDashboard = () => {
 
         if (existingSettings) {
           console.log("Existing settings found:", existingSettings);
+          const defaultAnswers = { business: [], creator: [], other: [] };
+          
+          let parsedAnswers = defaultAnswers;
+          if (existingSettings.answers) {
+            try {
+              const answersObj = typeof existingSettings.answers === 'string' 
+                ? JSON.parse(existingSettings.answers) 
+                : existingSettings.answers;
+                
+              parsedAnswers = {
+                business: Array.isArray(answersObj.business) ? answersObj.business : [],
+                creator: Array.isArray(answersObj.creator) ? answersObj.creator : [],
+                other: Array.isArray(answersObj.other) ? answersObj.other : []
+              };
+            } catch (e) {
+              console.error("Error parsing answers:", e);
+            }
+          }
+
           return {
             ...existingSettings,
-            answers: existingSettings.answers || {
-              business: [],
-              creator: [],
-              other: []
-            },
+            answers: parsedAnswers,
             buttons: Array.isArray(existingSettings.buttons) 
               ? existingSettings.buttons.map((button: any) => ({
                   id: button.id || crypto.randomUUID(),

@@ -56,23 +56,21 @@ const PhonePreview = ({ botName, greetingMessage, buttons = [], userId }: PhoneP
     enabled: !!userId,
   });
 
-  // Get the public URL for the avatar
-  const avatarUrl = settings?.avatar_url 
-    ? supabase.storage.from('chatbot-avatars').getPublicUrl(settings.avatar_url).data.publicUrl
-    : '';
-
   return (
     <div className="relative mx-auto w-[300px] h-[600px] rounded-[3rem] border-8 border-gray-900 overflow-hidden">
       <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-1/3 h-6 bg-gray-900 rounded-b-2xl"></div>
       <div className="h-full bg-gray-100 p-4">
         <div className="bg-white h-full rounded-2xl shadow-sm p-4 flex flex-col">
           <div className="text-center border-b pb-4 flex items-center justify-center gap-3">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src={avatarUrl} alt={botName} />
-              <AvatarFallback></AvatarFallback>
-            </Avatar>
+            {settings?.avatar_url && (
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={settings.avatar_url} alt={botName} />
+                <AvatarFallback>{botName[0]?.toUpperCase()}</AvatarFallback>
+              </Avatar>
+            )}
             <h3 className="font-bold">{botName || "My ChatBot"}</h3>
           </div>
+          
           <div className="flex-1 overflow-y-auto py-4">
             <div className="bg-primary/10 rounded-lg p-3 max-w-[80%] mb-4">
               <p className="text-sm">
@@ -94,6 +92,7 @@ const PhonePreview = ({ botName, greetingMessage, buttons = [], userId }: PhoneP
           </div>
 
           <div className="border-t pt-4">
+            {/* Products Section */}
             {products && products.length > 0 && (
               <Collapsible
                 open={isProductsOpen}

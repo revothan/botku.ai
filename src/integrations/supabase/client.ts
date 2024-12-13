@@ -9,8 +9,9 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
-    storage: window.localStorage,
-    flowType: 'pkce'
+    storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+    storageKey: 'menyapa-auth-token',
+    flowType: 'implicit'
   },
   global: {
     headers: {
@@ -19,3 +20,15 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     }
   }
 });
+
+// Add debug logging for session state changes
+supabase.auth.onAuthStateChange((event, session) => {
+  console.log('Auth state changed:', { event, session });
+});
+
+// Debug: Log initial session
+if (typeof window !== 'undefined') {
+  supabase.auth.getSession().then(({ data: { session } }) => {
+    console.log('Initial session:', session);
+  });
+}

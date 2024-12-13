@@ -35,8 +35,8 @@ const SettingsSection = ({ userId, settings, isLoading }: SettingsSectionProps) 
         .update({
           bot_name: values.bot_name,
           greeting_message: values.greeting_message,
-          training_data: values.training_data, // Store original training data
-          user_type: values.user_type,
+          training_data: values.training_data,
+          user_type: values.user_type as "business" | "creator" | "other",
           answers: values.answers
         })
         .eq("profile_id", userId)
@@ -48,7 +48,7 @@ const SettingsSection = ({ userId, settings, isLoading }: SettingsSectionProps) 
       const assistantResponse = await supabase.functions.invoke('create-openai-assistant', {
         body: JSON.stringify({
           ...values,
-          training_data: enhancedTrainingData, // Send enhanced training data to OpenAI
+          training_data: enhancedTrainingData,
           assistant_id: settings?.assistant_id
         })
       });
@@ -100,7 +100,7 @@ const SettingsSection = ({ userId, settings, isLoading }: SettingsSectionProps) 
     bot_name: settings?.bot_name || "",
     greeting_message: settings?.greeting_message || "",
     training_data: settings?.training_data || "",
-    user_type: settings?.user_type,
+    user_type: settings?.user_type as "business" | "creator" | "other" | undefined,
     answers: settings?.answers || {
       business: Array(5).fill(""),
       creator: Array(5).fill(""),

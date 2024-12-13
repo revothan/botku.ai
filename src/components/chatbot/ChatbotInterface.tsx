@@ -1,6 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { ChatInput } from "@/components/chatbot/ChatInput";
-import { ChatHeader } from "@/components/chatbot/ChatHeader";
 import { ChatMessages } from "@/components/chatbot/ChatMessages";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,7 +7,8 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 import ProductDetailsDialog from "@/components/products/ProductDetailsDialog";
-import { formatCurrency } from "@/lib/utils";  // Added this import
+import { formatCurrency } from "@/lib/utils";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import type { Message, ButtonConfig, ChatbotSettings } from "@/types/chatbot";
 import type { Product } from "@/types/product";
 
@@ -38,7 +38,6 @@ export const ChatbotInterface = ({
   const { data: products, isLoading: productsLoading } = useQuery({
     queryKey: ["chatbot-products", settings.profile_id],
     queryFn: async () => {
-      console.log("Fetching products for profile:", settings.profile_id);
       const { data, error } = await supabase
         .from("products")
         .select("*")
@@ -46,24 +45,36 @@ export const ChatbotInterface = ({
         .order("created_at", { ascending: false });
 
       if (error) {
-        console.error("Error fetching products:", error);
         throw error;
       }
-      console.log("Products fetched:", data);
       return data as Product[];
     },
     enabled: !!settings.profile_id,
   });
+
+  const avatarUrl = settings.avatar_url || undefined;
 
   return (
     <div className="h-[100dvh] bg-gradient-to-b from-[#fcf5eb] to-white p-4 flex items-center justify-center overflow-hidden">
       <div className="w-full max-w-lg h-full">
         <Card className="border-none shadow-lg bg-white/80 backdrop-blur-sm h-full">
           <CardContent className="p-4 h-full flex flex-col">
-            <ChatHeader 
-              botName={settings.bot_name} 
-              avatarUrl={settings.avatar_url}
-            />
+            {/* Integrated ChatHeader */}
+            <div className="text-center border-b pb-4 flex items-center justify-center gap-3">
+              <Avatar className="h-8 w-8">
+                {avatarUrl ? (
+                  <AvatarImage 
+                    src={avatarUrl} 
+                    alt={settings.bot_name} 
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                ) : null}
+                <AvatarFallback>{settings.bot_name[0]?.toUpperCase()}</AvatarFallback>
+              </Avatar>
+              <h3 className="font-bold text-secondary">{settings.bot_name}</h3>
+            </div>
             
             <ChatMessages 
               messages={messages}
@@ -74,7 +85,6 @@ export const ChatbotInterface = ({
             />
 
             <div className="border-t pt-4">
-              {/* Products Collapsible Section */}
               {productsLoading ? (
                 <div className="mb-4">
                   <div className="h-48 bg-gray-100 animate-pulse rounded-lg"></div>
@@ -126,7 +136,6 @@ export const ChatbotInterface = ({
                 </Collapsible>
               ) : null}
 
-              {/* Chat Input */}
               <ChatInput
                 inputMessage={inputMessage}
                 setInputMessage={setInputMessage}
