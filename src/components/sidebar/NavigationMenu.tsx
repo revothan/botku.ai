@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Package, MessageSquare } from "lucide-react";
+import { LayoutDashboard, Package, MessageSquare, Users } from "lucide-react";
 import { SidebarContent, SidebarMenu } from "@/components/ui/sidebar";
 import { NavigationItem } from "./NavigationItem";
 
@@ -27,6 +27,11 @@ export function NavigationMenu({ onNavigate }: NavigationMenuProps) {
       title: "Chat Monitoring",
       icon: MessageSquare,
       path: "/dashboard/chats",
+    },
+    {
+      title: "Customers",
+      icon: Users,
+      path: "/dashboard/customers",
     }
   ];
 

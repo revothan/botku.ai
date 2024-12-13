@@ -83,7 +83,7 @@ const CustomerDashboard = () => {
                 Signed up: {new Date(customer.created_at).toLocaleDateString()}
               </p>
             </Card>
-          </div>
+          ))}
         </div>
       )}
     </div>
