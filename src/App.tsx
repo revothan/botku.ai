@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-route
 import { SessionContextProvider, useSession } from '@supabase/auth-helpers-react';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { CartProvider } from "@/contexts/CartContext";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import UserPage from "./pages/UserPage";
@@ -174,13 +175,15 @@ const App = () => {
           supabaseClient={supabase}
           initialSession={null}
         >
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <AppRoutes />
-            </BrowserRouter>
-          </TooltipProvider>
+          <CartProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <AppRoutes />
+              </BrowserRouter>
+            </TooltipProvider>
+          </CartProvider>
         </SessionContextProvider>
       </QueryClientProvider>
     </React.StrictMode>

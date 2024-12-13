@@ -1,13 +1,10 @@
-import { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { formatCurrency } from "@/lib/utils";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { formatCurrency } from "@/lib/utils";
+import { useState } from "react";
+import { useCart } from "@/contexts/CartContext";
 import CustomerForm from "./CustomerForm";
+import OrderSummary from "./OrderSummary";
 import type { Product } from "@/types/product";
 
 interface ProductDetailsDialogProps {
@@ -18,57 +15,65 @@ interface ProductDetailsDialogProps {
 
 const ProductDetailsDialog = ({ product, open, onOpenChange }: ProductDetailsDialogProps) => {
   const [showCustomerForm, setShowCustomerForm] = useState(false);
-  
+  const [showOrderSummary, setShowOrderSummary] = useState(false);
+  const { addToCart } = useCart();
+
   if (!product) return null;
+
+  const handleAddToCart = () => {
+    addToCart(product);
+    onOpenChange(false);
+  };
+
+  const handleBuyNow = () => {
+    setShowOrderSummary(true);
+  };
 
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[400px] max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-semibold">{product.name}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            {product.image_url && (
-              <div className="relative w-full aspect-video">
-                <img
-                  src={product.image_url}
-                  alt={product.name}
-                  className="w-full h-full object-cover rounded-lg"
-                />
-              </div>
-            )}
-            
-            {product.details && (
-              <p className="text-sm text-muted-foreground">{product.details}</p>
-            )}
-            
-            <div className="space-y-2">
-              <p className="text-lg font-semibold text-primary">
-                {formatCurrency(product.price)}
-              </p>
-              
-              {product.stock !== null && product.stock > 0 && (
-                <p className="text-sm text-muted-foreground">
-                  Stock: {product.stock}
-                </p>
-              )}
-            </div>
-
+        <DialogContent className="sm:max-w-[425px]">
+          {product.image_url && (
+            <img
+              src={product.image_url}
+              alt={product.name}
+              className="w-full h-48 object-cover rounded-lg mb-4"
+            />
+          )}
+          <h2 className="text-lg font-semibold mb-2">{product.name}</h2>
+          <p className="text-xl font-bold text-primary mb-4">
+            {formatCurrency(product.price)}
+          </p>
+          {product.details && (
+            <p className="text-muted-foreground mb-4">{product.details}</p>
+          )}
+          {product.stock !== null && product.stock > 0 && (
+            <p className="text-sm text-muted-foreground mb-4">
+              Stock: {product.stock}
+            </p>
+          )}
+          <div className="flex gap-2">
             <Button 
-              className="w-full"
-              onClick={() => setShowCustomerForm(true)}
+              className="flex-1" 
+              variant="outline"
+              onClick={handleAddToCart}
             >
-              {product.cta || "Buy Now"}
+              Add to Cart
+            </Button>
+            <Button 
+              className="flex-1"
+              onClick={handleBuyNow}
+            >
+              Buy Now
             </Button>
           </div>
         </DialogContent>
       </Dialog>
 
-      <CustomerForm 
+      <OrderSummary
+        open={showOrderSummary}
+        onOpenChange={setShowOrderSummary}
         product={product}
-        open={showCustomerForm}
-        onOpenChange={setShowCustomerForm}
       />
     </>
   );

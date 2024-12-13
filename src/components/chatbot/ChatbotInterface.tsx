@@ -4,11 +4,14 @@ import { ChatMessages } from "@/components/chatbot/ChatMessages";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, ShoppingCart } from "lucide-react";
 import { useState } from "react";
 import ProductDetailsDialog from "@/components/products/ProductDetailsDialog";
+import OrderSummary from "@/components/products/OrderSummary";
 import { formatCurrency } from "@/lib/utils";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { useCart } from "@/contexts/CartContext";
 import type { Message, ButtonConfig, ChatbotSettings } from "@/types/chatbot";
 import type { Product } from "@/types/product";
 
@@ -33,6 +36,9 @@ export const ChatbotInterface = ({
 }: ChatbotInterfaceProps) => {
   const [isProductsOpen, setIsProductsOpen] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [showOrderSummary, setShowOrderSummary] = useState(false);
+  const [buyNowProduct, setBuyNowProduct] = useState<Product | null>(null);
+  const { getItemCount } = useCart();
   const buttons = (settings.buttons || []) as ButtonConfig[];
 
   const { data: products, isLoading: productsLoading } = useQuery({
@@ -53,27 +59,42 @@ export const ChatbotInterface = ({
   });
 
   const avatarUrl = settings.avatar_url || undefined;
+  const cartItemCount = getItemCount();
 
   return (
     <div className="h-[100dvh] bg-gradient-to-b from-[#fcf5eb] to-white p-4 flex items-center justify-center overflow-hidden">
       <div className="w-full max-w-lg h-full">
         <Card className="border-none shadow-lg bg-white/80 backdrop-blur-sm h-full">
           <CardContent className="p-4 h-full flex flex-col">
-            {/* Integrated ChatHeader */}
-            <div className="text-center border-b pb-4 flex items-center justify-center gap-3">
-              <Avatar className="h-8 w-8">
-                {avatarUrl ? (
-                  <AvatarImage 
-                    src={avatarUrl} 
-                    alt={settings.bot_name} 
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
-                ) : null}
-                <AvatarFallback>{settings.bot_name[0]?.toUpperCase()}</AvatarFallback>
-              </Avatar>
-              <h3 className="font-bold text-secondary">{settings.bot_name}</h3>
+            <div className="text-center border-b pb-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Avatar className="h-8 w-8">
+                  {avatarUrl ? (
+                    <AvatarImage 
+                      src={avatarUrl} 
+                      alt={settings.bot_name} 
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  ) : null}
+                  <AvatarFallback>{settings.bot_name[0]?.toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <h3 className="font-bold text-secondary">{settings.bot_name}</h3>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="relative"
+                onClick={() => setShowOrderSummary(true)}
+              >
+                <ShoppingCart className="h-5 w-5" />
+                {cartItemCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground rounded-full w-4 h-4 text-xs flex items-center justify-center">
+                    {cartItemCount}
+                  </span>
+                )}
+              </Button>
             </div>
             
             <ChatMessages 
@@ -151,6 +172,12 @@ export const ChatbotInterface = ({
         product={selectedProduct}
         open={!!selectedProduct}
         onOpenChange={(open) => !open && setSelectedProduct(null)}
+      />
+
+      <OrderSummary
+        open={showOrderSummary}
+        onOpenChange={setShowOrderSummary}
+        product={buyNowProduct}
       />
     </div>
   );
