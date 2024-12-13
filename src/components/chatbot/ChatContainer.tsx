@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useChatSession } from "@/hooks/useChatSession";
 import { useChatMessages } from "@/hooks/useChatMessages";
 import { ChatbotInterface } from "@/components/chatbot/ChatbotInterface";
-import type { ChatbotSettings } from "@/types/chatbot";
+import type { ChatbotSettings, AssistantResponse } from "@/types/chatbot";
 
 type ChatContainerProps = {
   settings: ChatbotSettings;

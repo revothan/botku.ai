@@ -27,7 +27,17 @@ export const useChatMessages = (sessionId: string | null) => {
         throw error;
       }
 
-      setMessages(prev => [...prev, { role, content }]);
+      const timestamp = new Date().toISOString();
+      const id = crypto.randomUUID();
+      
+      setMessages(prev => [...prev, {
+        id,
+        content,
+        sender: role,
+        timestamp,
+        role
+      }]);
+      
       return true;
     } catch (error: any) {
       console.error("Failed to insert message:", error);
