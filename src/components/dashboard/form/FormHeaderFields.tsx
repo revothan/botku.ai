@@ -20,7 +20,7 @@ const FormHeaderFields = ({ form }: FormHeaderFieldsProps) => {
               <Input 
                 placeholder="Masukkan nama chatbot Anda" 
                 {...field} 
-                className="w-full h-12 px-4"
+                className="w-full min-h-[48px] px-3 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200"
               />
             </FormControl>
             <FormMessage />
@@ -38,7 +38,7 @@ const FormHeaderFields = ({ form }: FormHeaderFieldsProps) => {
               <Input
                 placeholder="Masukkan pesan sambutan untuk pengunjung Anda"
                 {...field}
-                className="w-full h-12 px-4"
+                className="w-full min-h-[48px] px-3 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200"
               />
             </FormControl>
             <FormMessage />
