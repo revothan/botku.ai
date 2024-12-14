@@ -14,13 +14,13 @@ const FormHeaderFields = ({ form }: FormHeaderFieldsProps) => {
         control={form.control}
         name="bot_name"
         render={({ field }) => (
-          <FormItem className="w-full">
+          <FormItem>
             <FormLabel>Nama Chatbot</FormLabel>
             <FormControl>
               <Input 
                 placeholder="Masukkan nama chatbot Anda" 
                 {...field} 
-                className="w-full min-h-[48px] px-3 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200"
+                className="w-full px-4 py-2"
               />
             </FormControl>
             <FormMessage />
@@ -32,13 +32,13 @@ const FormHeaderFields = ({ form }: FormHeaderFieldsProps) => {
         control={form.control}
         name="greeting_message"
         render={({ field }) => (
-          <FormItem className="w-full">
+          <FormItem>
             <FormLabel>Pesan Sambutan</FormLabel>
             <FormControl>
               <Input
                 placeholder="Masukkan pesan sambutan untuk pengunjung Anda"
                 {...field}
-                className="w-full min-h-[48px] px-3 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200"
+                className="w-full px-4 py-2"
               />
             </FormControl>
             <FormMessage />
