@@ -141,6 +141,44 @@ export type Database = {
           },
         ]
       }
+      customers: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          name: string
+          product_name: string
+          profile_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          product_name?: string
+          profile_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          product_name?: string
+          profile_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customers_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       links: {
         Row: {
           created_at: string

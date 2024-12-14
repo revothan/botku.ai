@@ -36,13 +36,15 @@ const AppRoutes = () => {
       
       const checkSession = async () => {
         try {
-          const { data: { session: currentSession }, error } = await supabase.auth.getSession();
+          const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession();
           
           if (!mounted) return;
           
-          if (error) {
-            console.error("Session error:", error);
+          if (sessionError) {
+            console.error("Session error:", sessionError);
+            // Clear any invalid tokens
             await supabase.auth.signOut();
+            localStorage.removeItem('menyapa-auth-token');
             toast({
               title: "Session Error",
               description: "Please log in again to continue",
@@ -68,15 +70,20 @@ const AppRoutes = () => {
             const { data: { session: refreshedSession }, error: refreshError } = 
               await supabase.auth.refreshSession();
             
-            if (mounted && (refreshError || !refreshedSession)) {
+            if (mounted && refreshError) {
               console.error("Failed to refresh session:", refreshError);
-              await supabase.auth.signOut();
-              toast({
-                title: "Session Expired",
-                description: "Please log in again to continue",
-                variant: "destructive",
-              });
-              navigate('/login');
+              if (refreshError.message.includes('refresh_token_not_found')) {
+                // Clear invalid session state
+                await supabase.auth.signOut();
+                localStorage.removeItem('menyapa-auth-token');
+                queryClient.clear();
+                toast({
+                  title: "Session Expired",
+                  description: "Please log in again to continue",
+                  variant: "destructive",
+                });
+                navigate('/login');
+              }
             }
           }
         } catch (error: any) {
@@ -84,6 +91,7 @@ const AppRoutes = () => {
           
           console.error("Auth check error:", error);
           await supabase.auth.signOut();
+          localStorage.removeItem('menyapa-auth-token');
           toast({
             title: "Authentication Error",
             description: error.message || "Please try logging in again",
@@ -111,6 +119,7 @@ const AppRoutes = () => {
           console.log("Token refreshed successfully");
         } else if (event === 'SIGNED_OUT' || !session) {
           queryClient.clear();
+          localStorage.removeItem('menyapa-auth-token');
           navigate('/login');
         }
       });

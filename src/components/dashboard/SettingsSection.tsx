@@ -25,43 +25,80 @@ const SettingsSection = ({ userId, settings, isLoading }: SettingsSectionProps) 
     mutationFn: async (values: ChatbotFormData) => {
       if (!userId) throw new Error("Not authenticated");
 
+      console.log("Starting settings update with values:", values);
+
+      // Format training data based on user type and answers
+      let formattedTrainingData = '';
+      if (values.user_type && values.answers) {
+        const answers = values.answers[values.user_type];
+        const questions = values.user_type === 'business' 
+          ? ["Nama bisnis:", "Deskripsi produk/jasa:", "Target pelanggan:", "Pertanyaan umum:", "Tambahan:"]
+          : values.user_type === 'creator'
+          ? ["Jenis konten utama:", "Audiens utama:", "Pertanyaan umum pengikut:", "Tambahan:"]
+          : ["Tujuan utama AI:", "Topik/fokus utama:", "Gaya komunikasi:", "Tambahan:"];
+
+        formattedTrainingData = questions
+          .map((q, i) => `${q} ${answers[i] || ''}`)
+          .filter(text => text.trim())
+          .join('\n\n');
+      }
+
       // Prepend the assistant context to the training data
-      const enhancedTrainingData = values.training_data 
-        ? `${ASSISTANT_CONTEXT}${values.training_data}`
+      const enhancedTrainingData = formattedTrainingData 
+        ? `${ASSISTANT_CONTEXT}\n\n${formattedTrainingData}`
         : ASSISTANT_CONTEXT;
 
+      console.log("Enhanced training data:", enhancedTrainingData);
+
+      // First update the settings in the database
       const { data: settingsData, error: settingsError } = await supabase
         .from("chatbot_settings")
         .update({
           bot_name: values.bot_name,
           greeting_message: values.greeting_message,
-          training_data: values.training_data,
-          user_type: values.user_type as "business" | "creator" | "other",
+          training_data: formattedTrainingData, // Store original training data
+          user_type: values.user_type,
           answers: values.answers
         })
         .eq("profile_id", userId)
         .select()
         .single();
 
-      if (settingsError) throw settingsError;
+      if (settingsError) {
+        console.error("Error updating settings:", settingsError);
+        throw settingsError;
+      }
 
+      console.log("Settings updated successfully:", settingsData);
+
+      // Then update or create the OpenAI assistant
+      console.log("Updating OpenAI assistant...");
       const assistantResponse = await supabase.functions.invoke('create-openai-assistant', {
         body: JSON.stringify({
-          ...values,
+          bot_name: values.bot_name,
           training_data: enhancedTrainingData,
           assistant_id: settings?.assistant_id
         })
       });
 
       if (assistantResponse.error) {
+        console.error("Error updating assistant:", assistantResponse.error);
         throw new Error(assistantResponse.error.message);
       }
 
+      console.log("Assistant updated successfully:", assistantResponse.data);
+
+      // If this is a new assistant, update the assistant_id in the settings
       if (!settings?.assistant_id) {
-        await supabase
+        const { error: updateError } = await supabase
           .from("chatbot_settings")
           .update({ assistant_id: assistantResponse.data.assistant.id })
           .eq("profile_id", userId);
+
+        if (updateError) {
+          console.error("Error updating assistant_id:", updateError);
+          throw updateError;
+        }
       }
 
       return { 
@@ -78,7 +115,8 @@ const SettingsSection = ({ userId, settings, isLoading }: SettingsSectionProps) 
           : "Your chatbot has been created successfully.",
       });
     },
-    onError: (error) => {
+    onError: (error: Error) => {
+      console.error("Mutation error:", error);
       toast({
         title: "Error",
         description: error.message,
